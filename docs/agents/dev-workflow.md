@@ -88,7 +88,7 @@ The gates below are rolled out issue by issue. The Status column says what is li
 | Tests | `pytest` (offline) | live |
 | Lint and format | `ruff` (line length 100, rules `E,F,W,I,B,UP,SIM,RUF,C4,PT,S`; formatter owns line length) | live: tree is clean (#2), enforced by the `lint` CI job (#3) |
 | Workflow security | `zizmor`, SHA-pinned actions, least-privilege permissions | live (#3) |
-| Dependency updates | Dependabot with `cooldown` (`github-actions` and `uv`; `ty` and `ruff` are excluded from grouping and bumped deliberately; semver-major bumps and `grpcio`, `grpcio-tools`, `protobuf` are ignored and upgraded by hand) | live (#3, #5) |
+| Dependency updates | Dependabot with `cooldown` (`github-actions` and `uv`; `ty` and `ruff` are excluded from grouping and bumped deliberately; semver-major bumps are ignored and upgraded by hand, as are minor bumps of `grpcio`, `grpcio-tools`, `protobuf` and `opencv-python-headless`) | live (#3, #5) |
 | Local hooks | `prek` (commit stage: `ruff`, `typos`, `rumdl`, file hygiene), also run in CI | live (#4) |
 | Reproducible installs | `uv.lock`, `uv sync --locked`, `just` recipes | live (#5) |
 | Vulnerability audit | `uv audit` (weekly workflow `audit.yml`, non-blocking, experimental) | live (#5) |
@@ -154,6 +154,7 @@ Tools evaluated and deliberately not adopted yet. Adopt one when its trigger fir
 | `vulture` | dead code is found in review, or the package passes about 30 modules |
 | `tach` | the package passes about 30 modules or import cycles appear |
 | `complexipy` | over-long functions keep reaching review |
+| Lift the `numpy<2` cap and stop ignoring `opencv-python-headless` | a real clip (YOLO plus live NIM) passes end to end on numpy 2 with output identical to numpy 1.26; the offline gates already pass on numpy 2.2.6 |
 | `gitleaks` | GitHub push protection is unavailable, or a secret is ever committed |
 | `scorecard` | the project gains external users or is promoted |
 | `harden-runner` | CI starts using secrets or publishing artifacts |

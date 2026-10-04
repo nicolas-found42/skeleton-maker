@@ -31,6 +31,12 @@ updates:
       # a green CI says nothing about the real YOLO and NIM pipeline. Upgrade majors by hand.
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      # opencv-python-headless 4.14+ requires numpy>=2, but pyproject.toml caps numpy<2, so
+      # Dependabot's forced bump is unresolvable and its job fails. Patch updates stay allowed.
+      # Remove this entry when the numpy cap is lifted (see "Later, with triggers" in
+      # docs/agents/dev-workflow.md).
+      - dependency-name: "opencv-python-headless"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
       # The gRPC stubs are generated for the NIM and these pins move together, so only patch
       # releases are proposed for them (security fixes arrive as patches).
       - dependency-name: "grpcio"
