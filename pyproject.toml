@@ -24,7 +24,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=7"]
+dev = ["pytest>=7", "ruff==0.16.10"]
 download = ["yt-dlp>=2024.1.1"]
 
 [project.scripts]
@@ -39,3 +39,21 @@ skeleton_maker = ["proto/**/*.proto"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+# Generated gRPC stubs are rebuilt from proto/ on demand and gitignored.
+extend-exclude = ["skeleton_maker/_gen"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "C4", "PT", "S"]
+# The formatter owns line length.
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["skeleton_maker"]
+
+[tool.ruff.lint.per-file-ignores]
+# assert is how pytest tests are written.
+"tests/**" = ["S101"]
