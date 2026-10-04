@@ -1,0 +1,24 @@
+{
+  "name": "blocky",
+  "description": "A chunky pixel-art figure built from cubes.",
+  "materials": {"a": {"type": "standard", "roughness": 0.9}, "b": {"type": "standard", "roughness": 0.9}, "c": {"type": "standard", "roughness": 0.9}, "skin": {"type": "standard", "roughness": 0.9}, "dark": {"type": "basic"}},
+  "palettes": [
+    {"a": "#4ea1ff", "b": "#2d4a9a", "c": "#5a3f2a", "skin": "#e8b48a", "dark": "#14141c"},
+    {"a": "#ff6b6b", "b": "#7a2a3a", "c": "#2b2b34", "skin": "#b9835e", "dark": "#14141c"},
+    {"a": "#6bd66b", "b": "#2f6f3a", "c": "#c4a35a", "skin": "#f1c9a5", "dark": "#14141c"},
+    {"a": "#ffd23f", "b": "#b8860b", "c": "#3b2b6b", "skin": "#7a4c2e", "dark": "#14141c"}
+  ],
+  "parts": [
+    {"type": "limb", "from": "Hips", "to": "Chest", "shape": "box", "w": 0.3, "d": 0.17, "mat": "a", "extend": [0.03, 0.06]},
+    {"type": "limb", "from": "Hips", "to": "Spine1", "shape": "box", "w": 0.31, "d": 0.18, "mat": "b", "extend": [0.04, 0.0]},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "box", "pos": [0, 0.07, 0], "size": [0.2, 0.2, 0.2], "mat": "skin"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "box", "pos": [0, 0.155, -0.01], "size": [0.21, 0.07, 0.21], "mat": "c"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "box", "pos": [-0.05, 0.085, 0.101], "size": [0.04, 0.04, 0.01], "mat": "dark"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "box", "pos": [0.05, 0.085, 0.101], "size": [0.04, 0.04, 0.01], "mat": "dark"},
+    {"type": "limb", "from": ["L_Shoulder", "R_Shoulder"], "to": ["L_Elbow", "R_Elbow"], "shape": "box", "w": 0.09, "d": 0.09, "mat": "a", "extend": [0.03, 0.02]},
+    {"type": "limb", "from": ["L_Elbow", "R_Elbow"], "to": ["L_Wrist", "R_Wrist"], "shape": "box", "w": 0.08, "d": 0.08, "mat": "skin", "extend": [0.0, 0.03]},
+    {"type": "limb", "from": ["L_Hip", "R_Hip"], "to": ["L_Knee", "R_Knee"], "shape": "box", "w": 0.125, "d": 0.125, "mat": "b", "extend": [0.03, 0.02]},
+    {"type": "limb", "from": ["L_Knee", "R_Knee"], "to": ["L_Ankle", "R_Ankle"], "shape": "box", "w": 0.105, "d": 0.105, "mat": "b", "extend": [0.0, 0.02]},
+    {"type": "limb", "from": ["L_Heel", "R_Heel"], "to": ["L_Toe", "R_Toe"], "shape": "box", "w": 0.11, "d": 0.07, "mat": "c", "extend": [0.03, 0.05]}
+  ]
+}

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__TITLE__</title>
+<style>
+  :root { color-scheme: dark; --bg:#0e1016; --panel:rgba(20,23,32,.82); --line:#2b3040; --fg:#e8ebf4; --dim:#9aa3b8; --accent:#7cc4ff; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; background:var(--bg); color:var(--fg); font:13px/1.4 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; overflow:hidden; }
+  #stage, #stage canvas { position:fixed; inset:0; width:100%; height:100%; display:block; }
+  .panel { position:fixed; background:var(--panel); border:1px solid var(--line); border-radius:12px; backdrop-filter:blur(10px); padding:10px 12px; }
+  #info { top:12px; left:12px; min-width:190px; }
+  #info h1 { margin:0 0 2px; font-size:14px; font-weight:650; }
+  #info .sub { color:var(--dim); }
+  #side { top:12px; right:12px; width:250px; max-height:calc(100% - 100px); overflow:auto; }
+  #side h2 { margin:10px 0 6px; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); font-weight:600; }
+  #side h2:first-child { margin-top:0; }
+  select, button { font:inherit; color:var(--fg); background:#1b1f2c; border:1px solid var(--line); border-radius:8px; padding:5px 8px; }
+  button { cursor:pointer; } button:hover { border-color:#4a5372; }
+  button.on { background:#1f3a52; border-color:var(--accent); }
+  #side select { width:100%; }
+  .row { display:flex; gap:6px; margin:4px 0; } .row button { flex:1; }
+  label.opt { display:flex; align-items:center; gap:8px; margin:4px 0; color:var(--dim); }
+  .castrow { display:flex; align-items:center; gap:8px; margin:3px 0; } .castrow span { width:46px; color:var(--dim); } .castrow select { flex:1; }
+  .more { color:var(--dim); margin-top:4px; }
+  #bar { left:12px; right:12px; bottom:12px; display:flex; align-items:center; gap:12px; }
+  #bar #play { width:38px; padding:5px 0; }
+  #scrubwrap { position:relative; flex:1; height:22px; }
+  #scrub { width:100%; margin:0; position:absolute; inset:0; accent-color:var(--accent); }
+  #ticks i { position:absolute; top:0; bottom:0; width:2px; background:rgba(255,255,255,.35); pointer-events:none; }
+  #time { color:var(--dim); min-width:96px; text-align:right; font-variant-numeric:tabular-nums; }
+  #video { position:fixed; left:12px; bottom:70px; width:240px; max-height:200px; border-radius:10px; border:1px solid var(--line); display:none; background:#000; }
+  #labels .label { position:fixed; left:0; top:0; padding:1px 6px; border-radius:6px; background:rgba(0,0,0,.55); font-size:11px; pointer-events:none; display:none; }
+  #loading { position:fixed; inset:0; display:grid; place-items:center; color:var(--dim); font-size:14px; }
+  @media (max-width: 700px) { #side { width:190px; } #video { width:140px; } }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="labels"></div>
+<div id="loading">Building the stage…</div>
+<video id="video" playsinline></video>
+<div id="info" class="panel"><h1 id="title"></h1><div class="sub"><span id="count"></span> · <span id="shot"></span></div></div>
+<div id="side" class="panel">
+  <h2>Character</h2>
+  <select id="style"></select>
+  <h2>Cast</h2>
+  <div id="cast"></div>
+  <h2>View</h2>
+  <div class="row"><button id="view-original" class="on">Original camera</button><button id="view-orbit">Orbit</button></div>
+  <label class="castrow"><span>follow</span><select id="follow"></select></label>
+  <label class="opt"><input type="checkbox" id="shadows" checked> shadows</label>
+  <label class="opt"><input type="checkbox" id="gridbox" checked> floor grid</label>
+  <label class="opt"><input type="checkbox" id="labelbox"> person ids</label>
+  <h2>Export</h2>
+  <div class="row"><button id="shot-png">PNG</button><button id="rec">● Record</button></div>
+</div>
+<div id="bar" class="panel">
+  <button id="play">❚❚</button>
+  <div id="scrubwrap"><input id="scrub" type="range" min="0" max="1" step="1" value="0"><div id="ticks"></div></div>
+  <select id="speed"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select>
+  <span id="time"></span>
+</div>
+<script type="text/plain" id="three-src">__THREE__</script>
+<script type="application/json" id="specs">__SPECS__</script>
+<script type="application/json" id="options">__OPTIONS__</script>
+<script type="text/plain" id="payload">__PAYLOAD__</script>
+<script type="module">
+const THREE = await import(URL.createObjectURL(new Blob([document.getElementById("three-src").textContent], { type: "text/javascript" })));
+const SPECS = JSON.parse(document.getElementById("specs").textContent);
+const OPTIONS = JSON.parse(document.getElementById("options").textContent);
+const PAYLOAD = document.getElementById("payload").textContent.trim();
+__VIEWER__
+</script>
+</body>
+</html>

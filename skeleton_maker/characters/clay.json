@@ -1,0 +1,33 @@
+{
+  "name": "clay",
+  "description": "A soft claymation figure: rounded limbs, big head, dot eyes.",
+  "materials": {
+    "skin":  {"type": "standard", "roughness": 0.85, "metalness": 0.0},
+    "cloth": {"type": "standard", "roughness": 0.9,  "metalness": 0.0},
+    "pants": {"type": "standard", "roughness": 0.9,  "metalness": 0.0},
+    "dark":  {"type": "standard", "roughness": 0.4,  "metalness": 0.0},
+    "cheek": {"type": "standard", "roughness": 0.9,  "metalness": 0.0}
+  },
+  "palettes": [
+    {"skin": "#f2b999", "cloth": "#ff7a59", "pants": "#4f6dff", "dark": "#1f1b24", "cheek": "#ff9aa2"},
+    {"skin": "#c98b62", "cloth": "#3dd6a2", "pants": "#35364a", "dark": "#1f1b24", "cheek": "#e66f78"},
+    {"skin": "#8a5a3c", "cloth": "#ffd23f", "pants": "#7a3cff", "dark": "#1f1b24", "cheek": "#d65a68"},
+    {"skin": "#f7d6bd", "cloth": "#5fa8ff", "pants": "#ff5d8f", "dark": "#1f1b24", "cheek": "#ff9aa2"}
+  ],
+  "parts": [
+    {"type": "limb", "from": "Hips", "to": "Chest", "shape": "capsule", "w": 0.30, "d": 0.21, "mat": "cloth", "extend": [0.03, 0.06]},
+    {"type": "limb", "from": "Neck1", "to": "Head", "shape": "capsule", "r": 0.04, "mat": "skin"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "sphere", "pos": [0, 0.07, 0], "size": [0.125, 0.135, 0.125], "mat": "skin"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "sphere", "pos": [-0.05, 0.095, 0.105], "size": [0.017, 0.022, 0.012], "mat": "dark"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "sphere", "pos": [0.05, 0.095, 0.105], "size": [0.017, 0.022, 0.012], "mat": "dark"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "sphere", "pos": [-0.08, 0.055, 0.085], "size": [0.025, 0.018, 0.012], "mat": "cheek"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "sphere", "pos": [0.08, 0.055, 0.085], "size": [0.025, 0.018, 0.012], "mat": "cheek"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "sphere", "pos": [0, 0.15, -0.01], "size": [0.13, 0.07, 0.125], "mat": "dark"},
+    {"type": "limb", "from": ["L_Shoulder", "R_Shoulder"], "to": ["L_Elbow", "R_Elbow"], "shape": "capsule", "r": 0.05, "mat": "cloth", "cap": true},
+    {"type": "limb", "from": ["L_Elbow", "R_Elbow"], "to": ["L_Wrist", "R_Wrist"], "shape": "capsule", "r": 0.042, "mat": "skin", "cap": true},
+    {"type": "prop", "joint": ["L_HandC", "R_HandC"], "shape": "sphere", "size": [0.055, 0.05, 0.05], "mat": "skin"},
+    {"type": "limb", "from": ["L_Hip", "R_Hip"], "to": ["L_Knee", "R_Knee"], "shape": "capsule", "r": 0.075, "mat": "pants", "cap": true},
+    {"type": "limb", "from": ["L_Knee", "R_Knee"], "to": ["L_Ankle", "R_Ankle"], "shape": "capsule", "r": 0.058, "mat": "pants", "cap": true},
+    {"type": "limb", "from": ["L_Heel", "R_Heel"], "to": ["L_Toe", "R_Toe"], "shape": "capsule", "w": 0.075, "d": 0.055, "mat": "dark", "extend": [0.03, 0.04]}
+  ]
+}

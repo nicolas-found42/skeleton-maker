@@ -1,0 +1,28 @@
+{
+  "name": "neon",
+  "description": "A glowing light-figure: thin bright bones, halo head, motion trails from hands and feet.",
+  "materials": {"glow": {"type": "basic"}, "halo": {"type": "basic", "wireframe": true}, "core": {"type": "basic", "opacity": 0.35}},
+  "palettes": [
+    {"glow": "#35f2ff", "halo": "#a0fbff", "core": "#35f2ff"},
+    {"glow": "#ff4fd8", "halo": "#ffb3f0", "core": "#ff4fd8"},
+    {"glow": "#9bff4f", "halo": "#d8ffb0", "core": "#9bff4f"},
+    {"glow": "#ffb64f", "halo": "#ffe0b0", "core": "#ffb64f"}
+  ],
+  "parts": [
+    {"type": "limb", "from": "Hips", "to": "Chest", "shape": "cylinder", "r": 0.02, "mat": "glow"},
+    {"type": "limb", "from": "Chest", "to": "Head", "shape": "cylinder", "r": 0.016, "mat": "glow"},
+    {"type": "limb", "from": ["L_Clavicle", "R_Clavicle"], "to": ["L_Shoulder", "R_Shoulder"], "shape": "cylinder", "r": 0.016, "mat": "glow"},
+    {"type": "limb", "from": "Chest", "to": ["L_Clavicle", "R_Clavicle"], "shape": "cylinder", "r": 0.016, "mat": "glow"},
+    {"type": "limb", "from": "Hips", "to": ["L_Hip", "R_Hip"], "shape": "cylinder", "r": 0.016, "mat": "glow"},
+    {"type": "limb", "from": ["L_Shoulder", "R_Shoulder"], "to": ["L_Elbow", "R_Elbow"], "shape": "cylinder", "r": 0.016, "mat": "glow"},
+    {"type": "limb", "from": ["L_Elbow", "R_Elbow"], "to": ["L_Wrist", "R_Wrist"], "shape": "cylinder", "r": 0.014, "mat": "glow"},
+    {"type": "limb", "from": ["L_Hip", "R_Hip"], "to": ["L_Knee", "R_Knee"], "shape": "cylinder", "r": 0.018, "mat": "glow"},
+    {"type": "limb", "from": ["L_Knee", "R_Knee"], "to": ["L_Ankle", "R_Ankle"], "shape": "cylinder", "r": 0.016, "mat": "glow"},
+    {"type": "limb", "from": ["L_Heel", "R_Heel"], "to": ["L_Toe", "R_Toe"], "shape": "cylinder", "r": 0.012, "mat": "glow"},
+    {"type": "prop", "joint": ["L_Shoulder", "R_Shoulder", "L_Elbow", "R_Elbow", "L_Hip", "R_Hip", "L_Knee", "R_Knee", "Hips", "Chest"], "shape": "sphere", "size": [0.03, 0.03, 0.03], "mat": "glow"},
+    {"type": "prop", "joint": ["L_HandC", "R_HandC", "L_Ankle", "R_Ankle"], "shape": "sphere", "size": [0.04, 0.04, 0.04], "mat": "glow"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "icosa", "pos": [0, 0.07, 0], "size": [0.11, 0.12, 0.11], "mat": "halo"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "sphere", "pos": [0, 0.07, 0], "size": [0.08, 0.09, 0.08], "mat": "core"}
+  ],
+  "trails": {"joints": ["L_HandC", "R_HandC", "L_Toe", "R_Toe", "Head"], "length": 22, "mat": "glow"}
+}

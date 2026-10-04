@@ -46,7 +46,7 @@ skeleton-maker = "skeleton_maker.cli:main"
 packages = ["skeleton_maker"]
 
 [tool.setuptools.package-data]
-skeleton_maker = ["proto/**/*.proto"]
+skeleton_maker = ["proto/**/*.proto", "characters/*.json", "web/*.html", "web/*.js"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -69,8 +69,16 @@ omit = ["skeleton_maker/_gen/*"]
 
 [tool.coverage.report]
 # Ratchet: this floor may only ever go up. Raise it when a PR adds tests; never lower it.
-fail_under = 34
+fail_under = 55
 show_missing = true
+
+[tool.typos.files]
+# Vendored, minified third-party code (three.js): not ours to spell-check.
+extend-exclude = ["skeleton_maker/web/three.module.min.js"]
+
+[tool.typos.default.extend-words]
+# A real three.js material property (MeshStandardMaterial.metalness), used in the character specs.
+metalness = "metalness"
 
 [tool.ruff]
 line-length = 100
