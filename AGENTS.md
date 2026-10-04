@@ -31,3 +31,8 @@ Default five-label vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, 
 ### Domain docs
 
 Single-context: one `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
+### Research tooling
+
+For pose classification or quality experiments, read [`docs/research/pose-classification-tooling.md`](docs/research/pose-classification-tooling.md).
+For Jev judgment reports and evidence capture, read [`docs/agents/jev-evidence.md`](docs/agents/jev-evidence.md).

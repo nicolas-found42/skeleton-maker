@@ -1,0 +1,42 @@
+schema_version = 1
+generating_processing_commit = "939d1f0ed30d4f47ed8d3f31b53cda94f481b45d"
+stage_implementation_sha256 = "0ad7076f1b8c433f7f2a67737821ab07a863fc8bb4b5a758011d5fa2f87e060f"
+nova77_implementation_sha256 = "fc470957712280d1301c3662f6653780ad76a22d0a010c6ec6233c1e85e8af84"
+artifact_directory = "work/agent-run/experiments"
+model_requested = "typesafe/jev-1.13"
+
+[processing_sources."frozen_stage.py"]
+sha256 = "0ad7076f1b8c433f7f2a67737821ab07a863fc8bb4b5a758011d5fa2f87e060f"
+
+[processing_sources."frozen_nova77.py"]
+sha256 = "fc470957712280d1301c3662f6653780ad76a22d0a010c6ec6233c1e85e8af84"
+
+[processing_sources."frozen_processing.py"]
+sha256 = "9254d890d5fc1c36ac2fb72a73eca5bee133f4a326c046af9ebd075fe0fe545a"
+
+[processing_sources."nova77.py"]
+sha256 = "e686d20c1547da100dcc18f7e206c3ae7679c341aef8ba4a893e492ee3a156c4"
+
+[artifacts."windows.json"]
+sha256 = "e1610cfc1af59661fe296f1c7e633871b83e22df40fa999a77dd7e47c548fb76"
+schema = "frozen-window-dataset"
+
+[artifacts."source.json"]
+sha256 = "ceb9af195d883cc8632c0d89878720297669dd571cdf50c4097a2c464b150f0c"
+schema = "source-manifest"
+
+[artifacts."action_quality_v1.jsonl"]
+sha256 = "73db66477314d8ce09fc37d7c7100fc53c06e2fe32436036a1fdac8553d5751e"
+schema = "typesafe-choice-and-noul-result-records"
+
+[artifacts."quality_generic_v1.jsonl"]
+sha256 = "d503ed8c31c4f393239dafd21e9fad6adc7ba3b5120f69213a6ec00252334c33"
+schema = "typesafe-noul-result-records"
+
+[artifacts."injected_corruption_v1.jsonl"]
+sha256 = "c5c755aa7f094565930151bd7088656e12ff12b3ec0dc9b0730a6797dfcafc31"
+schema = "typesafe-noul-result-records"
+
+[artifacts."spec_assist_v1.jsonl"]
+sha256 = "0eed9a64152ddf3d4f2ff378575c981f545cee3bc2a3789aefcfe57fb5d21581"
+schema = "typesafe-choice-and-noul-result-records"

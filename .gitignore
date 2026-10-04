@@ -2,6 +2,8 @@
 .venv/
 venv/
 env/
+node_modules/
+npm-debug.log*
 
 # Secrets
 .env
@@ -31,6 +33,8 @@ work/
 *.webm
 *.mov
 *.json
+!package.json
+!package-lock.json
 !*/sample*.json
 !skeleton_maker/characters/*.json
 

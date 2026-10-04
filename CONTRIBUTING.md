@@ -4,12 +4,15 @@ Thanks for helping. The full rules are in [`docs/agents/dev-workflow.md`](docs/a
 
 ## Setup
 
-Install [just](https://github.com/casey/just) (`uv tool install rust-just` or `brew install just`) and [uv](https://docs.astral.sh/uv/), then:
+With [uv](https://docs.astral.sh/uv/), Node/npm and ffmpeg available, bootstrap the project tools from a fresh checkout:
 
 ```bash
-just setup   # install dependencies from uv.lock and the git hooks
-just check   # hooks, lint, types, workflow audit and tests: what CI runs
+uv run --locked python -m scripts.setup_dev
+just doctor  # check required tools and matching project Chromium
+just check   # hooks, lint, types, workflow audit, Python tests, research and browser checks
 ```
+
+The bootstrap installs `just` when absent, the locked Python environment and hooks, pinned npm dependencies, and matching Chromium. See [browser-testing.md](docs/agents/browser-testing.md) for browser setup and diagnostics, and [pose-classification-tooling.md](docs/research/pose-classification-tooling.md) for offline research validation.
 
 ## Making a change
 

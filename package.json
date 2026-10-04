@@ -1,0 +1,9 @@
+{
+  "name": "skeleton-maker-browser-checks",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Pinned Playwright runtime for offline browser regressions",
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}

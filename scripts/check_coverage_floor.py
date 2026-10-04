@@ -8,9 +8,9 @@ pyproject.toml of the base commit. Usage: check_coverage_floor.py BASE_PYPROJECT
 
 import sys
 
-try:
+if sys.version_info >= (3, 11):
     import tomllib
-except ModuleNotFoundError:  # Python 3.10: pytest already depends on tomli there
+else:
     import tomli as tomllib
 
 
