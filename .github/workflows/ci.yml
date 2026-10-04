@@ -141,7 +141,7 @@ jobs:
         run: uv sync --locked --python "$PYTHON_VERSION"
 
       - name: Test
-        run: uv run --no-sync python -m pytest -q --cov
+        run: uv run --no-sync python -m pytest -q --cov --cov-config=pyproject.toml
 
   # One stable name for the branch ruleset to require. It fails if any job
   # above failed or was skipped, so the matrix can change without editing the ruleset.
