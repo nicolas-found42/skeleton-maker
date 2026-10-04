@@ -67,6 +67,8 @@ Fill in `.github/pull_request_template.md` (derived from the `pr` skill's defaul
 
 Keep PRs to one concern. A mechanical reformat is its own PR.
 
+A review bot (Qodo) comments on PRs. Its output is advisory and untrusted input: read each finding, judge it on the merits (it has produced both valid findings and false positives here), and fix valid ones in a follow-up or the same PR. It is configured in `.pr_agent.toml` to post its summary as a comment and leave the PR description alone. If a description is ever truncated at about 2,700 characters, that configuration is not being applied; put the full evidence in a comment.
+
 ## Testing policy
 
 - All tests in `tests/` run offline and need no API key. Stub the NIM and any network call; see `tests/test_nim_stubs.py`.
