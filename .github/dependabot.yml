@@ -14,3 +14,18 @@ updates:
     commit-message:
       prefix: "ci"
     labels: []
+
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      python-dependencies:
+        patterns: ["*"]
+        # ty (beta, 0.0.x) and ruff are bumped deliberately, each in its own PR.
+        exclude-patterns: ["ty", "ruff"]
+    commit-message:
+      prefix: "chore"
+    labels: []
