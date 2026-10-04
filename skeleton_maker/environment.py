@@ -23,15 +23,19 @@ request's shot ids and are only observed inside it. Coordinates are full decoded
 source-frame pixels. Anything that does not validate is a failed run.
 """
 
+import hashlib
+import json
 import os
+import shutil
 import sys
 from datetime import datetime, timezone
 from fractions import Fraction
 from pathlib import Path
 from typing import NoReturn, Protocol
 
-from . import __version__, artifacts, envmanifest, poses, shots
+from . import __version__, artifacts, envmanifest, envworkers, poses, shots
 from .envmanifest import SCHEMA_VERSION, ManifestError
+from .envworkers import BackendError, BackendUnavailable
 from .utils import die, probe_video
 
 BACKEND_CONTRACT = "skeleton-maker.environment-backend/1"
@@ -45,6 +49,8 @@ MIN_SAMPLE_FPS = 0.05
 MAX_SAMPLE_FPS = 30.0
 #: Cap on sampled frames per run, so a long clip at a high rate cannot request unbounded work.
 MAX_SAMPLED_FRAMES = 20000
+
+CACHE_SCHEMA = "skeleton-maker.environment-cache/1"
 
 EXIT_INVALID = 2
 EXIT_PARTIAL = 3
@@ -61,6 +67,14 @@ class Backend(Protocol):
 
     def supports_geometry(self) -> bool: ...
 
+    def max_frames(self) -> int | None:
+        """Most sampled frames one run may request, or None when unbounded."""
+        ...
+
+    def cache_identity(self) -> dict | None:
+        """Everything that changes this backend's answers, or None to opt out of caching."""
+        ...
+
     def run(self, request: dict, assets_dir: Path) -> dict: ...
 
 
@@ -69,8 +83,84 @@ class Backend(Protocol):
 BACKENDS: dict[str, Backend] = {}
 
 
-class BackendError(RuntimeError):
-    """A backend failed or returned something that is not a valid response."""
+def default_cache_dir() -> Path:
+    base = os.environ.get("XDG_CACHE_HOME") or os.path.join(os.path.expanduser("~"), ".cache")
+    return Path(base) / "skeleton-maker" / "environment"
+
+
+def cache_key(identity: dict, request: dict) -> str:
+    """SHA-256 over everything that can change a backend's answer.
+
+    That is the input (source hash, scanned frames, shots, any poses), the labels, the
+    geometry mode and device, and the backend's own identity: model, checkpoint hashes,
+    preprocessing and settings. The video's path is deliberately not part of it.
+    """
+    poses_block = request.get("poses")
+    payload = {
+        "contract": BACKEND_CONTRACT,
+        "identity": identity,
+        "source_sha256": request["source_sha256"],
+        "frames": [f["frame_id"] for f in request["frames"]],
+        "shots": request["shots"],
+        "poses": None
+        if poses_block is None
+        else {k: v for k, v in poses_block.items() if k != "path"},
+        "requested_labels": request["requested_labels"],
+        "geometry": request["geometry"],
+        "device": request["device"],
+    }
+    text = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    return hashlib.sha256(text.encode()).hexdigest()
+
+
+def _cache_get(root: Path, key: str, assets_stage: Path) -> dict | None:
+    """The cached response for ``key``, with its assets copied into ``assets_stage``."""
+    entry_dir = root / key
+    path = entry_dir / "entry.json"
+    if not path.is_file():
+        return None
+    try:
+        entry = envmanifest.loads(path.read_text(encoding="utf-8"))
+        if entry.get("schema") != CACHE_SCHEMA or entry.get("key") != key:
+            raise ManifestError("wrong schema or key")
+        for asset in entry["assets"]:
+            target = envmanifest.resolve_asset(entry_dir / "assets", asset["path"], "cache asset")
+            if artifacts.sha256_file(target) != asset["sha256"]:
+                raise ManifestError(f"cache asset {asset['path']!r} changed")
+        shutil.copytree(entry_dir / "assets", assets_stage, dirs_exist_ok=True)
+        if not isinstance(entry["response"], dict):
+            raise ManifestError("no response")
+        return entry["response"]
+    except (OSError, KeyError, TypeError, ManifestError):
+        print("environment: ignoring unreadable cache entry")
+        shutil.rmtree(assets_stage, ignore_errors=True)
+        assets_stage.mkdir()
+        return None
+
+
+def _cache_put(root: Path, key: str, identity: dict, resp: dict, assets_stage: Path, assets: list):
+    """Store a validated complete response; best effort, a cache failure never fails the scan."""
+    tmp = root / f".tmp-{os.getpid()}-{key[:12]}"
+    try:
+        root.mkdir(parents=True, exist_ok=True)
+        shutil.rmtree(tmp, ignore_errors=True)
+        tmp.mkdir()
+        shutil.copytree(assets_stage, tmp / "assets")
+        entry = {
+            "schema": CACHE_SCHEMA,
+            "key": key,
+            "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "identity": identity,
+            "response": resp,
+            "assets": assets,
+        }
+        (tmp / "entry.json").write_text(json.dumps(entry, allow_nan=False), encoding="utf-8")
+        shutil.rmtree(root / key, ignore_errors=True)
+        os.replace(tmp, root / key)
+    except OSError as exc:
+        print(f"warning: could not write the inference cache: {exc}", file=sys.stderr)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
 
 
 def add_cli(subparsers) -> None:
@@ -108,6 +198,12 @@ def add_cli(subparsers) -> None:
         default="auto",
         help="auto, or a device the backend reports (for example cpu, cuda, mps)",
     )
+    p.add_argument(
+        "--cache-dir",
+        help="inference cache (default: ~/.cache/skeleton-maker/environment). Reused only when "
+        "the clip, frames, labels, settings, device and backend identity all match",
+    )
+    p.add_argument("--no-cache", action="store_true", help="neither read nor write the cache")
     p.set_defaults(func=run_cli)
 
 
@@ -171,19 +267,22 @@ def _load_pose_join(path: str, info: dict, clip_sha256: str) -> tuple[dict, list
 
 
 def _resolve_backend(name: str) -> Backend:
-    backend = BACKENDS.get(name)
+    backend = BACKENDS.get(name) or envworkers.discover(name)
     if backend is None:
         installed = ", ".join(sorted(BACKENDS)) or "none"
         _fail_options(
             f"environment backend {name!r} is not installed (installed: {installed}). "
-            "Set up the backend worker described in docs/environment.md, or choose another "
+            "Set up the worker described in docs/environment-worker.md, or choose another "
             "with --backend"
         )
     return backend
 
 
 def _resolve_device(backend: Backend, wanted: str) -> str:
-    available = backend.available_devices()
+    try:
+        available = backend.available_devices()
+    except BackendUnavailable as exc:
+        _fail_options(str(exc))
     if not available:
         _fail_options(f"backend {backend.name!r} reports no usable device")
     if wanted == "auto":
@@ -290,10 +389,15 @@ def run_cli(args) -> int:
 
     clock = artifacts.FrameClock(info["rate"].numerator, info["rate"].denominator)
     frame_ids = clock.sample(info["frame_count"], args.sample_fps)
-    if len(frame_ids) > MAX_SAMPLED_FRAMES:
+    try:
+        backend_limit = backend.max_frames()
+    except BackendUnavailable as exc:
+        _fail_options(str(exc))
+    limit = min(MAX_SAMPLED_FRAMES, backend_limit or MAX_SAMPLED_FRAMES)
+    if len(frame_ids) > limit:
         _fail_options(
-            f"{len(frame_ids)} frames would be scanned; the limit is {MAX_SAMPLED_FRAMES}. "
-            "Lower --sample-fps or use a shorter clip"
+            f"{len(frame_ids)} frames would be scanned; the limit for backend "
+            f"{backend.name!r} is {limit}. Lower --sample-fps or use a shorter clip"
         )
     source = {
         "path": os.path.abspath(video),
@@ -323,6 +427,7 @@ def run_cli(args) -> int:
         "device": device,
         "geometry": args.geometry,
         "requested_labels": [],
+        "source_sha256": source_sha256,
         "poses": pose_block,
         "source": {k: source[k] for k in ("width", "height", "frame_rate", "frame_count")},
         "shots": [{k: sh[k] for k in ("id", "first_frame", "last_frame")} for sh in shot_list],
@@ -333,13 +438,27 @@ def run_cli(args) -> int:
         f"(~{args.sample_fps:g} fps, geometry {args.geometry})"
     )
 
+    cache_root = Path(args.cache_dir) if args.cache_dir else default_cache_dir()
+    identity = None if args.no_cache else backend.cache_identity()
+    key = cache_key(identity, request) if identity is not None else None
+
     with artifacts.staging_dir(out) as stage:
         assets_stage = stage / "assets"
         assets_stage.mkdir()
         try:
-            resp = backend.run(request, assets_stage)
-            _validate_response(resp, request, args.geometry)
-            assets = _collect_assets(assets_stage)
+            resp = _cache_get(cache_root, key, assets_stage) if key is not None else None
+            if resp is not None and key is not None:
+                print(f"environment: cache hit ({key[:12]})")
+                _validate_response(resp, request, args.geometry)
+                assets = _collect_assets(assets_stage)
+            else:
+                if key is not None:
+                    print(f"environment: cache miss ({key[:12]})")
+                resp = backend.run(request, assets_stage)
+                _validate_response(resp, request, args.geometry)
+                assets = _collect_assets(assets_stage)
+                if key is not None and identity is not None and resp["status"] == "complete":
+                    _cache_put(cache_root, key, identity, resp, assets_stage, assets)
         except KeyboardInterrupt:
             print("error: interrupted; no environment manifest was written", file=sys.stderr)
             return EXIT_INTERRUPTED

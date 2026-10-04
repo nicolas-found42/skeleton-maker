@@ -1,6 +1,6 @@
 # Environment scan
 
-`skeleton-maker environment` scans a clip for the things around the people in it (surfaces, objects, vehicles) and writes a versioned manifest. This page documents the command, the manifest and the backend contract. Only the contract and the manifest are in the base package: the perception and geometry models run in a separate worker environment, so a plain install has **no backend**. Until one is installed the command reports that and exits without writing anything.
+`skeleton-maker environment` scans a clip for the things around the people in it (surfaces, objects, vehicles) and writes a versioned manifest. This page documents the command, the manifest and the backend contract. Only the contract and the manifest are in the base package: the perception and geometry models run in a separate worker environment, so a plain install has **no backend**. Until one is installed the command reports that and exits without writing anything. Set up the Grounded SAM 2 worker with `just environment-worker-setup`; see [environment-worker.md](environment-worker.md).
 
 ## Command
 
@@ -16,6 +16,7 @@ skeleton-maker environment demo.skeleton/clip.mp4 --out demo.skeleton/environmen
 | `--backend` | Installed backend name (default `grounded-sam2-da3`). |
 | `--geometry` | `off`: semantics only, geometry status `not_requested`. `auto`: geometry when the backend can produce it, otherwise status `unavailable` and the scan still completes. `required`: exit nonzero unless a valid shared registration (`registered_relative` or `registered_metric`) is produced. |
 | `--sample-fps` | Frames per second to scan, 0.05 to 30 and no more than the clip's rate (default 2). The step is rounded to whole source frames. |
+| `--cache-dir`, `--no-cache` | Where inference results are cached (default `~/.cache/skeleton-maker/environment`) and a switch to bypass it. See [environment-worker.md](environment-worker.md#cache). |
 | `--device` | `auto` (the backend's first reported device) or one the backend reports. An unavailable device is rejected before inference. |
 
 Exit codes: `0` complete, `1` failed, `2` invalid options or input, `3` partial, `130` interrupted. Every option is checked before inference. A failed or interrupted run, or a failed write, leaves any existing manifest and assets byte-identical; the new files replace the old ones only after everything validated. A `partial` run (the backend finished but says it could not cover everything) writes the manifest with `run.status: "partial"` and a `reason`, and exits 3 so a script cannot mistake it for a complete run.
@@ -68,7 +69,7 @@ People are not duplicated into the environment inventory. A backend reports a pe
 
 ## Backend contract
 
-Contract id `skeleton-maker.environment-backend/1`. A backend is an object with `name`, `available_devices()`, `supports_geometry()` and `run(request, assets_dir)`, registered in `skeleton_maker.environment.BACKENDS`. Heavyweight workers are expected to be invoked from such an adapter as a subprocess.
+Contract id `skeleton-maker.environment-backend/1`. A backend is an object with `name`, `available_devices()`, `supports_geometry()`, `max_frames()`, `cache_identity()` (a dict of everything that changes its answers, or `None` to opt out of caching) and `run(request, assets_dir)`, registered in `skeleton_maker.environment.BACKENDS`. Heavyweight workers run in their own interpreter through `skeleton_maker.envworkers.SubprocessBackend`, which speaks the worker protocol documented in that module (`preflight` and `run`).
 
 Request (`poses` is `null`, or the manifest's `poses` block):
 
