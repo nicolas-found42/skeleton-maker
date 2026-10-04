@@ -12,6 +12,7 @@ import json
 import os
 import sys
 import time
+from typing import cast
 
 from .bbox import read_annotation
 from .constants import (
@@ -209,8 +210,10 @@ def run(
                 if response.stream_flushed:
                     break
         except grpc.RpcError as err:
-            code = err.code()
-            detail = (err.details() or "").strip()
+            # Errors raised by a call are also grpc.Call; the RpcError base type omits code/details.
+            call = cast("grpc.Call", err)
+            code = call.code()
+            detail = (call.details() or "").strip()
             if code in transient and attempt < attempts:
                 if verbose:
                     print(

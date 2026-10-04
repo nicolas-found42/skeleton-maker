@@ -5,9 +5,10 @@ import os
 import shutil
 import subprocess
 import sys
+from typing import NoReturn
 
 
-def die(msg: str, code: int = 1):
+def die(msg: str, code: int = 1) -> NoReturn:
     print(f"error: {msg}", file=sys.stderr)
     raise SystemExit(code)
 

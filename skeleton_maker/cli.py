@@ -6,7 +6,6 @@ Each stage is also usable on its own; ``all`` chains them for a local video.
 
 import argparse
 import os
-import shutil
 import sys
 
 from . import __version__, detection, nim, render, verify
@@ -136,14 +135,14 @@ def cmd_all(args) -> int:
 
 def cmd_download(args) -> int:
     """Grab a window of a video with yt-dlp, NIM-conformant."""
-    require_tool("yt-dlp", "Install it: uv pip install yt-dlp")
+    yt_dlp = require_tool("yt-dlp", "Install it: uv pip install yt-dlp")
     ffmpeg = require_tool("ffmpeg")
     os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
     section = f"*{args.start}-{args.start + args.duration}" if args.duration else "*"
     import subprocess
 
     cmd = [
-        shutil.which("yt-dlp"),
+        yt_dlp,
         "--no-warnings",
         "--no-playlist",
         "--download-sections",

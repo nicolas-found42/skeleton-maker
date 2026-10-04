@@ -75,9 +75,18 @@ def scan(
         ok, frame = cap.read()
         if not ok:
             break
-        res = net.predict(
-            frame, imgsz=imgsz, conf=conf, classes=[PERSON_CLASS], device=device, verbose=False
-        )[0]
+        res = next(
+            iter(
+                net.predict(
+                    frame,
+                    imgsz=imgsz,
+                    conf=conf,
+                    classes=[PERSON_CLASS],
+                    device=device,
+                    verbose=False,
+                )
+            )
+        )
         hits = list(_person_boxes(res))
         heights = sorted(max(0.0, y2 - y1) for (_x1, y1, _x2, y2), _c, _t in hits)
         area = 0.0
