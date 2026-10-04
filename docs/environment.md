@@ -39,6 +39,8 @@ Schema `skeleton-maker.environment/1`. Loaders must reject any other version.
 | `config` | `requested_labels`, `geometry_mode`, `sample_fps`, `device` |
 | `assets` | `path` (relative to `<stem>.assets/`), `sha256`, `bytes` |
 
+Mask assets are single-channel PNG images the size of the source frame (any non-zero pixel is inside). Scoring against human labels is described in [environment-scoring.md](environment-scoring.md).
+
 Loading (`skeleton_maker.envmanifest.load_manifest`) checks the schema version, structure, finite numbers, that observations reference real entities and processed frames, that boxes lie inside the frame, that every asset exists inside the bundle with the recorded hash, and that no path, absolute path or symlink leaves the bundle.
 
 A `registered_relative` geometry result has no solved metric scale and must not be overlaid on the NIM's meter-valued skeletons.
