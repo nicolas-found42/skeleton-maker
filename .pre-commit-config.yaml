@@ -26,8 +26,8 @@ repos:
     hooks:
       - id: typos
         # The upstream hook defaults to --write-changes, which silently rewrites files. A
-        # "fix" can break identifiers (it wanted metalness -> metallicity in three.js code),
-        # so only report; decide each correction by hand.
+        # "fix" can break identifiers that are valid names in third-party APIs, so only
+        # report; decide each correction by hand.
         args: [--force-exclude]
 
   - repo: https://github.com/rvben/rumdl-pre-commit
