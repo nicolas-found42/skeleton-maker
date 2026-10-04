@@ -1,0 +1,93 @@
+# SPDX-License-Identifier: MIT
+"""Deterministic stand-in for the environment inference boundary (tests only).
+
+The real perception and geometry workers are heavyweight and live outside the base
+package; CI substitutes this fake through the backend registry and nothing else.
+"""
+
+import copy
+
+from skeleton_maker import environment
+
+CONTRACT = environment.BACKEND_CONTRACT
+
+
+class FakeBackend:
+    """Returns a fixed, schema-valid response for whatever frames it is asked about."""
+
+    name = "fake"
+
+    def __init__(self, *, devices=("cpu",), geometry=False, mutate=None, raises=None):
+        self.devices = list(devices)
+        self.geometry = geometry
+        self.mutate = mutate
+        self.raises = raises
+        self.requests = []
+
+    def available_devices(self):
+        return list(self.devices)
+
+    def supports_geometry(self):
+        return self.geometry
+
+    def run(self, request, assets_dir):
+        self.requests.append(copy.deepcopy(request))
+        if self.raises is not None:
+            raise self.raises
+        frames = request["frames"]
+        first, last = frames[0]["frame_id"], frames[-1]["frame_id"]
+        (assets_dir / "masks").mkdir(parents=True, exist_ok=True)
+        (assets_dir / "masks" / "floor-0.png").write_bytes(b"\x89PNG fake floor mask")
+        response = {
+            "contract": CONTRACT,
+            "status": "complete",
+            "backend": {
+                "name": self.name,
+                "version": "0.0-test",
+                "checkpoints": [{"name": "fake-weights", "sha256": "0" * 64, "license": "none"}],
+            },
+            "device": request["device"],
+            "shots": [{"id": "shot-0", "first_frame": first, "last_frame": last}],
+            "entities": [
+                {
+                    "id": "shot-0/floor-1",
+                    "shot": "shot-0",
+                    "family": "surface",
+                    "labels": {"native": "floor", "normalized": "floor"},
+                    "motion": "static",
+                },
+                {
+                    "id": "shot-0/chair-1",
+                    "shot": "shot-0",
+                    "family": "object",
+                    "labels": {"native": "chair", "normalized": "chair"},
+                    "motion": "unknown",
+                },
+            ],
+            "observations": [
+                {
+                    "id": "obs-0",
+                    "entity": "shot-0/floor-1",
+                    "frame_id": first,
+                    "bbox": [0.0, 20.0, 63.0, 47.0],
+                    "mask": {"asset": "masks/floor-0.png"},
+                    "score": 0.9,
+                    "score_meaning": "model confidence, uncalibrated",
+                    "visibility": "visible",
+                },
+                {
+                    "id": "obs-1",
+                    "entity": "shot-0/chair-1",
+                    "frame_id": last,
+                    "bbox": [10.0, 10.0, 20.0, 30.0],
+                    "mask": None,
+                    "score": 0.6,
+                    "score_meaning": "model confidence, uncalibrated",
+                    "visibility": "occluded",
+                },
+            ],
+            "geometry": {"status": "unavailable", "reason": "fake backend has no geometry"},
+        }
+        if self.mutate is not None:
+            self.mutate(response)
+        return response

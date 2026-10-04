@@ -203,6 +203,10 @@ What the stage does to the raw 3D joints:
 Characters are driven by joint **positions** only; the model's `rest_pose` is
 bone-aligned rather than anatomical, so its rotations are not used.
 
+### Environment scan
+
+`skeleton-maker environment` scans a clip for surfaces, objects and vehicles and writes a versioned manifest. The base package ships the command, the manifest and the backend contract; the perception models are a separate install. See [docs/environment.md](docs/environment.md).
+
 ### Writing a character
 
 A character is a JSON file. Pass it with `--spec my_character.json` (repeatable).
