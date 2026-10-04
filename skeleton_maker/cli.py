@@ -8,7 +8,7 @@ import argparse
 import os
 import sys
 
-from . import __version__, character, detection, nim, render, verify
+from . import __version__, character, detection, environment, nim, render, verify
 from .constants import CONFORM_ENCODE_ARGS
 from .utils import die, is_streamable_mp4, probe_video, require_tool, run_ffmpeg
 
@@ -175,6 +175,7 @@ def build_parser() -> argparse.ArgumentParser:
     nim.add_cli(sub)
     render.add_cli(sub)
     character.add_cli(sub)
+    environment.add_cli(sub)
 
     p = sub.add_parser("clip", help="cut a window and make it NIM-conformant")
     p.add_argument("video")

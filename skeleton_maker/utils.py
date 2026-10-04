@@ -81,6 +81,7 @@ def probe_video(path: str) -> dict:
         "codec": info.get("codec_name", "?"),
         "pix_fmt": info.get("pix_fmt", "?"),
         "r_fps": frac(info.get("r_frame_rate", "0")),
+        "r_frame_rate": info.get("r_frame_rate", "0/0"),
         "avg_fps": frac(info.get("avg_frame_rate", "0")),
         "nb_frames": int(frames) if frames.isdigit() else None,
         "duration": float(info.get("duration", 0) or 0),
