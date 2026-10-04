@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "skeleton-maker"
+version = "0.1.0"
+description = "Draw 3D body-pose skeletons on any video using the NVIDIA 3D Body Pose NIM."
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+license = { text = "MIT" }
+authors = [{ name = "Nicolas" }]
+keywords = ["body-pose", "pose-estimation", "skeleton", "nvidia", "nim", "yolo", "video"]
+
+dependencies = [
+    "grpcio==1.67.1",
+    "grpcio-tools==1.67.1",
+    "protobuf>=5.27,<6",
+    "numpy>=1.26,<2",
+    "opencv-python-headless>=4.9,<5",
+    "tqdm>=4.66",
+    "ultralytics>=8.3",
+    "lap>=0.5.12",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+download = ["yt-dlp>=2024.1.1"]
+
+[project.scripts]
+skeleton-maker = "skeleton_maker.cli:main"
+
+# _gen is populated from proto/ at first use, so it is not a declared package.
+[tool.setuptools]
+packages = ["skeleton_maker"]
+
+[tool.setuptools.package-data]
+skeleton_maker = ["proto/**/*.proto"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

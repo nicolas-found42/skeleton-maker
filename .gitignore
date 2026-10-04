@@ -1,0 +1,36 @@
+# Environments
+.venv/
+venv/
+env/
+
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+
+# Generated gRPC stubs (rebuilt from proto/ on demand)
+skeleton_maker/_gen/
+
+# Model weights (downloaded on first run)
+*.pt
+*.onnx
+
+# Pipeline inputs and outputs: never commit media
+in/
+out/
+work/
+*.mp4
+*.mkv
+*.webm
+*.mov
+*.json
+!*/sample*.json
+
+# macOS
+.DS_Store

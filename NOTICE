@@ -1,0 +1,24 @@
+skeleton-maker
+Copyright (c) 2026 Nicolas. MIT licensed (see LICENSE).
+
+This project bundles or derives from third-party work:
+
+1. Protocol buffer definitions and derived gRPC stubs
+   Files: skeleton_maker/proto/nvidia/**, skeleton_maker/_gen/nvidia/**
+   Source: NVIDIA-Maxine/nim-clients, body-pose/protos
+   Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES
+   License: MIT
+
+2. Nova-77 skeleton topology and overlay colours
+   File: skeleton_maker/constants.py (NOVA77_PARENTS, TRACK_COLORS, COLOR_2D, COLOR_3D)
+   Source: NVIDIA-Maxine/nim-clients, body-pose/scripts/constants.py
+   Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES
+   License: MIT
+
+3. Object detection
+   Ultralytics YOLO (AGPL-3.0). Installed as a dependency, not vendored.
+   Review the Ultralytics licence before commercial use.
+
+The 3D Body Pose model itself is not distributed here. It is called over the
+network through NVIDIA's hosted endpoint, and its use is governed by the NVIDIA
+API Trial Terms of Service and the NVIDIA Open Model License Agreement.
