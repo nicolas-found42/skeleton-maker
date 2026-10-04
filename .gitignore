@@ -13,6 +13,7 @@ __pycache__/
 build/
 dist/
 .pytest_cache/
+.jev-browser/
 
 # Generated gRPC stubs (rebuilt from proto/ on demand)
 skeleton_maker/_gen/

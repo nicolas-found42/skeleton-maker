@@ -11,7 +11,9 @@ from __future__ import annotations
 
 import html as htmllib
 import json
+import math
 import os
+import re
 import sys
 from importlib import resources
 
@@ -29,14 +31,39 @@ class SpecError(ValueError):
 
 def _joint_names(value, where: str) -> list:
     names = value if isinstance(value, list) else [value]
+    if not names:
+        raise SpecError(f"{where}: needs at least one joint")
     for n in names:
         if n not in CANON:
             raise SpecError(f"{where}: unknown joint {n!r}. Joints: {', '.join(CANON)}")
     return names
 
 
+def _number(value, where: str, *, positive=False, unit=False):
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+        raise SpecError(f"{where}: needs a finite number")
+    if positive and value <= 0:
+        raise SpecError(f"{where}: must be positive")
+    if unit and not 0 <= value <= 1:
+        raise SpecError(f"{where}: must be between 0 and 1")
+
+
+def _vector(value, where: str, length=3, *, positive=False):
+    if not isinstance(value, list) or len(value) != length:
+        raise SpecError(f"{where}: needs a list of {length} numbers")
+    for i, item in enumerate(value):
+        _number(item, f"{where}[{i}]", positive=positive)
+
+
+def _count(value, where: str, maximum: int):
+    if isinstance(value, bool) or not isinstance(value, int) or not 1 <= value <= maximum:
+        raise SpecError(f"{where}: needs an integer between 1 and {maximum}")
+
+
 def validate_spec(spec: dict) -> dict:
     """Check a character spec and return it; raises :class:`SpecError` with a pointed message."""
+    if not isinstance(spec, dict):
+        raise SpecError("spec must be an object")
     name = spec.get("name")
     if not isinstance(name, str) or not name.isidentifier():
         raise SpecError("spec needs a 'name' that is a plain identifier, e.g. 'my_robot'")
@@ -46,22 +73,36 @@ def validate_spec(spec: dict) -> dict:
             f"{name}: 'materials' must be an object mapping a material name to {{type: standard|basic, ...}}"
         )
     for m, d in materials.items():
-        if d.get("type") not in MATERIAL_TYPES:
+        where = f"{name}.materials[{m!r}]"
+        if not isinstance(d, dict):
+            raise SpecError(f"{where}: material must be an object")
+        if not isinstance(d.get("type"), str) or d["type"] not in MATERIAL_TYPES:
             raise SpecError(f"{name}: material {m!r} needs type 'standard' or 'basic'")
+        for key in ("roughness", "metalness", "opacity"):
+            if key in d:
+                _number(d[key], f"{where}.{key}", unit=True)
+        if "wireframe" in d and not isinstance(d["wireframe"], bool):
+            raise SpecError(f"{where}.wireframe: needs a boolean")
     palettes = spec.get("palettes")
     if not isinstance(palettes, list) or not palettes:
         raise SpecError(
             f"{name}: 'palettes' must be a non-empty list of {{material: '#rrggbb'}} objects"
         )
     for i, pal in enumerate(palettes):
+        if not isinstance(pal, dict):
+            raise SpecError(f"{name}: palette {i} must be an object")
         for m in materials:
             if m not in pal:
                 raise SpecError(f"{name}: palette {i} is missing a colour for material {m!r}")
+            if not isinstance(pal[m], str) or not re.fullmatch(r"#[0-9a-fA-F]{6}", pal[m]):
+                raise SpecError(f"{name}: palette {i} material {m!r} needs a '#rrggbb' colour")
     parts = spec.get("parts")
     if not isinstance(parts, list) or not parts:
         raise SpecError(f"{name}: 'parts' must be a non-empty list")
     for i, p in enumerate(parts):
         where = f"{name}.parts[{i}]"
+        if not isinstance(p, dict):
+            raise SpecError(f"{where}: part must be an object")
         kind = p.get("type")
         if kind == "limb":
             frm, to = (
@@ -72,33 +113,58 @@ def validate_spec(spec: dict) -> dict:
                 raise SpecError(
                     f"{where}: 'from' and 'to' lists must be the same length (or one of them a single joint)"
                 )
-            if p.get("shape", "capsule") not in {"box", "cylinder", "capsule"}:
+            if p.get("shape", "capsule") not in ("box", "cylinder", "capsule"):
                 raise SpecError(f"{where}: limb shape must be box, cylinder or capsule")
             if not (("r" in p) or ("w" in p and "d" in p)):
                 raise SpecError(
                     f"{where}: a limb needs 'r' (radius) or both 'w' and 'd' (full widths, metres at 1.75 m height)"
                 )
+            for key in ("r", "r2", "w", "d"):
+                if key in p:
+                    _number(p[key], f"{where}.{key}", positive=True)
+            if "extend" in p:
+                _vector(p["extend"], f"{where}.extend", 2)
         elif kind == "prop":
             _joint_names(p.get("joint"), where + ".joint")
-            if p.get("shape", "sphere") not in SHAPES:
+            if (
+                not isinstance(p.get("shape", "sphere"), str)
+                or p.get("shape", "sphere") not in SHAPES
+            ):
                 raise SpecError(f"{where}: prop shape must be one of {sorted(SHAPES)}")
-            if p.get("frame", "body") not in {"body", "head"}:
+            if p.get("frame", "body") not in ("body", "head"):
                 raise SpecError(f"{where}: frame must be 'body' or 'head'")
+            for key in ("size", "pos", "rot"):
+                if key in p:
+                    _vector(p[key], f"{where}.{key}", positive=key == "size")
         elif kind == "chain":
             _joint_names(p.get("joint"), where + ".joint")
             for key in ("dir", "n", "len", "r", "mat", "lag"):
                 if key not in p:
                     raise SpecError(f"{where}: a chain needs {key!r}")
+            _vector(p["dir"], f"{where}.dir")
+            if not any(p["dir"]):
+                raise SpecError(f"{where}.dir: must not be zero")
+            _count(p["n"], f"{where}.n", 256)
+            _number(p["len"], f"{where}.len", positive=True)
+            _vector(p["r"], f"{where}.r", 2, positive=True)
+            _number(p["lag"], f"{where}.lag", unit=True)
+            if "tip" in p and (not isinstance(p["tip"], str) or p["tip"] not in materials):
+                raise SpecError(f"{where}.tip: unknown material")
         else:
             raise SpecError(f"{where}: type must be limb, prop or chain, not {kind!r}")
-        if p.get("mat") not in materials:
+        if not isinstance(p.get("mat"), str) or p["mat"] not in materials:
             raise SpecError(
                 f"{where}: unknown material {p.get('mat')!r}; defined: {sorted(materials)}"
             )
     trails = spec.get("trails")
-    if trails:
+    if trails is not None:
+        if not isinstance(trails, dict):
+            raise SpecError(f"{name}.trails: must be an object")
         _joint_names(trails.get("joints"), f"{name}.trails.joints")
-        if trails.get("mat") not in materials:
+        if not isinstance(trails.get("joints"), list):
+            raise SpecError(f"{name}.trails.joints: must be a list")
+        _count(trails.get("length"), f"{name}.trails.length", 4096)
+        if not isinstance(trails.get("mat"), str) or trails["mat"] not in materials:
             raise SpecError(f"{name}.trails: unknown material {trails.get('mat')!r}")
     return spec
 
@@ -125,17 +191,16 @@ def build_html(stage, specs: dict, options: dict, title: str) -> str:
     def js(obj) -> str:  # JSON inside <script>: "</" must not end the element
         return json.dumps(obj, separators=(",", ":")).replace("</", "<\\/")
 
-    for key, value in (
-        ("__TITLE__", htmllib.escape(title)),
-        ("__SPECS__", js(specs)),
-        ("__OPTIONS__", js(options)),
-        ("__PAYLOAD__", stage.payload()),
-        ("__THREE__", _asset("three.module.min.js")),
-        ("__VIEWER__", _asset("viewer.js")),
-    ):
-        # str.replace on the page, not on the inserted text: the viewer and three.js contain these tokens
-        page = page.replace(key, value, 1)
-    return page
+    replacements = {
+        "__TITLE__": htmllib.escape(title),
+        "__SPECS__": js(specs),
+        "__OPTIONS__": js(options),
+        "__PAYLOAD__": stage.payload(),
+        "__THREE__": _asset("three.module.min.js"),
+        "__VIEWER__": _asset("viewer.js"),
+    }
+    # Substitute the original template once; inserted user text is never a new template slot.
+    return re.sub("|".join(replacements), lambda match: replacements[match[0]], page)
 
 
 def make_stage_html(
@@ -152,10 +217,19 @@ def make_stage_html(
     title: str | None = None,
 ) -> dict:
     """Write the stage HTML; returns a summary dict."""
+    _number(fps, "fps", positive=True)
+    _number(scale, "scale", positive=True)
+    _number(fov, "fov", positive=True)
+    if fov >= 180:
+        raise SpecError("fov: must be less than 180 degrees")
+    _number(min_conf, "min_conf", unit=True)
     specs = builtin_specs()
     for path in extra_specs or []:
         with open(path) as fh:
-            spec = validate_spec(json.load(fh))
+            try:
+                spec = validate_spec(json.load(fh))
+            except json.JSONDecodeError as exc:
+                raise SpecError(f"{path}: {exc.msg} at line {exc.lineno}") from exc
         specs[spec["name"]] = spec
     if character != "auto" and character not in specs:
         die(f"unknown character {character!r}. Available: {', '.join(sorted(specs))}")

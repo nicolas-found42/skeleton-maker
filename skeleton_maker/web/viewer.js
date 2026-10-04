@@ -419,7 +419,7 @@ function buildCastUI(si) {
   const box = $("cast"); box.innerHTML = "";
   const shot = stage.meta.shots[si];
   const seen = new Set();
-  for (const t of shot.tracks.slice(0, 12)) {
+  for (const t of shot.tracks) {
     if (seen.has(t.id)) continue; seen.add(t.id);
     const row = document.createElement("label"); row.className = "castrow";
     row.innerHTML = `<span>#${t.id}</span>`;
@@ -429,7 +429,6 @@ function buildCastUI(si) {
     s.onchange = () => { castOverride[t.id] = s.value; for (const [k, r] of rigs) if (r.track.id === t.id) { scene.remove(r.group); r.dispose(); rigs.delete(k); } };
     row.appendChild(s); box.appendChild(row);
   }
-  if (shot.tracks.length > 12) { const m = document.createElement("div"); m.className = "more"; m.textContent = `+ ${shot.tracks.length - 12} more`; box.appendChild(m); }
 }
 
 // ---- video picture-in-picture ---------------------------------------------
@@ -441,7 +440,9 @@ function initVideo() {
 }
 function syncVideo() {
   if (!video) return;
-  const t = current.frame / stage.meta.fps;
+  const shot = stage.meta.shots[shotAt(current.frame)];
+  const t = (shot.frame0 + current.frame - shot.global0) / stage.meta.fps;
+  video.playbackRate = current.speed;
   if (Math.abs(video.currentTime - t) > 0.12) video.currentTime = t;
   if (current.playing && video.paused) video.play().catch(() => {});
   if (!current.playing && !video.paused) video.pause();

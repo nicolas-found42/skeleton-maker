@@ -100,8 +100,9 @@ design the digest as carefully as the questions; never gate on one generic confi
 ## Next
 
 1. Run one real clip through the NIM and repeat experiments 5–7 on actual Nova-77 digests.
-   Joint names for the 77-joint skeleton are not in the repo (only parent indices), so a
-   name map is a prerequisite for any feature code.
+   `skeleton_maker/nova77.py` now maps the canonical joints used by the character stage;
+   its left/right assignment is inferred per track. Use that map and retain the assignment
+   uncertainty when building features.
 2. Prototype `skeleton-maker export --format bvh|gltf` first; it is useful regardless of what
    the Jev experiments turn out to mean.
 3. Reproduce: scripts and cached Jev answers are in the session scratchpad

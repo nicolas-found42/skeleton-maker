@@ -67,6 +67,104 @@ def test_unknown_material_reference():
         validate_spec(s)
 
 
+@pytest.mark.parametrize("value", [-1, 0, float("nan"), float("inf"), "wide", True])
+def test_invalid_limb_width_is_a_pointed_error(value):
+    s = _spec()
+    s["parts"][0]["w"] = value
+    with pytest.raises(SpecError, match=r"parts\[0\].w"):
+        validate_spec(s)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"), [("materials", {"main": "wrong"}), ("palettes", [None]), ("parts", [None])]
+)
+def test_malformed_spec_containers_are_validation_errors(field, value):
+    s = _spec()
+    s[field] = value
+    with pytest.raises(SpecError, match=field[:-1]):
+        validate_spec(s)
+
+
+def test_invalid_spec_does_not_overwrite_existing_output(tmp_path):
+    from skeleton_maker.character import make_stage_html
+
+    spec = _spec()
+    spec["parts"][0]["w"] = -1
+    custom = tmp_path / "invalid.json"
+    custom.write_text(json.dumps(spec))
+    out = tmp_path / "stage.html"
+    out.write_text("existing stage")
+    with pytest.raises(SpecError, match=r"parts\[0\].w"):
+        make_stage_html("unused-pose.json", str(out), extra_specs=[str(custom)])
+    assert out.read_text() == "existing stage"
+
+
+def test_invalid_json_is_a_pointed_spec_error_before_output(tmp_path):
+    from skeleton_maker.character import make_stage_html
+
+    custom = tmp_path / "broken.json"
+    custom.write_text('{"name":')
+    out = tmp_path / "stage.html"
+    with pytest.raises(SpecError, match=r"broken.json.*line 1"):
+        make_stage_html("unused-pose.json", str(out), extra_specs=[str(custom)])
+    assert not out.exists()
+
+
+@pytest.mark.parametrize(
+    ("option", "value"),
+    [
+        ("fps", 0),
+        ("fps", -30),
+        ("fps", float("nan")),
+        ("fps", float("inf")),
+        ("scale", 0),
+        ("scale", -1),
+        ("scale", float("nan")),
+        ("fov", 0),
+        ("fov", 180),
+        ("fov", float("inf")),
+        ("min_conf", -0.1),
+        ("min_conf", 1.1),
+    ],
+)
+def test_invalid_viewer_options_fail_before_output(tmp_path, option, value):
+    from skeleton_maker.character import make_stage_html
+
+    out = tmp_path / "stage.html"
+    with pytest.raises(SpecError, match=option):
+        make_stage_html("unused-pose.json", str(out), **{option: value})
+    assert not out.exists()
+
+
+@pytest.mark.parametrize(
+    ("kind", "key", "value"),
+    [
+        ("prop", "size", [1, 0, 1]),
+        ("prop", "pos", [0, 1]),
+        ("chain", "n", 2.5),
+        ("chain", "r", [0.1, -0.1]),
+        ("chain", "dir", [0, 0, 0]),
+        ("chain", "tip", "absent"),
+    ],
+)
+def test_invalid_prop_and_chain_geometry_is_named(kind, key, value):
+    s = copy.deepcopy(builtin_specs()["critter"])
+    part = next(p for p in s["parts"] if p["type"] == kind)
+    part[key] = value
+    with pytest.raises(SpecError, match=key):
+        validate_spec(s)
+
+
+def test_template_tokens_in_user_text_do_not_replace_template_slots():
+    from skeleton_maker.stage import Stage
+
+    title = "__SPECS__ __VIEWER__"
+    page = character.build_html(Stage({"shots": []}, b""), builtin_specs(), {"title": title}, title)
+    assert f"<title>{title}</title>" in page
+    spec_json = page.split('id="specs">')[1].split("</script>")[0]
+    assert "robot" in json.loads(spec_json)
+
+
 def test_html_is_self_contained_and_escapes_titles():
     from skeleton_maker.stage import build_stage
     from tests.test_stage import clip

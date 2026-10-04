@@ -230,10 +230,15 @@ keeps a wrong guess from becoming a broken page.
 
 ## Tests
 
-49 tests, none of which call the NIM or touch the network. They cover the
+The tests run offline, without a NIM call or API key. They cover the
 annotation round trip and its limits, the Nova-77 topology, gRPC stub generation
 from the bundled protos, and `verify` end-to-end on synthetic artifacts —
 including the frame-shift failure it exists to catch.
+
+The character tests also build a wheel in a temporary directory and exercise its
+assets outside the source checkout. Custom-spec dimensions must be finite and
+positive; positions and rotations are finite triples. Chain counts are integers
+from 1 to 256 and trail lengths are integers from 1 to 4096.
 
 ## Cost and privacy
 
