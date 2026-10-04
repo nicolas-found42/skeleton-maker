@@ -31,8 +31,15 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
     });
     await page.selectOption('#speed', '0.5');
     await page.click('#play');
-    await page.waitForFunction(() => Number(document.querySelector('#scrub').value) >= 35);
-    await page.click('#play');
+    // Pause in the same browser task that observes the crossing: this short fixture
+    // can wrap while a separate Playwright click waits for an animation frame.
+    await page.waitForFunction(() => {
+      const viewer = window.__stage;
+      if (viewer.current.frame < 35) return false;
+      viewer.current.playing = false;
+      viewer.render(true);
+      return true;
+    }, null, { polling: 'raf' });
     await page.waitForFunction(() => !document.querySelector('#video').seeking);
     const crossing = await page.evaluate(() => ({
       frame: Number(document.querySelector('#scrub').value),
@@ -40,6 +47,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
       rate: document.querySelector('#video').playbackRate,
     }));
     console.log(JSON.stringify({ crossing }));
+    assert(crossing.frame >= 35 && crossing.frame < 60, 'snapshot is in the second shot before wrapping');
     try { assert(Math.abs(crossing.videoTime - (90 + crossing.frame - 30) / 30) < .2, 'continuous playback follows original time across cut'); } catch (e) { failures.push(e.message); }
     assert.equal(crossing.rate, .5, 'source video follows selected playback speed');
     assert.equal(errors.length, 0, 'no browser runtime errors');
