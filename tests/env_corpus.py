@@ -41,10 +41,12 @@ class Clip:
         self.geometry = None
         self.review = {"second_reviewer": "reviewer-b", "disagreements_resolved": True}
         self.entities = {}
+        self.vocab = {}
         self.observations = []
         self.scanned = list(self.frames)
         self.pred_geometry = {"status": "unavailable", "reason": "test"}
         self.run_status = "complete"
+        self.perception_status = "complete"
         self._masks = 0
 
     # --- ground truth -------------------------------------------------------
@@ -83,6 +85,7 @@ class Clip:
 
     # --- predictions --------------------------------------------------------
     def _entity(self, eid, family, label):
+        self.vocab[label] = family
         self.entities.setdefault(
             eid,
             {
@@ -90,7 +93,12 @@ class Clip:
                 "shot": "shot-0",
                 "family": family,
                 "motion": "unknown",
-                "labels": {"native": label, "normalized": label},
+                "labels": {
+                    "requested": label,
+                    "native": label,
+                    "normalized": label,
+                    "status": "matched",
+                },
             },
         )
 
@@ -118,11 +126,138 @@ class Clip:
         self.pred(frame, f"surface-{cls}", "surface", cls, rect)
 
     def pred_registration(self, status, frames=(), dimensions=()):
-        self.pred_geometry = {
+        geometry = {
             "status": status,
             "reason": "test",
-            "evaluation": {"frames": list(frames), "dimensions": list(dimensions)},
+            "evaluation": {
+                "frames": list(frames),
+                "dimensions": [{**item, "units": item.get("units", "m")} for item in dimensions],
+            },
         }
+        if status in ("registered_relative", "registered_metric"):
+            metric = status == "registered_metric"
+            units = "m" if metric else "relative_depth"
+            target_frame = "fixture-world"
+            identity = [
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0],
+            ]
+            checked_anchor_ids = sorted(
+                {point["id"] for frame in frames for point in frame.get("control_points", [])}
+            )
+            checked_dimension_ids = sorted(item["id"] for item in dimensions)
+            if not checked_anchor_ids and not checked_dimension_ids:
+                checked_anchor_ids = ["fixture-check"]
+            geometry.update(
+                {
+                    "units": units,
+                    "coordinate_convention": "test camera convention",
+                    "scale_provenance": {
+                        "kind": "fixture",
+                        "metric": metric,
+                        "fit_anchor_ids": ["fixture-fit"],
+                        "check_anchor_ids": ["fixture-check"],
+                        "fit_dimension_ids": [],
+                    },
+                    "static_fusion_entities": [],
+                    "excluded_dynamic_entities": [],
+                    "excluded_skeletons": [],
+                    "frames": [
+                        {
+                            "frame_id": frame_id,
+                            "shot": "shot-0",
+                            "depth_asset": f"geometry/depth/{frame_id}.npy",
+                            "intrinsics": [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+                            "extrinsics_w2c": [
+                                [1.0, 0.0, 0.0, 0.0],
+                                [0.0, 1.0, 0.0, 0.0],
+                                [0.0, 0.0, 1.0, 0.0],
+                            ],
+                            "depth_pixel_space": "processed_frame_pixels",
+                            "preprocessing": {
+                                "process_res": 10,
+                                "process_res_method": "upper_bound_resize",
+                                "source_size": [W, H],
+                                "processed_size": [W, H],
+                                "undistorted_source_to_processed": [
+                                    [1.0, 0.0, 0.0],
+                                    [0.0, 1.0, 0.0],
+                                    [0.0, 0.0, 1.0],
+                                ],
+                                "processed_to_undistorted_source": [
+                                    [1.0, 0.0, 0.0],
+                                    [0.0, 1.0, 0.0],
+                                    [0.0, 0.0, 1.0],
+                                ],
+                                "depth_resampling": "none; native DA3 processed depth grid",
+                                "intrinsics_pixel_space": "undistorted_source_frame_pixels",
+                                "crop": None,
+                                "lens_transform": {"model": "none", "applied": False},
+                            },
+                        }
+                        for frame_id in self.scanned
+                    ],
+                }
+            )
+            registration = {
+                "schema": "skeleton-maker.geometry-registration/1",
+                "source_frame": "fixture-scene",
+                "target_frame": target_frame,
+                "direction": "source_to_target",
+                "source_units": "relative_depth",
+                "target_units": units,
+                "scene_transforms": [
+                    {
+                        "shot": "shot-0",
+                        "source_frame": "fixture-scene",
+                        "target_frame": target_frame,
+                        "source_to_target": "fixture transform",
+                        "source_units": "relative_depth",
+                        "target_units": units,
+                        "matrix_4x4": identity,
+                        "scale": 1.0,
+                    }
+                ],
+                "camera_transforms": [
+                    {
+                        "frame_id": f["frame_id"],
+                        "shot": "shot-0",
+                        "source_frame": f"nim-camera:{f['frame_id']}",
+                        "target_frame": target_frame,
+                        "direction": "nim_camera_m_to_metric_world_m",
+                        "units": "m",
+                        "matrix_4x4": identity,
+                        "root_translation_applied": False,
+                        "stage_transform_applied": False,
+                    }
+                    for f in ({"frame_id": frame_id} for frame_id in self.scanned)
+                    if metric
+                ],
+                "fit_anchor_ids": ["fixture-fit"],
+                "check_anchor_ids": checked_anchor_ids,
+                "check_dimension_ids": checked_dimension_ids,
+                "checks": [
+                    {
+                        "id": identifier,
+                        "kind": (
+                            "fit_anchor_residual"
+                            if identifier == "fixture-fit"
+                            else "withheld_dimension"
+                            if identifier in checked_dimension_ids
+                            else "withheld_anchor_position"
+                        ),
+                        "error_m": 0.0,
+                        "uncertainty_m": 0.01,
+                        "passed": True,
+                    }
+                    for identifier in ["fixture-fit", *checked_anchor_ids, *checked_dimension_ids]
+                ],
+            }
+            geometry["coordinate_frame_id"] = target_frame
+            geometry["registration"] = registration
+        self.pred_geometry = geometry
 
     # --- files --------------------------------------------------------------
     def write_annotation(self):
@@ -150,7 +285,7 @@ class Clip:
         base = self.corpus.predictions / f"{self.name}.assets"
         base.mkdir(parents=True, exist_ok=True)
         assets = []
-        for path in sorted(base.rglob("*.png")):
+        for path in sorted(path for path in base.rglob("*") if path.is_file()):
             from skeleton_maker.artifacts import sha256_file
 
             assets.append(
@@ -163,7 +298,11 @@ class Clip:
         last = max(self.scanned) if self.scanned else 0
         doc = {
             "schema": envmanifest.SCHEMA_VERSION,
-            "run": {"status": self.run_status, "created_at": "2026-01-01T00:00:00+00:00"},
+            "run": {
+                "status": self.run_status,
+                "perception_status": self.perception_status,
+                "created_at": "2026-01-01T00:00:00+00:00",
+            },
             "source": {
                 "path": f"/clips/{self.name}.mp4",
                 "sha256": self.sha,
@@ -193,8 +332,13 @@ class Clip:
             "observations": self.observations,
             "geometry": {"mode": "auto", **self.pred_geometry},
             "backend": {"name": "test", "version": "0", "checkpoints": [], "device": "cpu"},
+            "relations": [],
             "config": {
                 "requested_labels": [],
+                "label_vocabulary": [
+                    {"label": label, "family": family, "source": "preset"}
+                    for label, family in sorted(self.vocab.items())
+                ],
                 "geometry_mode": "auto",
                 "sample_fps": 2,
                 "device": "cpu",

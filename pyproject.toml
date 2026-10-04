@@ -60,19 +60,19 @@ python-version = "3.10"
 [tool.ty.src]
 include = ["skeleton_maker", "tests", "scripts", "experiments"]
 # Generated gRPC stubs are rebuilt from proto/ on demand and gitignored.
-# Worker scripts run in their own environment (torch and friends) and are not importable here.
-exclude = ["skeleton_maker/_gen", "skeleton_maker/workers"]
+# Worker modules are shipped and imported by offline tests; their model dependencies stay lazy.
+exclude = ["skeleton_maker/_gen"]
 
 [tool.coverage.run]
 source = ["skeleton_maker"]
 # Keep the data file inside the already-ignored .pytest_cache.
 data_file = ".pytest_cache/.coverage"
 # Generated gRPC stubs are rebuilt from proto/ on demand and gitignored.
-omit = ["skeleton_maker/_gen/*", "skeleton_maker/workers/*"]
+omit = ["skeleton_maker/_gen/*"]
 
 [tool.coverage.report]
 # Ratchet: this floor may only ever go up. Raise it when a PR adds tests; never lower it.
-fail_under = 80
+fail_under = 82
 show_missing = true
 
 [tool.typos.files]

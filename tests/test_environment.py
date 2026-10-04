@@ -7,7 +7,7 @@ import subprocess
 
 import pytest
 
-from skeleton_maker import cli, environment, envmanifest
+from skeleton_maker import cli, environment, envmanifest, envworkers
 
 from .env_fakes import FakeBackend
 
@@ -102,7 +102,15 @@ def test_help_documents_every_option(capsys):
         _run(["--help"])
     assert exc.value.code == 0
     text = capsys.readouterr().out
-    for option in ("--out", "--backend", "--geometry", "--sample-fps", "--device"):
+    for option in (
+        "--out",
+        "--backend",
+        "--geometry",
+        "--sample-fps",
+        "--device",
+        "--calibration",
+        "--viewer",
+    ):
         assert option in text
 
 
@@ -198,19 +206,24 @@ def test_time_mapping_is_exact_for_ntsc_rates(tmp_path, fake):
     assert manifest["processed_frames"][1]["time"] == [1001, 2000]
 
 
-def test_geometry_modes_without_a_geometry_backend(clip, fake, tmp_path, capsys):
+def test_geometry_modes_without_a_geometry_backend(clip, fake, tmp_path, capsys, monkeypatch):
+    monkeypatch.setattr(envworkers, "discover_geometry", lambda: None)
     out = tmp_path / "e.json"
     assert _run([str(clip), "--out", str(out), "--backend", "fake", "--geometry", "auto"]) == 0
-    geometry = json.loads(out.read_text())["geometry"]
+    manifest = json.loads(out.read_text())
+    geometry = manifest["geometry"]
     assert geometry["status"] == "unavailable"
-    assert "no geometry support" in geometry["reason"]
+    assert "DA3 geometry worker is not installed" in geometry["reason"]
+    assert manifest["run"]["status"] == "partial"
+    assert manifest["run"]["perception_status"] == "complete"
+    assert "semantic scan completed, but spatial registration is partial" in capsys.readouterr().err
 
     out.unlink()
     capsys.readouterr()
     err = _run_failing(
         [str(clip), "--out", str(out), "--backend", "fake", "--geometry", "required"], capsys
     )
-    assert "no geometry support" in err
+    assert "independent DA3 worker" in err
     assert not out.exists()
 
 
@@ -224,7 +237,7 @@ def test_required_geometry_fails_if_the_backend_cannot_register(
         [str(clip), "--out", str(out), "--backend", "fake", "--geometry", "required"], capsys
     )
 
-    assert "no valid shared registration" in err
+    assert "no valid shared metric registration" in err
     assert not out.exists()
 
 
@@ -242,6 +255,7 @@ def test_partial_backend_result_is_marked_and_exits_nonzero(clip, monkeypatch, t
     run = json.loads(out.read_text())["run"]
     assert run["status"] == "partial"
     assert "failed to decode" in run["reason"]
+    assert "geometry registration unavailable" in run["reason"]
     assert "partial" in capsys.readouterr().err
 
 
@@ -368,7 +382,7 @@ def test_rerun_replaces_the_artifact_and_stale_assets(clip, fake, tmp_path):
 
     assert not stale.exists()
     assert (tmp_path / "environment.assets" / "masks" / "floor-0.png").exists()
-    assert json.loads(out.read_text())["run"]["status"] == "complete"
+    assert json.loads(out.read_text())["run"]["status"] == "partial"
 
 
 @pytest.fixture
@@ -388,6 +402,13 @@ def test_manifest_round_trips_through_the_loader(written):
     doc = envmanifest.load_manifest(written)
     assert doc["assets"][0]["path"] == "masks/floor-0.png"
     assert doc["observations"][0]["mask"] == {"asset": "masks/floor-0.png"}
+
+
+def test_manifest_loader_reports_missing_entity_family_as_manifest_error(written):
+    _edit(written, lambda doc: doc["entities"][0].pop("family"))
+
+    with pytest.raises(envmanifest.ManifestError, match=r"entities\[0\]: missing 'family'"):
+        envmanifest.load_manifest(written)
 
 
 @pytest.mark.parametrize(

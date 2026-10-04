@@ -24,6 +24,9 @@ doctor:
 environment-worker-setup:
     uv run --locked python -m scripts.setup_environment_worker
 
+da3-geometry-setup:
+    uv run --locked python -m scripts.setup_da3_geometry_worker
+
 # Run the offline generated-fixture browser regressions.
 browser-check:
     uv run --locked python -m scripts.run_browser_checks

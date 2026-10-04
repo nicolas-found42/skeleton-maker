@@ -29,6 +29,7 @@ PREFLIGHT_TIMEOUT_S = 180
 WORKERS_DIR = Path(__file__).with_name("workers")
 #: Workers the package knows how to find, by backend name.
 KNOWN_WORKERS = {"grounded-sam2-da3": "grounded_sam2_da3.py"}
+KNOWN_GEOMETRY_WORKERS = {"da3-geometry": "da3_geometry.py"}
 
 
 class BackendError(RuntimeError):
@@ -158,6 +159,16 @@ def discover(name: str) -> SubprocessBackend | None:
     script = KNOWN_WORKERS.get(name)
     if script is None:
         return None
+    python = worker_home() / name / ".venv" / "bin" / "python"
+    if not python.exists():
+        return None
+    return SubprocessBackend(name, str(python), WORKERS_DIR / script)
+
+
+def discover_geometry() -> SubprocessBackend | None:
+    """Return the optional DA3 geometry worker when its isolated interpreter exists."""
+    name = "da3-geometry"
+    script = KNOWN_GEOMETRY_WORKERS[name]
     python = worker_home() / name / ".venv" / "bin" / "python"
     if not python.exists():
         return None

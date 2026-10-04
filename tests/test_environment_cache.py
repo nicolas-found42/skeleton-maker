@@ -53,11 +53,15 @@ def test_identical_rerun_reuses_the_cache_without_calling_the_backend(
 ):
     assert _run(clip, tmp_path) == 0
     first = json.loads((tmp_path / "environment.json").read_text())
+    assert first["run"]["status"] == "partial"
+    assert first["run"]["perception_status"] == "complete"
     assert "cache miss" in capsys.readouterr().out
 
     assert _run(clip, tmp_path, out="second.json") == 0
 
     second = json.loads((tmp_path / "second.json").read_text())
+    assert second["run"]["status"] == "partial"
+    assert second["run"]["perception_status"] == "complete"
     assert len(backend.requests) == 1, "the second run must not reach the backend"
     assert "cache hit" in capsys.readouterr().out
     assert second["observations"] == first["observations"]

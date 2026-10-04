@@ -406,7 +406,7 @@ function render(force) {
   $("time").textContent = `${(current.frame / fps).toFixed(1)}s / ${(stage.total / fps).toFixed(1)}s`;
   syncVideo();
   updateLabels(si);
-  renderer.render(scene, camera);
+  __ENVIRONMENT_RENDER__renderer.render(scene, camera);
 }
 
 // Follow: keep the orbit camera on one person, e.g. the performer in a crowd.
@@ -518,7 +518,7 @@ async function boot() {
   };
   $("loading").style.display = "none";
   loop();
-  window.__stage = { stage, rigs, current, get camera() { return camera; }, setFrame, render, enterOrbit, enterOriginal, orbit };
+  window.__stage = { stage, rigs, current, get camera() { return camera; }, setFrame, render, enterOrbit, enterOriginal, orbit };__ENVIRONMENT_EXPOSE__
 }
 
 function resize() {

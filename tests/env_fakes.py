@@ -7,9 +7,16 @@ package; CI substitutes this fake through the backend registry and nothing else.
 
 import copy
 
+import cv2
+import numpy as np
+
 from skeleton_maker import environment
 
 CONTRACT = environment.BACKEND_CONTRACT
+
+
+def _labels(label):
+    return {"requested": label, "native": label, "normalized": label, "status": "matched"}
 
 
 class FakeBackend:
@@ -63,7 +70,10 @@ class FakeBackend:
 
         floor_shot, chair_shot = shot_of(first), shot_of(last)
         (assets_dir / "masks").mkdir(parents=True, exist_ok=True)
-        (assets_dir / "masks" / "floor-0.png").write_bytes(b"\x89PNG fake floor mask")
+        width, height = request["source"]["width"], request["source"]["height"]
+        floor = np.zeros((height, width), np.uint8)
+        floor[20:47, 0:63] = 255
+        cv2.imwrite(str(assets_dir / "masks" / "floor-0.png"), floor)
         response = {
             "contract": CONTRACT,
             "status": "complete",
@@ -78,14 +88,14 @@ class FakeBackend:
                     "id": f"{floor_shot}/floor-1",
                     "shot": floor_shot,
                     "family": "surface",
-                    "labels": {"native": "floor", "normalized": "floor"},
+                    "labels": _labels("floor"),
                     "motion": "static",
                 },
                 {
                     "id": f"{chair_shot}/chair-1",
                     "shot": chair_shot,
                     "family": "object",
-                    "labels": {"native": "chair", "normalized": "chair"},
+                    "labels": _labels("chair"),
                     "motion": "unknown",
                 },
             ],

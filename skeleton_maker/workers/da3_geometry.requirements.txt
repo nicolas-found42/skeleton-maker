@@ -1,0 +1,14 @@
+# Python 3.12; exact inference environment used by the DA3 geometry worker.
+torch==2.14.1
+torchvision==0.29.1
+numpy==1.26.4
+huggingface_hub==1.33.0
+opencv-python-headless==4.11.0.86
+pillow==12.3.0
+safetensors==0.8.0
+einops==0.8.1
+omegaconf==2.3.1
+imageio==2.37.0
+trimesh==4.6.4
+moviepy==1.0.3
+addict==2.4.0

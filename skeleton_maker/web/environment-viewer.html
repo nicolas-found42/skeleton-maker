@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>__TITLE__</title>
+  <style>
+    :root { color-scheme: dark; font: 15px system-ui, sans-serif; background: #111827; color: #e5e7eb; }
+    body { margin: 0; }
+    header { padding: .8rem 1rem; background: #1f2937; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    h1 { font-size: 1.1rem; margin: 0 auto 0 0; }
+    main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 320px); gap: 1rem; padding: 1rem; }
+    .stage { position: relative; width: 100%; background: #000; line-height: 0; }
+    video { display: block; width: 100%; max-height: 75vh; }
+    canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+    aside, .controls { background: #1f2937; border-radius: .5rem; padding: 1rem; }
+    aside h2 { font-size: 1rem; margin: 0 0 .6rem; }
+    label { display: inline-flex; align-items: center; gap: .35rem; }
+    .families { display: flex; gap: .8rem; flex-wrap: wrap; }
+    input, select, button { accent-color: #38bdf8; }
+    input[type=range] { width: min(32rem, 45vw); }
+    .transport { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; margin-top: .7rem; }
+    .status { padding: .2rem .5rem; border-radius: .4rem; display: inline-block; }
+    .status.missing { color: #d1d5db; background: #374151; }
+    .status.low { color: #fef08a; background: #713f12; }
+    .status.absent { color: #fecaca; background: #7f1d1d; }
+    .status.observed { color: #bbf7d0; background: #14532d; }
+    .detail { line-height: 1.5; overflow-wrap: anywhere; }
+    .detail dt { color: #9ca3af; margin-top: .55rem; }
+    .detail dd { margin: 0; }
+    .error { color: #fecaca; padding: .6rem 1rem; }
+    @media (max-width: 800px) { main { grid-template-columns: 1fr; } input[type=range] { width: 55vw; } }
+  </style>
+</head>
+<body>
+  <header><h1 id="title">__TITLE__</h1><span id="geometry"></span><div class="families" aria-label="Visible families"></div></header>
+  <main>
+    <section>
+      <div class="stage"><video id="video" controls preload="metadata" src="__BUNDLE__/__VIDEO__"></video><canvas id="overlay" aria-label="Pose and environment overlay"></canvas></div>
+      <p class="error" id="error" role="alert" hidden></p>
+      <div class="controls transport">
+        <label for="frame">Frame</label><input id="frame" type="range" min="0" value="0" step="1">
+        <output id="frame-label" for="frame">0</output><span id="shot"></span>
+      </div>
+    </section>
+    <aside>
+      <h2>Entity evidence</h2>
+      <label for="entity">Entity</label> <select id="entity"></select>
+      <dl class="detail" id="detail"></dl>
+    </aside>
+  </main>
+  <script type="application/json" id="payload">__PAYLOAD__</script>
+  <script defer data-bundle="__BUNDLE__" src="__BUNDLE__/viewer.js"></script>
+</body>
+</html>

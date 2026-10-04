@@ -53,7 +53,9 @@ def test_a_worker_run_produces_a_manifest_and_streams_progress(clip, worker, tmp
     assert cli.main(_argv(clip, tmp_path)) == 0
 
     manifest = json.loads((tmp_path / "environment.json").read_text())
-    assert manifest["run"]["status"] == "complete"
+    assert manifest["run"]["status"] == "partial"
+    assert manifest["run"]["perception_status"] == "complete"
+    assert manifest["geometry"]["status"] == "unavailable"
     assert manifest["backend"]["name"] == "fake"
     captured = capsys.readouterr()
     assert "progress: 2/2" in captured.err

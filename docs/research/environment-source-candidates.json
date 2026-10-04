@@ -1,0 +1,447 @@
+{
+  "schema": "skeleton-maker.environment-source-candidates/1",
+  "status": "candidates_only",
+  "accuracy_evaluated": false,
+  "sources": [
+    {
+      "id": "Avg9pGlqwf0",
+      "source_url": "https://www.youtube.com/watch?v=Avg9pGlqwf0",
+      "title": "Sample Standard Double Room Tour | Purdue Housing",
+      "uploader": "Purdue University",
+      "reported_license": "Creative Commons Attribution license (reuse allowed)",
+      "candidate_family": "indoor",
+      "split": "unassigned",
+      "independent_annotation": "pending",
+      "second_review": "pending",
+      "measured_geometry": "unavailable",
+      "pixel_review": "pending",
+      "sha256": "e3c7933c4db9458878c9d57c38bda99b772a97446ccd89c73e0377c3338f3da5",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 854,
+            "height": 480,
+            "r_frame_rate": "30000/1001",
+            "nb_frames": "360"
+          }
+        ],
+        "format": {
+          "duration": "12.012000"
+        }
+      },
+      "download_status": "downloaded",
+      "local_file": "Avg9pGlqwf0.mp4",
+      "download_format_id": "397",
+      "requested_excerpt_seconds": [
+        15,
+        27
+      ]
+    },
+    {
+      "id": "RGQSkVRiw_A",
+      "source_url": "https://www.youtube.com/watch?v=RGQSkVRiw_A",
+      "title": "Apartment tour \ud83c\udfe0 Living in an 18th century Dutch house in Leiden, The Netherlands",
+      "uploader": "Janica\u00b4s Journey",
+      "reported_license": "Creative Commons Attribution license (reuse allowed)",
+      "candidate_family": "indoor",
+      "split": "unassigned",
+      "independent_annotation": "pending",
+      "second_review": "pending",
+      "measured_geometry": "unavailable",
+      "pixel_review": "pending",
+      "sha256": "3b5be9fefac6237e4aa0311e197b5597350f9dec8dec9a78bf4e4998c3c6f1de",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 640,
+            "height": 360,
+            "r_frame_rate": "25/1",
+            "nb_frames": "1050"
+          }
+        ],
+        "format": {
+          "duration": "42.000000"
+        }
+      },
+      "download_status": "downloaded",
+      "local_file": "dutch-architecture.mp4",
+      "download_format_id": "605",
+      "requested_excerpt_seconds": [
+        253,
+        295
+      ]
+    },
+    {
+      "id": "_dOzjhTsR4A",
+      "source_url": "https://www.youtube.com/watch?v=_dOzjhTsR4A",
+      "title": "Cozy Studio Apartment Tour 2025 | 35sm/378sqft Full Apartment Space Design",
+      "uploader": "Cleve.Interior",
+      "reported_license": "Creative Commons Attribution license (reuse allowed)",
+      "candidate_family": "indoor",
+      "split": "unassigned",
+      "independent_annotation": "pending",
+      "second_review": "pending",
+      "measured_geometry": "unavailable",
+      "pixel_review": "pending",
+      "sha256": "08654e0178a0bdf752fac15dd0a4d473e4e160eccea47fbd26a5ac5fe8ebc84c",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 854,
+            "height": 480,
+            "r_frame_rate": "30/1",
+            "nb_frames": "360",
+            "side_data_list": [
+              {}
+            ]
+          }
+        ],
+        "format": {
+          "duration": "12.000000"
+        }
+      },
+      "download_status": "downloaded",
+      "local_file": "_dOzjhTsR4A.mp4",
+      "download_format_id": "697",
+      "requested_excerpt_seconds": [
+        15,
+        27
+      ]
+    },
+    {
+      "id": "AQfaV49HCdU",
+      "source_url": "https://www.youtube.com/watch?v=AQfaV49HCdU",
+      "title": "Real Estate Office Tour! | Sell With Manuel Vlog 003",
+      "uploader": "Manuel Sanchez",
+      "reported_license": "Creative Commons Attribution license (reuse allowed)",
+      "candidate_family": "indoor",
+      "split": "unassigned",
+      "independent_annotation": "pending",
+      "second_review": "pending",
+      "measured_geometry": "unavailable",
+      "pixel_review": "pending",
+      "sha256": "9eb9c289bfe5860027a98cea5c81a50964f501e20bf5e37412665f89d39df488",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 640,
+            "height": 360,
+            "r_frame_rate": "30000/1001",
+            "nb_frames": "360"
+          }
+        ],
+        "format": {
+          "duration": "12.012000"
+        }
+      },
+      "download_status": "downloaded",
+      "local_file": "AQfaV49HCdU.mp4",
+      "download_format_id": "605",
+      "requested_excerpt_seconds": [
+        15,
+        27
+      ]
+    },
+    {
+      "id": "R33oeO9TMcc",
+      "source_url": "https://www.youtube.com/watch?v=R33oeO9TMcc",
+      "title": "Commercial Office Space Designed by Trendle Interiors at Sector 63 Noida",
+      "uploader": "Trendle Interiors",
+      "reported_license": "Creative Commons Attribution license (reuse allowed)",
+      "candidate_family": "indoor",
+      "split": "unassigned",
+      "independent_annotation": "pending",
+      "second_review": "pending",
+      "measured_geometry": "unavailable",
+      "pixel_review": "pending",
+      "sha256": "6bac72fb4948a9c64e1a4a10271ce1bd77070ea61d7b1ec9a01658dd1ee3e1e6",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 400,
+            "height": 224,
+            "r_frame_rate": "30000/1001",
+            "nb_frames": "360"
+          }
+        ],
+        "format": {
+          "duration": "12.012000"
+        }
+      },
+      "download_status": "downloaded",
+      "local_file": "R33oeO9TMcc.mp4",
+      "download_format_id": "133",
+      "requested_excerpt_seconds": [
+        15,
+        27
+      ]
+    },
+    {
+      "id": "3R_H8mbPwzg",
+      "source_url": "https://www.youtube.com/watch?v=3R_H8mbPwzg",
+      "title": "In the Kitchen before the Korean State Dinner",
+      "uploader": "The White House",
+      "reported_license": "Public domain (Commons reviewed record)",
+      "candidate_family": "indoor",
+      "split": "unassigned",
+      "independent_annotation": "pending",
+      "second_review": "pending",
+      "measured_geometry": "unavailable",
+      "pixel_review": "inspected development frame18; live-action kitchen",
+      "commons_source": "https://commons.wikimedia.org/wiki/File:In_the_Kitchen_before_the_Korean_State_Dinner.webm",
+      "sha256": "85cfb55f7c776a779b05ae0a2fced9cf35e204a98d7a5b80891841bc61c34190",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 480,
+            "height": 270,
+            "r_frame_rate": "10/1",
+            "nb_frames": "120"
+          }
+        ],
+        "format": {
+          "duration": "12.000000"
+        }
+      },
+      "download_status": "downloaded",
+      "local_file": "3R_H8mbPwzg.mp4",
+      "requested_excerpt_seconds": [
+        15,
+        27
+      ]
+    },
+    {
+      "id": "QfnC5TucOEo",
+      "source_url": "https://www.youtube.com/watch?v=QfnC5TucOEo",
+      "title": "Stockholm commuting by motorcycle",
+      "uploader": "Don Pelleone",
+      "reported_license": "Creative Commons Attribution license (reuse allowed)",
+      "candidate_family": "outdoor",
+      "split": "unassigned",
+      "independent_annotation": "pending",
+      "second_review": "pending",
+      "measured_geometry": "unavailable",
+      "pixel_review": "pending",
+      "sha256": "ec8571d5f87fb1fafef7ee0c85627527842df0d52a2a1c43fc9430575ca2533b",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 640,
+            "height": 360,
+            "r_frame_rate": "25/1",
+            "nb_frames": "300"
+          }
+        ],
+        "format": {
+          "duration": "12.000000"
+        }
+      },
+      "download_status": "downloaded",
+      "local_file": "QfnC5TucOEo.mp4",
+      "download_format_id": "605",
+      "requested_excerpt_seconds": [
+        15,
+        27
+      ]
+    },
+    {
+      "id": "B_Rtsa3Z7oM",
+      "source_url": "https://www.youtube.com/watch?v=B_Rtsa3Z7oM",
+      "title": "My Daily motorbike Ride Perth Western Australia (131)",
+      "uploader": "Drewno",
+      "reported_license": "Creative Commons Attribution license (reuse allowed)",
+      "candidate_family": "outdoor",
+      "split": "unassigned",
+      "independent_annotation": "pending",
+      "second_review": "pending",
+      "measured_geometry": "unavailable",
+      "pixel_review": "pending",
+      "sha256": "331eb61f22b647bbcdb38791eca29b54c1f8e3eefc7bee5e3f671c9e1beb3ef7",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 640,
+            "height": 360,
+            "r_frame_rate": "30/1",
+            "nb_frames": "360"
+          }
+        ],
+        "format": {
+          "duration": "12.000000"
+        }
+      },
+      "download_status": "downloaded",
+      "local_file": "B_Rtsa3Z7oM.mp4",
+      "download_format_id": "605",
+      "requested_excerpt_seconds": [
+        15,
+        27
+      ]
+    },
+    {
+      "id": "fA8gI34Pv-s",
+      "source_url": "https://www.youtube.com/watch?v=fA8gI34Pv-s",
+      "title": "Thailand Street View Car Bus Motorcycles",
+      "uploader": "Fun Explore",
+      "reported_license": "Creative Commons Attribution license (reuse allowed)",
+      "candidate_family": "outdoor",
+      "split": "unassigned",
+      "independent_annotation": "pending",
+      "second_review": "pending",
+      "measured_geometry": "unavailable",
+      "pixel_review": "pending",
+      "sha256": "bbfb5a7ed86b2060ffb48596ab41916db98c2a5ac6aac2c4ced00322d08d45ec",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 640,
+            "height": 360,
+            "r_frame_rate": "25/1",
+            "nb_frames": "264"
+          }
+        ],
+        "format": {
+          "duration": "10.560000"
+        }
+      },
+      "download_status": "downloaded",
+      "local_file": "fA8gI34Pv-s.mp4",
+      "download_format_id": "605",
+      "requested_excerpt_seconds": [
+        15,
+        27
+      ]
+    },
+    {
+      "id": "x6zdwIBdLLM",
+      "source_url": "https://www.youtube.com/watch?v=x6zdwIBdLLM",
+      "title": "A Bristol Commute",
+      "uploader": "Dogbot",
+      "reported_license": "Creative Commons Attribution license (reuse allowed)",
+      "candidate_family": "outdoor",
+      "split": "unassigned",
+      "independent_annotation": "pending",
+      "second_review": "pending",
+      "measured_geometry": "unavailable",
+      "pixel_review": "pending",
+      "sha256": "c2c79a1f9809782d54fe204a943781fa4a22c0d8f1b87a7d1319c3dfb5d6786b",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 640,
+            "height": 360,
+            "r_frame_rate": "30000/1001",
+            "nb_frames": "360"
+          }
+        ],
+        "format": {
+          "duration": "12.012000"
+        }
+      },
+      "download_status": "downloaded",
+      "local_file": "x6zdwIBdLLM.mp4",
+      "download_format_id": "605",
+      "requested_excerpt_seconds": [
+        15,
+        27
+      ]
+    },
+    {
+      "id": "wzI-Sm0CshA",
+      "source_url": "https://www.youtube.com/watch?v=wzI-Sm0CshA",
+      "title": "Motorcycle near miss with a bus",
+      "uploader": "GaryGSF",
+      "reported_license": "Creative Commons Attribution license (reuse allowed)",
+      "candidate_family": "outdoor",
+      "split": "unassigned",
+      "independent_annotation": "pending",
+      "second_review": "pending",
+      "measured_geometry": "unavailable",
+      "pixel_review": "pending",
+      "sha256": "27e1e4984936d30ccdf274c29fc407c4a81acd59f5947cf0bbad0c85c0b46be9",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 640,
+            "height": 360,
+            "r_frame_rate": "25/1",
+            "nb_frames": "200"
+          }
+        ],
+        "format": {
+          "duration": "8.000000"
+        }
+      },
+      "download_status": "downloaded",
+      "local_file": "wzI-Sm0CshA.mp4",
+      "download_format_id": "605",
+      "requested_excerpt_seconds": [
+        0,
+        8
+      ]
+    },
+    {
+      "id": "53rmMpz3WcI",
+      "source_url": "https://www.youtube.com/watch?v=53rmMpz3WcI",
+      "title": "Motorcycle Riding clips - through red and lane cut in",
+      "uploader": "RidingInLondon",
+      "reported_license": "Creative Commons Attribution license (reuse allowed)",
+      "candidate_family": "outdoor",
+      "split": "unassigned",
+      "independent_annotation": "pending",
+      "second_review": "pending",
+      "measured_geometry": "unavailable",
+      "pixel_review": "pending",
+      "sha256": "9bd861f902632820f18b0ed1a39715621588a90c5ed4ded0de71ae36d627a228",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 640,
+            "height": 360,
+            "r_frame_rate": "30/1",
+            "nb_frames": "240"
+          }
+        ],
+        "format": {
+          "duration": "8.000000"
+        }
+      },
+      "download_status": "downloaded",
+      "local_file": "53rmMpz3WcI.mp4",
+      "download_format_id": "605",
+      "requested_excerpt_seconds": [
+        0,
+        8
+      ]
+    }
+  ],
+  "retrieved_at": "2026-10-04",
+  "tools": {
+    "yt_dlp": "2026.08.19",
+    "ffmpeg": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers"
+  }
+}

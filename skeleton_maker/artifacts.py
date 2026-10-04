@@ -5,8 +5,10 @@ import hashlib
 import os
 import shutil
 import tempfile
-from collections.abc import Generator
+import uuid
+from collections.abc import Generator, Iterable
 from contextlib import contextmanager
+from dataclasses import dataclass
 from fractions import Fraction
 from pathlib import Path
 
@@ -111,3 +113,83 @@ def publish(manifest_path, manifest_text: str, assets_src, assets_dst) -> None:
         tmp_manifest.unlink(missing_ok=True)
         raise
     shutil.rmtree(parked, ignore_errors=True)
+
+
+def publish_group(items: Iterable[tuple[Path | None, Path]]) -> list[str]:
+    """Install prepared files/directories as a group and restore the old set on failure.
+
+    Each staged source must be on the same filesystem as its destination. A ``None`` source
+    removes an existing destination on success. All preparation and cross-filesystem copying
+    must finish before this function is called, so installation only renames completed items.
+    """
+    entries = [(Path(src) if src is not None else None, Path(dst)) for src, dst in items]
+    if not entries:
+        return []
+    destinations = [dst.absolute() for _, dst in entries]
+    if len(set(destinations)) != len(destinations):
+        raise ValueError("grouped artifact destinations must be unique")
+    if any(
+        a in b.parents or b in a.parents
+        for i, a in enumerate(destinations)
+        for b in destinations[i + 1 :]
+    ):
+        raise ValueError("grouped artifact destinations must not contain one another")
+    for src, dst in entries:
+        if src is not None and (
+            src.absolute() == dst.absolute() or not (src.exists() or src.is_symlink())
+        ):
+            raise FileNotFoundError(f"staged artifact is missing or is its destination: {src}")
+        dst.parent.mkdir(parents=True, exist_ok=True)
+
+    states: list[_PublishState] = []
+    try:
+        for src, dst in entries:
+            backup = dst.with_name(f".{dst.name}.{uuid.uuid4().hex}.old")
+            state = _PublishState(destination=dst, backup=backup)
+            states.append(state)
+            if dst.exists() or dst.is_symlink():
+                os.replace(dst, backup)
+                state.parked = True
+            if src is not None:
+                os.replace(src, dst)
+                state.installed = True
+    except BaseException as exc:
+        rollback_errors = []
+        for state in reversed(states):
+            try:
+                if state.installed:
+                    _remove_artifact(state.destination)
+                if state.parked:
+                    os.replace(state.backup, state.destination)
+            except OSError as rollback_exc:
+                rollback_errors.append(f"{state.destination}: {rollback_exc}")
+        if rollback_errors:
+            details = "; ".join(rollback_errors)
+            raise OSError(f"artifact group failed and rollback was incomplete: {details}") from exc
+        raise
+    else:
+        cleanup_warnings = []
+        for state in states:
+            if state.parked:
+                try:
+                    _remove_artifact(state.backup)
+                except OSError as exc:
+                    cleanup_warnings.append(
+                        f"could not remove recovery backup {state.backup}: {exc}"
+                    )
+        return cleanup_warnings
+
+
+@dataclass
+class _PublishState:
+    destination: Path
+    backup: Path
+    parked: bool = False
+    installed: bool = False
+
+
+def _remove_artifact(path: Path) -> None:
+    if path.is_dir() and not path.is_symlink():
+        shutil.rmtree(path)
+    else:
+        path.unlink(missing_ok=True)

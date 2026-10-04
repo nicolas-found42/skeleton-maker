@@ -14,14 +14,18 @@ import json
 import math
 import os
 import re
+import subprocess
 import sys
+from fractions import Fraction
 from importlib import resources
 from pathlib import Path
 from urllib.parse import quote
 
+from . import artifacts, environment, envmanifest, stage_environment
 from .nova77 import CANON
+from .path_safety import paths_overlap
 from .stage import Options, build_stage, load_frames
-from .utils import die
+from .utils import die, probe_video
 
 SHAPES = {"box", "cylinder", "capsule", "sphere", "cone", "icosa", "torus"}
 MATERIAL_TYPES = {"standard", "basic"}
@@ -195,13 +199,28 @@ def build_html(stage, specs: dict, options: dict, title: str) -> str:
     def js(obj) -> str:  # Keep script-data parser control sequences out of user JSON.
         return json.dumps(obj, separators=(",", ":")).replace("<", "\\u003c")
 
+    viewer = _asset("viewer.js")
+    environment_script = ""
+    environment_status = ""
+    if "environment" in options:
+        environment_script = _asset("environment_stage.js")
+        environment_status = '<div id="environment-status" class="sub" role="status"></div>'
+        viewer = viewer.replace("__ENVIRONMENT_RENDER__", "drawEnvironment(si, k);")
+        viewer = viewer.replace(
+            "__ENVIRONMENT_EXPOSE__", "window.__stage.environment = environmentView;"
+        )
+    else:
+        viewer = viewer.replace("__ENVIRONMENT_RENDER__", "")
+        viewer = viewer.replace("__ENVIRONMENT_EXPOSE__", "")
     replacements = {
         "__TITLE__": htmllib.escape(title),
         "__SPECS__": js(specs),
         "__OPTIONS__": js(options),
         "__PAYLOAD__": stage.payload(),
         "__THREE__": _asset("three.module.min.js"),
-        "__VIEWER__": _asset("viewer.js"),
+        "__VIEWER__": viewer,
+        "__ENVIRONMENT_STATUS__": environment_status,
+        "__ENVIRONMENT_VIEWER__": environment_script,
     }
     # Substitute the original template once; inserted user text is never a new template slot.
     return re.sub("|".join(replacements), lambda match: replacements[match[0]], page)
@@ -214,14 +233,16 @@ def make_stage_html(
     character: str = "auto",
     extra_specs: list | None = None,
     video: str | None = None,
-    fps: float = 30.0,
+    fps: float | None = None,
     fov: float = 45.0,
     min_conf: float = 0.0,
     scale: float = 1.0,
     title: str | None = None,
+    environment_manifest: str | None = None,
 ) -> dict:
     """Write the stage HTML; returns a summary dict."""
-    _number(fps, "fps", positive=True)
+    if fps is not None:
+        _number(fps, "fps", positive=True)
     _number(scale, "scale", positive=True)
     _number(fov, "fov", positive=True)
     if fov >= 180:
@@ -239,10 +260,100 @@ def make_stage_html(
         specs[spec["name"]] = spec
     if character != "auto" and character not in specs:
         die(f"unknown character {character!r}. Available: {', '.join(sorted(specs))}")
+    environment_doc = None
+    if environment_manifest is not None:
+        pose_path = Path(pose_json).resolve()
+        output_path = Path(out).resolve()
+        manifest_path = Path(environment_manifest).resolve()
+        assets_path = envmanifest.assets_dir_for(manifest_path)
+        try:
+            environment.validate_artifact_paths(
+                inputs=[
+                    ("pose file", pose_path),
+                    ("environment manifest", manifest_path),
+                    ("source video", video),
+                ],
+                files=[("character stage", output_path)],
+                directories=[],
+            )
+        except environment.ManifestError as exc:
+            raise SpecError(str(exc)) from exc
+        if paths_overlap(output_path, assets_path):
+            raise SpecError(f"character stage conflicts with environment assets: {assets_path}")
+        try:
+            environment_doc = envmanifest.load_manifest(manifest_path)
+        except envmanifest.ManifestError as exc:
+            raise SpecError(f"invalid environment manifest: {exc}") from exc
     frames = load_frames(pose_json)
     if not frames:
         die(f"{pose_json} has no frames")
-    stage = build_stage(frames, Options(fps=fps, min_conf=min_conf))
+    if environment_doc is not None:
+        source = environment_doc["source"]
+        poses_manifest = environment_doc.get("poses")
+        if poses_manifest is not None and "file_sha256" in poses_manifest:
+            actual_pose_hash = artifacts.sha256_file(pose_json)
+            if actual_pose_hash != poses_manifest["file_sha256"]:
+                raise SpecError(
+                    "pose file sha256 does not match the pose file recorded in the environment manifest"
+                )
+        source_frame_count = source["frame_count"]
+        if any(frame_id < 0 or frame_id >= source_frame_count for frame_id, _ in frames):
+            raise SpecError(
+                f"pose frame IDs must be within the environment source frame range "
+                f"0..{source_frame_count - 1}"
+            )
+        source_rate = Fraction(*source["frame_rate"])
+        if video is not None:
+            try:
+                actual_video_hash = artifacts.sha256_file(video)
+            except OSError as exc:
+                raise SpecError(f"cannot read source video {video}: {exc.strerror or exc}") from exc
+            if actual_video_hash != source["sha256"]:
+                raise SpecError(
+                    "source video sha256 does not match the video recorded in the environment manifest"
+                )
+            try:
+                video_info = probe_video(video)
+                video_rate = Fraction(video_info["r_frame_rate"])
+            except (
+                OSError,
+                ValueError,
+                ZeroDivisionError,
+                KeyError,
+                subprocess.SubprocessError,
+                SystemExit,
+            ) as exc:
+                raise SpecError(f"cannot read source video metadata: {exc}") from exc
+            if abs(video_info["r_fps"] - video_info["avg_fps"]) > 0.01:
+                raise SpecError("source video has a variable frame rate and cannot be synchronized")
+            actual_frame_count = video_info["nb_frames"]
+            if actual_frame_count is None:
+                actual_frame_count = round(video_info["duration"] * float(video_rate))
+            if (video_info["width"], video_info["height"]) != (
+                source["width"],
+                source["height"],
+            ):
+                raise SpecError("source video dimensions do not match the environment manifest")
+            if actual_frame_count != source_frame_count:
+                raise SpecError("source video frame count does not match the environment manifest")
+            if video_rate != source_rate:
+                raise SpecError("source video frame rate does not match the environment manifest")
+        if fps is None:
+            effective_fps = float(source_rate)
+        elif not math.isclose(fps, float(source_rate), rel_tol=0.0, abs_tol=1e-6):
+            raise SpecError(
+                f"fps {fps:g} does not match the environment source frame rate "
+                f"{source_rate.numerator}/{source_rate.denominator}"
+            )
+        else:
+            effective_fps = float(source_rate)
+    else:
+        effective_fps = 30.0 if fps is None else fps
+    stage = build_stage(
+        frames,
+        Options(fps=effective_fps, min_conf=min_conf),
+        capture_display_transforms=environment_manifest is not None,
+    )
     shots = stage.meta["shots"]
     if not shots:
         die("no usable bodies found in the pose file (no frame had hips, chest and head)")
@@ -252,6 +363,13 @@ def make_stage_html(
         "scale": scale,
         "title": title or os.path.basename(pose_json),
     }
+    if environment_manifest is not None:
+        try:
+            options["environment"] = stage_environment.prepare(
+                environment_manifest, stage.meta, document=environment_doc
+            )
+        except envmanifest.ManifestError as exc:
+            raise SpecError(f"invalid environment manifest: {exc}") from exc
     if video:
         video_path = Path(video).resolve()
         try:
@@ -293,7 +411,17 @@ def add_cli(subparsers) -> None:
         help="add a custom character spec (JSON); repeatable",
     )
     p.add_argument("--video", help="the source clip, shown picture-in-picture and kept in sync")
-    p.add_argument("--fps", type=float, default=30.0, help="frame rate of the clip (default: 30)")
+    p.add_argument(
+        "--environment",
+        metavar="MANIFEST",
+        help="show registered metric environment geometry from a manifest",
+    )
+    p.add_argument(
+        "--fps",
+        type=float,
+        default=None,
+        help="frame rate of the clip (default: 30, or the environment source frame rate)",
+    )
     p.add_argument(
         "--fov",
         type=float,
@@ -331,6 +459,7 @@ def run_cli(args) -> int:
             min_conf=args.min_conf,
             scale=args.scale,
             title=args.title,
+            environment_manifest=args.environment,
         )
     except SpecError as exc:
         print(f"error: {exc}", file=sys.stderr)

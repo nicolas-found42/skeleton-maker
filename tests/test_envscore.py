@@ -422,6 +422,163 @@ def test_registration_reports_coverage_and_reprojection_error(corpus, tmp_path):
     assert gate["pass"] is True
 
 
+def test_unavailable_geometry_cannot_claim_registered_evaluation_frames(corpus, tmp_path, capsys):
+    a = corpus.clip("unavailable", frames=range(5), tags=["translating"])
+    a.gt_geometry(
+        range(5),
+        control_points=[{"frame_id": f, "id": "corner", "xy": [5.0, 5.0]} for f in range(5)],
+    )
+    a.pred_registration(
+        "unavailable",
+        [
+            {
+                "frame_id": f,
+                "registered": True,
+                "control_points": [{"id": "corner", "xy": [5.0, 5.0]}],
+            }
+            for f in range(5)
+        ],
+    )
+    corpus.write()
+
+    out = tmp_path / "score.json"
+    with pytest.raises(SystemExit) as exc:
+        cli.main(
+            [
+                "environment-score",
+                "--predictions",
+                str(corpus.predictions),
+                "--annotations",
+                str(corpus.annotations),
+                "--out",
+                str(out),
+            ]
+        )
+
+    assert exc.value.code == 2
+    assert (
+        "registered: true conflicts with geometry.status 'unavailable'" in capsys.readouterr().err
+    )
+    assert not out.exists()
+
+
+def test_registration_evaluation_missing_frame_id_is_invalid_before_report_write(
+    corpus, tmp_path, capsys
+):
+    a = corpus.clip("malformed-registration")
+    a.gt_geometry([], control_points=[])
+    a.pred_registration("unavailable", [{"registered": True, "control_points": []}])
+    corpus.write()
+    out = tmp_path / "score.json"
+
+    with pytest.raises(SystemExit) as exc:
+        cli.main(
+            [
+                "environment-score",
+                "--predictions",
+                str(corpus.predictions),
+                "--annotations",
+                str(corpus.annotations),
+                "--out",
+                str(out),
+            ]
+        )
+
+    assert exc.value.code == 2
+    assert "geometry.evaluation.frames[0].frame_id" in capsys.readouterr().err
+    assert not out.exists()
+
+
+@pytest.mark.parametrize("mutation", ["fit-point", "missing-dimension-units"])
+def test_registration_evaluation_must_name_independent_checks_and_units(
+    corpus, tmp_path, capsys, mutation
+):
+    a = corpus.clip("malformed-registration")
+    a.pred_registration(
+        "registered_metric",
+        frames=[
+            {
+                "frame_id": 0,
+                "registered": True,
+                "control_points": [{"id": "corner", "xy": [5.0, 5.0]}],
+            }
+        ],
+        dimensions=[{"id": "door-height", "meters": 2.0}],
+    )
+    corpus.write()
+    prediction = corpus.predictions / "malformed-registration.json"
+    doc = json.loads(prediction.read_text())
+    if mutation == "fit-point":
+        doc["geometry"]["evaluation"]["frames"][0]["control_points"][0]["id"] = "fixture-fit"
+    else:
+        doc["geometry"]["evaluation"]["dimensions"][0].pop("units")
+    prediction.write_text(json.dumps(doc))
+    out = tmp_path / "score.json"
+
+    with pytest.raises(SystemExit) as exc:
+        cli.main(
+            [
+                "environment-score",
+                "--predictions",
+                str(corpus.predictions),
+                "--annotations",
+                str(corpus.annotations),
+                "--out",
+                str(out),
+            ]
+        )
+
+    assert exc.value.code == 2
+    error = capsys.readouterr().err
+    if mutation == "fit-point":
+        assert "independent registration check anchors" in error
+    else:
+        assert "geometry.evaluation.dimensions[0]: missing 'units'" in error
+    assert not out.exists()
+
+
+@pytest.mark.parametrize("collision", ["annotation", "prediction", "asset", "hardlink", "symlink"])
+def test_score_output_cannot_overwrite_or_alias_inputs(corpus, tmp_path, capsys, collision):
+    a = corpus.clip("collision", frames=[0])
+    a.gt_surface(0, "wall", (0, 1, 0, 1))
+    a.pred_surface(0, "wall", (0, 1, 0, 1))
+    corpus.write()
+    annotation = corpus.annotations / "collision.json"
+    prediction = corpus.predictions / "collision.json"
+    asset = next((corpus.predictions / "collision.assets").rglob("*.png"))
+    source = {
+        "annotation": annotation,
+        "prediction": prediction,
+        "asset": asset,
+    }
+    if collision in source:
+        out = source[collision]
+    elif collision == "hardlink":
+        out = tmp_path / "hardlink.json"
+        out.hardlink_to(annotation)
+    else:
+        out = tmp_path / "symlink.json"
+        out.symlink_to(annotation)
+    protected = {path: path.read_bytes() for path in (annotation, prediction, asset)}
+
+    with pytest.raises(SystemExit) as exc:
+        cli.main(
+            [
+                "environment-score",
+                "--predictions",
+                str(corpus.predictions),
+                "--annotations",
+                str(corpus.annotations),
+                "--out",
+                str(out),
+            ]
+        )
+
+    assert exc.value.code == 2
+    assert "--out" in capsys.readouterr().err
+    assert all(path.read_bytes() == content for path, content in protected.items())
+
+
 def test_large_reprojection_errors_fail_registration(corpus, tmp_path):
     _registration_clip(corpus, "a", {0: 0.1, 1: 0.2, 2: 0.3, 3: 0.4, 4: 0.5})
     corpus.write()
@@ -501,6 +658,62 @@ def test_underconstrained_clips_must_not_claim_registration(corpus, tmp_path):
     assert gate["clips"] == {"honest": True, "liar": False}
 
 
+def test_relative_camera_frame_is_honest_for_underconstrained_clips(corpus, tmp_path):
+    clip = corpus.clip("relative-camera", tags=["underconstrained"])
+    depth_asset = "geometry/depth/depth-00000000.npy"
+    depth_path = corpus.predictions / "relative-camera.assets" / depth_asset
+    depth_path.parent.mkdir(parents=True)
+    depth_path.write_bytes(b"relative test depth")
+    clip.pred_geometry = {
+        "status": "relative-camera-frame",
+        "reason": "test relative camera frame",
+        "units": "relative_depth",
+        "coordinate_convention": "camera x right, y down, z forward; world-to-camera extrinsics",
+        "scale_provenance": {"kind": "relative_model_prediction", "metric": False},
+        "static_fusion_entities": [],
+        "excluded_dynamic_entities": [],
+        "frames": [
+            {
+                "frame_id": 0,
+                "depth_asset": depth_asset,
+                "intrinsics": [[10.0, 0.0, 5.0], [0.0, 10.0, 5.0], [0.0, 0.0, 1.0]],
+                "extrinsics_w2c": [
+                    [1.0, 0.0, 0.0, 0.0],
+                    [0.0, 1.0, 0.0, 0.0],
+                    [0.0, 0.0, 1.0, 0.0],
+                ],
+                "depth_pixel_space": "source_frame_pixels",
+                "preprocessing": {
+                    "process_res": 14,
+                    "process_res_method": "upper_bound_resize",
+                    "source_size": [10, 10],
+                    "processed_size": [10, 10],
+                    "undistorted_source_to_processed": [
+                        [1.0, 0.0, 0.0],
+                        [0.0, 1.0, 0.0],
+                        [0.0, 0.0, 1.0],
+                    ],
+                    "processed_to_undistorted_source": [
+                        [1.0, 0.0, 0.0],
+                        [0.0, 1.0, 0.0],
+                        [0.0, 0.0, 1.0],
+                    ],
+                    "depth_resampling": "bilinear to source_size",
+                    "intrinsics_pixel_space": "undistorted_source_frame_pixels",
+                    "crop": None,
+                    "lens_transform": {"model": "none", "applied": False},
+                },
+            }
+        ],
+    }
+    corpus.write()
+
+    _, doc = _score(corpus, tmp_path)
+
+    assert doc["gates"]["underconstrained"]["clips"] == {"relative-camera": True}
+    assert doc["gates"]["underconstrained"]["pass"] is True
+
+
 # --- corpus coverage, splits and inputs -------------------------------------------------------
 
 
@@ -521,7 +734,8 @@ def test_a_small_corpus_fails_coverage_with_named_reasons(corpus, tmp_path):
     } <= failed
 
 
-def test_a_full_corpus_passes_coverage(corpus, tmp_path):
+@pytest.mark.parametrize("geometry_only_abstention", [False, True])
+def test_a_full_corpus_passes_coverage(corpus, tmp_path, geometry_only_abstention):
     required = list(envscore.TARGETS["required_tags"])
     for i in range(12):
         split = "development" if i < 6 else "heldout"
@@ -539,6 +753,9 @@ def test_a_full_corpus_passes_coverage(corpus, tmp_path):
             dimensions=[{"id": "door", "meters": 2.0, "uncertainty_m": 0.01, "withheld": True}],
         )
         a.interval(0, 29)  # 2.9 s at 10 fps
+        if geometry_only_abstention and i == 0:
+            a.run_status = "partial"
+            a.perception_status = "complete"
     corpus.write()
 
     _, doc = _score(corpus, tmp_path)
@@ -581,6 +798,7 @@ def test_a_clip_without_a_prediction_scores_as_all_misses(corpus, tmp_path):
 def test_incomplete_runs_are_flagged_and_fail_coverage(corpus, tmp_path):
     a = corpus.clip()
     a.run_status = "partial"
+    a.perception_status = "partial"
     corpus.write()
 
     _, doc = _score(corpus, tmp_path)
@@ -633,6 +851,7 @@ def _edit_annotation(corpus, fn):
         (lambda d: d.update(schema="other/1"), "unsupported annotation schema"),
         (lambda d: d.update(split="train"), "split"),
         (lambda d: d.update(source_sha256="abc"), "64-character"),
+        (lambda d: d.update(source_sha256="z" * 64), "hexadecimal"),
         (lambda d: d["frames"][0].update(negative_classes=["table"]), "class-negative"),
         (
             lambda d: d["frames"][0]["instances"].append(
@@ -663,6 +882,67 @@ def test_malformed_annotations_are_rejected_with_pointed_errors(
     assert not (tmp_path / "score.json").exists()
 
 
+def test_null_annotation_surface_list_is_a_pointed_error_and_preserves_prior_score(
+    corpus, tmp_path, capsys
+):
+    corpus.clip()
+    corpus.write()
+    _edit_annotation(corpus, lambda d: d["frames"][0].update(surfaces=None))
+    out = tmp_path / "score.json"
+    out.write_text("previous report")
+
+    with pytest.raises(SystemExit) as exc:
+        _score(corpus, tmp_path)
+
+    err = capsys.readouterr().err
+    assert exc.value.code == 2
+    assert "a.json" in err
+    assert "frames[0].surfaces: expected a list" in err
+    assert out.read_text() == "previous report"
+
+
+def test_non_finite_annotation_control_point_is_rejected(corpus, tmp_path, capsys):
+    _registration_clip(corpus, "a", {0: 0.0}, eligible=[0])
+    corpus.write()
+    path = corpus.annotations / "a.json"
+    path.write_text(path.read_text().replace('"xy": [5.0, 5.0]', '"xy": [1e999, 5.0]', 1))
+
+    with pytest.raises(SystemExit) as exc:
+        _score(corpus, tmp_path)
+
+    assert exc.value.code == 2
+    assert "geometry.control_points[0].xy: expected finite numbers" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    ("edit", "message"),
+    [
+        (
+            lambda d: d["geometry"].update(eligible_frames=[0, 0]),
+            "geometry.eligible_frames: duplicate frame id 0",
+        ),
+        (
+            lambda d: d["geometry"]["control_points"].append(
+                {"frame_id": 0, "id": "corner", "xy": [6.0, 6.0]}
+            ),
+            "geometry.control_points[1]: duplicate id 'corner' in frame 0",
+        ),
+    ],
+)
+def test_duplicate_annotation_geometry_references_are_rejected(
+    corpus, tmp_path, capsys, edit, message
+):
+    _registration_clip(corpus, "a", {0: 0.0}, eligible=[0])
+    corpus.write()
+    _edit_annotation(corpus, edit)
+
+    with pytest.raises(SystemExit) as exc:
+        _score(corpus, tmp_path)
+
+    assert exc.value.code == 2
+    assert message in capsys.readouterr().err
+
+
 def test_masks_of_the_wrong_size_or_outside_the_directory_are_rejected(corpus, tmp_path, capsys):
     a = corpus.clip()
     a.gt_instance(0, "c", "object", "chair", (0, 4, 0, 4))
@@ -687,7 +967,7 @@ def test_missing_directories_and_empty_corpora_are_errors(tmp_path, capsys):
                 "--annotations",
                 str(tmp_path),
                 "--out",
-                str(tmp_path / "s.json"),
+                str(tmp_path.parent / "s.json"),
             ]
         )
     assert exc.value.code == 2

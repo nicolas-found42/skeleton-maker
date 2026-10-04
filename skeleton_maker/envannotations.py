@@ -8,6 +8,7 @@ this module reads a manifest.
 """
 
 import json
+import math
 from pathlib import Path
 
 import cv2
@@ -60,6 +61,17 @@ def _frame_range(obj, where):
     return first, last
 
 
+def _list_field(obj, key, where, *, default=None):
+    if key not in obj:
+        if default is not None:
+            return default
+        raise AnnotationError(f"{where}: missing '{key}'")
+    value = obj[key]
+    if not isinstance(value, list):
+        raise AnnotationError(f"{where}.{key}: expected a list")
+    return value
+
+
 def _validate(doc) -> None:
     if not isinstance(doc, dict):
         raise AnnotationError("annotation must be a JSON object")
@@ -68,15 +80,20 @@ def _validate(doc) -> None:
             f"unsupported annotation schema {doc.get('schema')!r}; expected {ANNOTATION_SCHEMA!r}"
         )
     _need(doc, "clip", str, "annotation")
-    if len(_need(doc, "source_sha256", str, "annotation")) != 64:
-        raise AnnotationError("source_sha256: expected a 64-character SHA-256 hex digest")
+    source_sha = _need(doc, "source_sha256", str, "annotation")
+    if len(source_sha) != 64:
+        raise AnnotationError("source_sha256: expected a 64-character SHA-256 hexadecimal digest")
+    if any(character not in "0123456789abcdefABCDEF" for character in source_sha):
+        raise AnnotationError("source_sha256: expected a hexadecimal digest")
     _one_of(_need(doc, "split", str, "annotation"), SPLITS, "split")
     width = _need(doc, "width", int, "annotation")
     height = _need(doc, "height", int, "annotation")
     if width <= 0 or height <= 0:
         raise AnnotationError("width and height must be positive")
     rate = _need(doc, "frame_rate", list, "annotation")
-    if len(rate) != 2 or not all(isinstance(v, int) and v > 0 for v in rate):
+    if len(rate) != 2 or not all(
+        isinstance(v, int) and not isinstance(v, bool) and v > 0 for v in rate
+    ):
         raise AnnotationError("frame_rate: expected [numerator, denominator], both > 0")
     tags = doc.get("tags", [])
     if not isinstance(tags, list) or not all(isinstance(t, str) for t in tags):
@@ -94,10 +111,14 @@ def _validate(doc) -> None:
 
     shots = []
     for i, shot in enumerate(_need(doc, "shots", list, "annotation")):
+        if not isinstance(shot, dict):
+            raise AnnotationError(f"shots[{i}]: expected an object")
         shots.append(_frame_range(shot, f"shots[{i}]"))
     seen_frames = set()
     for i, frame in enumerate(_need(doc, "frames", list, "annotation")):
         where = f"frames[{i}]"
+        if not isinstance(frame, dict):
+            raise AnnotationError(f"{where}: expected an object")
         fid = _need(frame, "frame_id", int, where)
         if fid in seen_frames:
             raise AnnotationError(f"{where}: duplicate frame_id {fid}")
@@ -108,8 +129,10 @@ def _validate(doc) -> None:
                 f"{where}.negative_classes: only {', '.join(STRUCTURAL)} can be class-negative"
             )
         positives = set()
-        for j, surface in enumerate(frame.get("surfaces", [])):
+        for j, surface in enumerate(_list_field(frame, "surfaces", where, default=[])):
             sw = f"{where}.surfaces[{j}]"
+            if not isinstance(surface, dict):
+                raise AnnotationError(f"{sw}: expected an object")
             cls = _need(surface, "class", str, sw)
             if cls not in STRUCTURAL:
                 raise AnnotationError(f"{sw}.class: {cls!r} is not one of {', '.join(STRUCTURAL)}")
@@ -119,8 +142,10 @@ def _validate(doc) -> None:
         if both:
             raise AnnotationError(f"{where}: {sorted(both)[0]} is both positive and negative")
         ids = set()
-        for j, inst in enumerate(frame.get("instances", [])):
+        for j, inst in enumerate(_list_field(frame, "instances", where, default=[])):
             iw = f"{where}.instances[{j}]"
+            if not isinstance(inst, dict):
+                raise AnnotationError(f"{iw}: expected an object")
             iid = _need(inst, "id", str, iw)
             if iid in ids:
                 raise AnnotationError(f"{iw}: duplicate instance id {iid!r} in the frame")
@@ -131,9 +156,13 @@ def _validate(doc) -> None:
             _one_of(vis, GT_VISIBILITIES, f"{iw}.visibility")
             if vis != "absent":
                 _need(inst, "mask", str, iw)
-        for j, region in enumerate(frame.get("ignore", [])):
+        for j, region in enumerate(_list_field(frame, "ignore", where, default=[])):
+            if not isinstance(region, dict):
+                raise AnnotationError(f"{where}.ignore[{j}]: expected an object")
             _need(region, "mask", str, f"{where}.ignore[{j}]")
-    for i, interval in enumerate(doc.get("tracking_intervals", [])):
+    for i, interval in enumerate(_list_field(doc, "tracking_intervals", "annotation", default=[])):
+        if not isinstance(interval, dict):
+            raise AnnotationError(f"tracking_intervals[{i}]: expected an object")
         first, last = _frame_range(interval, f"tracking_intervals[{i}]")
         if not any(a <= first and last <= b for a, b in shots):
             raise AnnotationError(
@@ -142,19 +171,41 @@ def _validate(doc) -> None:
             )
     geometry = doc.get("geometry")
     if geometry is not None:
+        if not isinstance(geometry, dict):
+            raise AnnotationError("geometry: expected an object")
         eligible = _need(geometry, "eligible_frames", list, "geometry")
         if not all(isinstance(f, int) and not isinstance(f, bool) for f in eligible):
             raise AnnotationError("geometry.eligible_frames: expected frame ids")
-        for i, cp in enumerate(geometry.get("control_points", [])):
+        seen_eligible = set()
+        for frame_id in eligible:
+            if frame_id in seen_eligible:
+                raise AnnotationError(f"geometry.eligible_frames: duplicate frame id {frame_id}")
+            seen_eligible.add(frame_id)
+        control_ids: dict[int, set[str]] = {}
+        for i, cp in enumerate(_list_field(geometry, "control_points", "geometry", default=[])):
             cw = f"geometry.control_points[{i}]"
-            if _need(cp, "frame_id", int, cw) not in eligible:
+            if not isinstance(cp, dict):
+                raise AnnotationError(f"{cw}: expected an object")
+            frame_id = _need(cp, "frame_id", int, cw)
+            if frame_id not in eligible:
                 raise AnnotationError(f"{cw}: frame {cp['frame_id']} is not an eligible frame")
-            _need(cp, "id", str, cw)
+            point_id = _need(cp, "id", str, cw)
+            frame_control_ids = control_ids.setdefault(frame_id, set())
+            if point_id in frame_control_ids:
+                raise AnnotationError(f"{cw}: duplicate id {point_id!r} in frame {frame_id}")
+            frame_control_ids.add(point_id)
             xy = _need(cp, "xy", list, cw)
-            if len(xy) != 2 or not all(isinstance(v, (int, float)) for v in xy):
-                raise AnnotationError(f"{cw}.xy: expected [x, y]")
-        for i, dim in enumerate(geometry.get("dimensions", [])):
+            if len(xy) != 2 or not all(
+                isinstance(v, (int, float))
+                and not isinstance(v, bool)
+                and (not isinstance(v, float) or math.isfinite(v))
+                for v in xy
+            ):
+                raise AnnotationError(f"{cw}.xy: expected finite numbers [x, y]")
+        for i, dim in enumerate(_list_field(geometry, "dimensions", "geometry", default=[])):
             dw = f"geometry.dimensions[{i}]"
+            if not isinstance(dim, dict):
+                raise AnnotationError(f"{dw}: expected an object")
             _need(dim, "id", str, dw)
             if _need(dim, "meters", float, dw) <= 0:
                 raise AnnotationError(f"{dw}.meters: must be positive")

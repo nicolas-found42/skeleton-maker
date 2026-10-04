@@ -37,6 +37,7 @@ work/
 !package-lock.json
 !*/sample*.json
 !skeleton_maker/characters/*.json
+!docs/research/environment-source-candidates.json
 
 # macOS
 .DS_Store

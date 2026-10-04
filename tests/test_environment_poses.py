@@ -191,6 +191,54 @@ def test_missing_pose_file_is_rejected(clip, fake, tmp_path, capsys):
     assert "no such file" in err
 
 
+def test_output_cannot_replace_the_pose_input(clip, monkeypatch, tmp_path, capsys):
+    pose_file = tmp_path / "pose.json"
+    _write_poses(pose_file, range(30))
+    before = pose_file.read_bytes()
+    backend = FakeBackend()
+    monkeypatch.setitem(environment.BACKENDS, "fake", backend)
+    argv = [str(clip), "--out", str(pose_file), "--backend", "fake", "--poses", str(pose_file)]
+
+    err = _run_failing(argv, capsys)
+
+    assert "--out would overwrite the pose input" in err
+    assert pose_file.read_bytes() == before
+    assert backend.requests == []
+
+
+@pytest.mark.parametrize("input_kind", ["video", "poses"])
+def test_inputs_inside_the_output_asset_bundle_are_preserved(
+    clip, monkeypatch, tmp_path, capsys, input_kind
+):
+    assets = tmp_path / "environment.assets"
+    assets.mkdir()
+    if input_kind == "video":
+        video = assets / "clip.mp4"
+        shutil.copyfile(clip, video)
+        pose_file = None
+        before = video.read_bytes()
+    else:
+        video = clip
+        pose_file = assets / "pose.json"
+        _write_poses(pose_file, range(30))
+        before = pose_file.read_bytes()
+    backend = FakeBackend()
+    monkeypatch.setitem(environment.BACKENDS, "fake", backend)
+    argv = [str(video), "--out", str(tmp_path / "environment.json"), "--backend", "fake"]
+    if pose_file is not None:
+        argv.extend(["--poses", str(pose_file)])
+
+    err = _run_failing(argv, capsys)
+
+    assert f"--out asset bundle would remove the {input_kind} input" in err
+    if input_kind == "video":
+        assert video.read_bytes() == before
+    else:
+        assert pose_file is not None
+        assert pose_file.read_bytes() == before
+    assert backend.requests == []
+
+
 def _with_people(*people):
     def mutate(resp):
         for entity, skeleton in people:
@@ -199,7 +247,12 @@ def _with_people(*people):
                 "shot": "shot-0",
                 "family": "person",
                 "motion": "dynamic",
-                "labels": {"native": "person", "normalized": "person"},
+                "labels": {
+                    "requested": None,
+                    "native": "person",
+                    "normalized": "person",
+                    "status": "matched",
+                },
             }
             if skeleton is not None:
                 ent["skeleton_id"] = skeleton

@@ -125,12 +125,27 @@ def run_browser_scripts(
     run: Callable[..., None] = _run,
     env: dict[str, str] | None = None,
 ) -> None:
-    """Run both regression scripts; propagate failures so the server context closes."""
-    for script in ("check_character_browser.cjs", "check_character_edges.cjs"):
+    """Run each offline viewer regression; propagate failures and keep assets local."""
+    screenshot = ROOT / "work" / "jev-run" / "ticket-60" / "environment-viewer.png"
+    screenshot.parent.mkdir(parents=True, exist_ok=True)
+    scripts = [
+        ("check_character_browser.cjs", [f"{base_url}/index.html"]),
+        ("check_character_edges.cjs", [f"{base_url}/index.html"]),
+        ("check_environment_browser.cjs", [f"{base_url}/environment.html", str(screenshot)]),
+        (
+            "check_character_environment_browser.cjs",
+            [
+                f"{base_url}/stage-environment/index.html",
+                str(ROOT / "work" / "jev-run" / "ticket-65" / "registered-stage.png"),
+                f"{base_url}/stage-environment/expected.json",
+            ],
+        ),
+    ]
+    for script, arguments in scripts:
         if env is None:
-            run([node, str(ROOT / "scripts" / script), f"{base_url}/index.html"])
+            run([node, str(ROOT / "scripts" / script), *arguments])
         else:
-            run([node, str(ROOT / "scripts" / script), f"{base_url}/index.html"], env=env)
+            run([node, str(ROOT / "scripts" / script), *arguments], env=env)
 
 
 def main() -> int:
@@ -183,6 +198,19 @@ def main() -> int:
                 "--locked",
                 "python",
                 "-m",
+                "scripts.make_environment_viewer_fixture",
+                str(video),
+                str(fixture_dir / "environment.json"),
+            ],
+            env=child_env,
+        )
+        _run(
+            [
+                "uv",
+                "run",
+                "--locked",
+                "python",
+                "-m",
                 "scripts.make_character_fixture",
                 str(html),
                 "--video-name",
@@ -191,11 +219,24 @@ def main() -> int:
             env=child_env,
         )
 
+        _run(
+            [
+                "uv",
+                "run",
+                "--locked",
+                "python",
+                "-m",
+                "scripts.make_character_environment_fixture",
+                str(fixture_dir / "stage-environment"),
+            ],
+            env=child_env,
+        )
+
         with serve_directory(fixture_dir) as origin:
             # The fixture generator's canonical output basename is index.html.
             run_browser_scripts(origin, node, env=child_env)
 
-    print("PASS: both offline browser regressions completed; temporary fixture and server removed.")
+    print("PASS: all offline browser regressions completed; temporary fixture and server removed.")
     return 0
 
 

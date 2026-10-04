@@ -12,7 +12,7 @@ Ground truth is human labelling only. Model predictions and Jev judgments are ne
 
 ## Inputs
 
-A predictions directory of environment manifests (`*.json`, loaded with full validation), joined to annotations by `source.sha256`. A clip with an annotation but no manifest scores as all misses and fails coverage; a manifest whose `run.status` is not `complete` fails coverage.
+A predictions directory of environment manifests (`*.json`, loaded with full validation), joined to annotations by `source.sha256`. A clip with an annotation but no manifest scores as all misses and fails coverage. Incomplete prediction runs also fail coverage, except when perception completed and only geometry is partial with an honest unregistered status (`not_requested`, `unavailable`, `relative` or `relative-camera-frame`).
 
 Mask assets in manifests and annotations are single-channel PNG images the size of the source frame; any non-zero pixel is inside. Only observations with `visibility: "visible"` and a mask count as detections.
 
@@ -73,7 +73,7 @@ Registration and scale are scored from an optional `geometry.evaluation` block i
 | `identity_objects`, `identity_vehicles` | IDF1 at least 0.75 over the annotated tracking intervals, with ids assigned by an optimal one-to-one match per interval. Reports id switches, fragmentation (a matched track lost and re-found) and misses. |
 | `registration` | Coverage of eligible frames at least 0.80, median reprojection error at most 0.5% and 95th percentile at most 2.0% of the image diagonal. Percentiles use the nearest-rank method. Abstained frames count against coverage. |
 | `metric_scale` | Every withheld dimension within 10% relative error, and the manifest's geometry status is `registered_metric`. The annotation's `uncertainty_m` is reported with it. |
-| `underconstrained` | Every clip tagged `underconstrained` reports `not_requested`, `unavailable` or `relative` geometry, never a registration. |
+| `underconstrained` | Every clip tagged `underconstrained` reports `not_requested`, `unavailable`, `relative` or `relative-camera-frame` geometry, never a registration. |
 | `corpus_coverage` | At least 12 clips (6 development, 6 held-out); 10 annotated frames and a 2-second tracking interval per held-out clip; second review on every held-out clip; complete prediction runs; at least 2 held-out clips with positive annotations for each of objects, vehicles, walls, floors and ceilings, and at least one class-negative frame for each structural class; at least 6 object and 3 vehicle subtypes; every required scene tag; 2 held-out translating-camera clips with eligible frames and control points; one withheld metric dimension. |
 
 ## Empty sets, ignored regions and aggregation

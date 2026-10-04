@@ -28,6 +28,7 @@ from .envannotations import (
     read_mask,
 )
 from .envmanifest import ManifestError
+from .path_safety import is_same_or_ancestor, same_path
 from .utils import die
 
 SCORER_VERSION = "1"
@@ -79,7 +80,8 @@ TARGETS: dict[str, Any] = {
 
 EXIT_FAILED_GATES = 1
 EXIT_INVALID = 2
-HONEST_GEOMETRY = ("not_requested", "unavailable", "relative")
+HONEST_GEOMETRY = ("not_requested", "unavailable", "relative", "relative-camera-frame")
+REGISTERED_GEOMETRY = ("registered_relative", "registered_metric")
 
 
 # --- loading -------------------------------------------------------------------------------
@@ -90,6 +92,26 @@ def _json_files(directory: str, what: str) -> list[Path]:
     if not path.is_dir():
         die(f"no such directory: {directory} ({what})", EXIT_INVALID)
     return sorted(p for p in path.glob("*.json") if p.is_file())
+
+
+def _validate_score_output_path(output: str, predictions: str, annotations: str) -> None:
+    """Reject output paths that could replace or enter either scorer input corpus."""
+    target = Path(output).resolve()
+    roots = [Path(predictions), Path(annotations)]
+    for root in roots:
+        if is_same_or_ancestor(root, target):
+            die(f"--out must be outside scorer input directories: {root}", EXIT_INVALID)
+    if not target.exists():
+        return
+    for root in roots:
+        for source in root.rglob("*"):
+            try:
+                if source.is_file() and same_path(target, source):
+                    die(f"--out aliases scorer input {source}", EXIT_INVALID)
+            except OSError:
+                # A concurrent removal or inaccessible unrelated file cannot turn an
+                # otherwise-contained output into a destructive input alias.
+                continue
 
 
 def _load_corpus(predictions: str, annotations: str):
@@ -490,7 +512,9 @@ def _registration_gate(clips: dict, manifests: dict) -> dict:
             continue
         diag = math.hypot(ann["width"], ann["height"])
         manifest = manifests.get(name, (None,))[0]
-        evaluation = ((manifest or {}).get("geometry") or {}).get("evaluation") or {}
+        predicted_geometry = (manifest or {}).get("geometry") or {}
+        status_is_registered = predicted_geometry.get("status") in REGISTERED_GEOMETRY
+        evaluation = predicted_geometry.get("evaluation") or {}
         predicted = {f["frame_id"]: f for f in evaluation.get("frames", [])}
         c_valid = 0
         for frame_id in geometry["eligible_frames"]:
@@ -498,7 +522,7 @@ def _registration_gate(clips: dict, manifests: dict) -> dict:
             record = predicted.get(frame_id)
             wanted = [cp for cp in geometry.get("control_points", []) if cp["frame_id"] == frame_id]
             points = {p["id"]: p["xy"] for p in (record or {}).get("control_points", [])}
-            if not record or record.get("registered") is not True:
+            if not status_is_registered or not record or record.get("registered") is not True:
                 continue
             if any(cp["id"] not in points for cp in wanted):
                 continue
@@ -645,9 +669,18 @@ def _coverage_gate(all_clips: dict, manifests: dict) -> dict:
         bool(held) and all(a.get("review") for a in held.values()),
         "every held-out clip needs a second reviewer with disagreements resolved",
     )
-    incomplete = [
-        n for n in all_clips if n not in manifests or manifests[n][0]["run"]["status"] != "complete"
-    ]
+    incomplete = []
+    for name in all_clips:
+        manifest = manifests.get(name, (None,))[0]
+        run = (manifest or {}).get("run") or {}
+        geometry_status = ((manifest or {}).get("geometry") or {}).get("status")
+        geometry_only_partial = (
+            run.get("status") == "partial"
+            and run.get("perception_status") == "complete"
+            and geometry_status in HONEST_GEOMETRY
+        )
+        if run.get("status") != "complete" and not geometry_only_partial:
+            incomplete.append(name)
     check(
         "complete prediction runs", not incomplete, f"missing or incomplete: {incomplete or 'none'}"
     )
@@ -796,6 +829,7 @@ def add_cli(subparsers) -> None:
 
 
 def run_cli(args) -> int:
+    _validate_score_output_path(args.out, args.predictions, args.annotations)
     try:
         report = score(args.predictions, args.annotations, args.split)
     except ManifestError as exc:
