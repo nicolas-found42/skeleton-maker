@@ -4,7 +4,7 @@ The rules for changing this repo. They apply equally to humans and to every codi
 
 ## Flow
 
-1. **Issue.** Features and bugs start from a GitHub issue (use the forms in `.github/ISSUE_TEMPLATE/`). Chores and doc fixes may skip the issue. Agents only start on issues labelled `ready-for-agent`, unless the maintainer says otherwise.
+1. **Issue.** Features and bugs start from a GitHub issue (use the templates in `.github/ISSUE_TEMPLATE/`). Chores and doc fixes may skip the issue. Agents only start on issues labelled `ready-for-agent`, unless the maintainer says otherwise.
 2. **Branch** from `main`.
 3. **Implement**, running the checks under [Quality gates](#quality-gates).
 4. **Pull request** using `.github/pull_request_template.md`, with `Closes #<issue>` when an issue exists.
@@ -43,17 +43,27 @@ There is no `build` type. With squash merge the PR title becomes the commit on `
 
 ## Issues
 
-Use the forms in `.github/ISSUE_TEMPLATE/`. Each issue is one independently shippable change with acceptance criteria someone else can check by running a command or inspecting a file. State facts you measured; mark anything unknown as unknown.
+Use the templates in `.github/ISSUE_TEMPLATE/`: `bug-report.md` for defects, `feature-request.md` for features and chores. They are derived from the `issue-authoring` and `pr` skills, so an agent with those skills and an agent without them produce the same structure.
 
-Labels (the default triage vocabulary, see `triage-labels.md`): `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. Issue forms apply `needs-triage`.
+A bug report has ten sections: Summary, Impact, Environment, Preconditions, Steps to reproduce, Expected behavior, Actual behavior, Evidence, Acceptance criteria, Scope and developer notes. A feature or chore keeps Summary, Acceptance criteria and Scope, and replaces the reproduction sections with Problem and current workflow, Desired behavior, a Concrete example, Alternatives considered, and Out of scope and dependencies.
+
+Rules for both:
+
+- One independently fixable problem per issue.
+- Separate what you observed, what the code suggests, and what you only suspect.
+- Acceptance criteria are unchecked, externally observable pass/fail conditions, each checkable by running a command or inspecting a file or page. Never check a box before the fix exists.
+- Unknown information is allowed when named with its consequence ("browser version not captured; observed in Chrome desktop; cross-browser untested"). Do not invent facts, success rates or severities.
+- Evidence must be readable in the published issue: embedded or pasted, never a local path. Prefer synthetic data and never include secrets.
+
+Labels (the default triage vocabulary, see `triage-labels.md`): `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. The templates apply `needs-triage`.
 
 ## Pull requests
 
-Fill in `.github/pull_request_template.md`:
+Fill in `.github/pull_request_template.md` (derived from the `pr` skill's default template):
 
-- **Summary**: the problem, the resulting behaviour, a compact before/after (a `diff` block for code changes), and the linked issue.
-- **Evidence**: each behaviour claim with the command or scenario and the observed before/after result. Say plainly what you did not verify.
-- **Merge Danger**: one line. Is it a one-way or two-way door, and what is the blast radius if it is wrong.
+- **Summary**: the problem and why it matters, the resulting behaviour, the linked issue, and the smallest before/after view that shows the change: a `diff` block for code, a labelled "Conceptual diff" for behaviour or structure, or a usage example and its result for a wholly new feature. Note tradeoffs and limitations.
+- **Evidence**: each behaviour claim with the command or scenario and the observed **before** and **after** result. Before/after claims need an observation from both versions. A source diff shows what was edited, not what it does. Keep the decisive output excerpt in the body. Say plainly what you did not verify, why, and what check is still needed. Failed checks stay visible.
+- **Merge Danger**: one line with **Door** (one-way or two-way, and why) and **Blast Radius** (who or what is affected and what could go wrong, including downstream consumers and in-flight branches).
 
 Keep PRs to one concern. A mechanical reformat is its own PR.
 
