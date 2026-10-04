@@ -39,12 +39,22 @@ def probe_video(path: str) -> dict:
     ffprobe = require_tool("ffprobe", "It ships with ffmpeg.")
     out = subprocess.run(
         [
-            ffprobe, "-v", "error", "-select_streams", "v:0",
-            "-show_entries", "stream=width,height,r_frame_rate,avg_frame_rate,nb_frames,codec_name,pix_fmt",
-            "-show_entries", "format=duration",
-            "-of", "default=noprint_wrappers=1", path,
+            ffprobe,
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=width,height,r_frame_rate,avg_frame_rate,nb_frames,codec_name,pix_fmt",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "default=noprint_wrappers=1",
+            path,
         ],
-        capture_output=True, text=True, check=True,
+        capture_output=True,
+        text=True,
+        check=True,
     ).stdout
 
     def frac(value: str) -> float:
@@ -87,4 +97,4 @@ def is_streamable_mp4(path: str) -> bool:
     if len(head) < 16 or head[4:8] != b"ftyp":
         return False
     ftyp_size = int.from_bytes(head[0:4], "big")
-    return head[ftyp_size + 4: ftyp_size + 8] == b"moov"
+    return head[ftyp_size + 4 : ftyp_size + 8] == b"moov"

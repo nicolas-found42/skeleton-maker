@@ -56,9 +56,15 @@ def draw_detection(frame, det, color) -> None:
     height, width = frame.shape[:2]
 
     cv2.rectangle(frame, (round(x), round(y)), (round(x + w), round(y + h)), color, 2)
-    cv2.putText(frame, f"ID: {det['tracking_id']}",
-                (round(x), max(round(y) - 8, 12)),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+    cv2.putText(
+        frame,
+        f"ID: {det['tracking_id']}",
+        (round(x), max(round(y) - 8, 12)),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.5,
+        color,
+        2,
+    )
 
     if det.get("_draw_2d"):
         kp2d = np.asarray(det["keypoints_2d"], np.float32).reshape(-1, 2)
@@ -69,8 +75,10 @@ def draw_detection(frame, det, color) -> None:
             visible = (
                 (conf > 0.0)
                 & np.isfinite(kp2d).all(axis=1)
-                & (px >= x - mx) & (px <= x + w + mx)
-                & (py >= y - my) & (py <= y + h + my)
+                & (px >= x - mx)
+                & (px <= x + w + mx)
+                & (py >= y - my)
+                & (py <= y + h + my)
             )
             _draw_skeleton(frame, kp2d, visible, COLOR_2D, 4)
 
@@ -85,13 +93,24 @@ def draw_detection(frame, det, color) -> None:
             visible = (
                 (z[:, 0] > 1e-6)
                 & np.isfinite(projected).all(axis=1)
-                & (px >= 0) & (px < width) & (py >= 0) & (py < height)
+                & (px >= 0)
+                & (px < width)
+                & (py >= 0)
+                & (py < height)
             )
             _draw_skeleton(frame, projected, visible, COLOR_3D, 3)
 
 
-def render(video: str, pose_json: str, output: str, *, draw: str = "2d",
-           focal_length: float = 0.0, quality: int = 19, verbose: bool = True) -> int:
+def render(
+    video: str,
+    pose_json: str,
+    output: str,
+    *,
+    draw: str = "2d",
+    focal_length: float = 0.0,
+    quality: int = 19,
+    verbose: bool = True,
+) -> int:
     """Render the overlay and return the number of frames written."""
     if draw not in DRAW_KEYPOINTS_CONFIGS:
         raise SystemExit(f"error: --draw must be one of {list(DRAW_KEYPOINTS_CONFIGS)}")
@@ -117,8 +136,15 @@ def render(video: str, pose_json: str, output: str, *, draw: str = "2d",
             ok, frame = cap.read()
             if not ok:
                 break
-            cv2.putText(frame, f"Frame: {frame_id}", (18, 32),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+            cv2.putText(
+                frame,
+                f"Frame: {frame_id}",
+                (18, 32),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.6,
+                (255, 255, 255),
+                2,
+            )
             for det in poses.get(frame_id, []):
                 det["_draw_2d"], det["_draw_3d"] = want_2d, want_3d
                 det["_focal"] = focal_length
@@ -131,9 +157,26 @@ def render(video: str, pose_json: str, output: str, *, draw: str = "2d",
         writer.release()
 
     # Re-encode: OpenCV's mp4v is not a web-friendly codec.
-    run_ffmpeg(["-i", tmp, "-c:v", "libx264", "-preset", "slow", "-crf", str(quality),
-                "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-an", output, "-y"],
-               f"re-encoding {output}")
+    run_ffmpeg(
+        [
+            "-i",
+            tmp,
+            "-c:v",
+            "libx264",
+            "-preset",
+            "slow",
+            "-crf",
+            str(quality),
+            "-pix_fmt",
+            "yuv420p",
+            "-movflags",
+            "+faststart",
+            "-an",
+            output,
+            "-y",
+        ],
+        f"re-encoding {output}",
+    )
     import os
 
     os.remove(tmp)
@@ -147,14 +190,30 @@ def add_cli(subparsers) -> None:
     p.add_argument("video", help="the clip the poses were computed for")
     p.add_argument("pose_json", help="pose output from `pose`")
     p.add_argument("--out", required=True, help="overlay video to write (MP4)")
-    p.add_argument("--draw", choices=list(DRAW_KEYPOINTS_CONFIGS), default="2d",
-                   help="2d | 3d | both (default: 2d; the 3D layer needs a real focal length)")
-    p.add_argument("--focal-length", type=float, default=0.0,
-                   help="focal length in pixels for the 3D reprojection; 0 uses the frame diagonal")
-    p.add_argument("--quality", type=int, default=19, help="x264 CRF (default: 19, lower is better)")
+    p.add_argument(
+        "--draw",
+        choices=list(DRAW_KEYPOINTS_CONFIGS),
+        default="2d",
+        help="2d | 3d | both (default: 2d; the 3D layer needs a real focal length)",
+    )
+    p.add_argument(
+        "--focal-length",
+        type=float,
+        default=0.0,
+        help="focal length in pixels for the 3D reprojection; 0 uses the frame diagonal",
+    )
+    p.add_argument(
+        "--quality", type=int, default=19, help="x264 CRF (default: 19, lower is better)"
+    )
 
 
 def run_cli(args) -> int:
-    render(args.video, args.pose_json, args.out, draw=args.draw,
-           focal_length=args.focal_length, quality=args.quality)
+    render(
+        args.video,
+        args.pose_json,
+        args.out,
+        draw=args.draw,
+        focal_length=args.focal_length,
+        quality=args.quality,
+    )
     return 0

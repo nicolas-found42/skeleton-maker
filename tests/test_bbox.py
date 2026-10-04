@@ -15,8 +15,7 @@ def make_frames(n_ids=3, n_frames=5, per_frame=None):
         for tid in range(1, n_ids + 1):
             if per_frame and fid not in per_frame.get(tid, []):
                 continue
-            dets.append({"tracking_id": tid, "bbox": [10.0 * tid, 20.0, 30.0, 40.0],
-                         "score": 0.9})
+            dets.append({"tracking_id": tid, "bbox": [10.0 * tid, 20.0, 30.0, 40.0], "score": 0.9})
         frames.append({"frame_id": fid, "detections": dets})
     return frames
 
@@ -60,8 +59,12 @@ def test_write_rejects_more_ids_than_the_nim_accepts(tmp_path):
 
 
 def test_write_rejects_a_non_positive_box(tmp_path):
-    frames = [{"frame_id": 0, "detections": [
-        {"tracking_id": 1, "bbox": [10.0, 10.0, 0.0, 5.0], "score": 0.9}]}]
+    frames = [
+        {
+            "frame_id": 0,
+            "detections": [{"tracking_id": 1, "bbox": [10.0, 10.0, 0.0, 5.0], "score": 0.9}],
+        }
+    ]
     with pytest.raises(ValueError, match="non-positive"):
         write_annotation(frames, str(tmp_path / "boxes.txt"))
 
