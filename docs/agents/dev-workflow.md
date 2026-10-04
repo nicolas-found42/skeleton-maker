@@ -76,7 +76,7 @@ The gates below are rolled out issue by issue. The Status column says what is li
 | Gate | Tool | Status |
 | --- | --- | --- |
 | Tests | `pytest` (offline) | live |
-| Lint and format | `ruff` (line length 100, rules `E,F,W,I,B,UP,SIM,RUF,C4,PT,S`; formatter owns line length) | planned (#2, CI in #3) |
+| Lint and format | `ruff` (line length 100, rules `E,F,W,I,B,UP,SIM,RUF,C4,PT,S`; formatter owns line length) | configured, tree is clean (#2); CI gate planned (#3) |
 | Workflow security | `zizmor`, SHA-pinned actions, least-privilege permissions | planned (#3) |
 | Dependency updates | Dependabot with `cooldown` | planned (#3, `uv` ecosystem in #5) |
 | Local hooks | `prek` (commit stage: `ruff`, `typos`, `rumdl`, file hygiene) | planned (#4) |
