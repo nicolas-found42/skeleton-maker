@@ -57,6 +57,18 @@ class FrameClock:
         return list(range(0, frame_count, step))
 
 
+def write_atomic(path, text: str) -> None:
+    """Write ``text`` so readers see the old file or the whole new one, never a fragment."""
+    path = Path(path)
+    tmp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    try:
+        tmp.write_text(text, encoding="utf-8")
+        os.replace(tmp, path)
+    except BaseException:
+        tmp.unlink(missing_ok=True)
+        raise
+
+
 @contextmanager
 def staging_dir(near) -> Generator[Path, None, None]:
     """A scratch directory beside ``near`` (same filesystem), removed on exit."""
