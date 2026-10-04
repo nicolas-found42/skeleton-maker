@@ -172,9 +172,65 @@ the overlay really differs from the source clip.
 python -m pytest -q      # the suite; no API calls, no network
 ```
 
+## Characters
+
+Any `pose.json` can be turned into an animated character stage: one self-contained
+HTML file (no network, no install) in which every tracked person becomes a
+character driven by their 3D joints.
+
+```bash
+skeleton-maker character in/clip.skeleton/pose.json --video in/clip.skeleton/clip.mp4
+skeleton-maker character pose.json --character robot --out robot.html
+skeleton-maker character --list
+```
+
+Open the HTML in a browser. It plays the clip, shows the source video
+picture-in-picture (serve the folder with a server that supports HTTP range
+requests, or the video cannot seek), switches between the original camera and a free
+orbit, lets you recast each person, follows one person with the camera (useful for a
+performer in a crowd; turn on "person ids" to find them), and records a PNG or WebM. Six characters ship:
+`robot`, `clay`, `mannequin`, `neon` (light trails), `blocky` and `critter` (a
+tail that follows the hips).
+
+What the stage does to the raw 3D joints:
+
+- splits the clip into **shots** at camera cuts (disjoint tracker ids, or the root jumping more than 1.2 m) so a cut does not drag a character across the scene;
+- fills gaps of up to 5 frames, drops frames without hips, chest and head, and smooths the motion;
+- levels the world from the people themselves: a spine-up estimate, then a ground-plane fit, then a per-frame floor under each person's feet;
+- works out which side is left from the direction the toes point, since the model's two sides are not always the person's left and right;
+- measures each person's leg length so one character spec fits adults and children.
+
+Characters are driven by joint **positions** only; the model's `rest_pose` is
+bone-aligned rather than anatomical, so its rotations are not used.
+
+### Writing a character
+
+A character is a JSON file. Pass it with `--spec my_character.json` (repeatable).
+
+```json
+{"name": "my_robot",
+ "materials": {"body": {"type": "standard", "roughness": 0.4, "metalness": 0.5}},
+ "palettes": [{"body": "#c9d2dc"}, {"body": "#e8553d"}],
+ "parts": [
+   {"type": "limb", "from": "Hips", "to": "Chest", "shape": "box", "w": 0.3, "d": 0.2, "mat": "body"},
+   {"type": "limb", "from": ["L_Shoulder", "R_Shoulder"], "to": ["L_Elbow", "R_Elbow"], "shape": "capsule", "r": 0.04, "mat": "body"},
+   {"type": "prop", "joint": "Head", "frame": "head", "shape": "sphere", "pos": [0, 0.07, 0], "size": [0.11, 0.12, 0.11], "mat": "body"}
+ ]}
+```
+
+- `parts[].type` is `limb` (a shape stretched between two joints, or between two lists of joints for left/right pairs), `prop` (a shape attached to a joint, in the `body` or `head` frame; `pos` is `[x left, y up, z forward]`) or `chain` (a lagging tail or ribbon).
+- Sizes are metres for a 1.75 m person and scale per body. `limb` takes a radius `r`, or full widths `w` and `d`.
+- Every palette must colour every material; people are cast across the palettes.
+- Joint names: `Hips Spine1 Spine2 Chest Neck1 Neck2 Head HeadTop Face L_/R_HeadSide L_/R_Clavicle L_/R_Shoulder L_/R_Elbow L_/R_Wrist L_/R_HandC L_/R_HandTip L_/R_Hip L_/R_Knee L_/R_Ankle L_/R_Heel L_/R_Toe`; `skeleton_maker/nova77.py` has the exact list.
+
+A spec is checked before anything is written, and a mistake names the part and the
+joint. Because it is plain JSON with a small vocabulary, a language model can write
+one from a sentence ("a clay astronaut with a glass helmet"); the validator is what
+keeps a wrong guess from becoming a broken page.
+
 ## Tests
 
-25 tests, none of which call the NIM or touch the network. They cover the
+49 tests, none of which call the NIM or touch the network. They cover the
 annotation round trip and its limits, the Nova-77 topology, gRPC stub generation
 from the bundled protos, and `verify` end-to-end on synthetic artifacts —
 including the frame-shift failure it exists to catch.

@@ -1,0 +1,34 @@
+{
+  "name": "critter",
+  "description": "A friendly fox-like mascot with ears, a snout and a swishing tail.",
+  "materials": {"fur": {"type": "standard", "roughness": 0.9}, "belly": {"type": "standard", "roughness": 0.9}, "dark": {"type": "standard", "roughness": 0.5}, "eye": {"type": "basic"}},
+  "palettes": [
+    {"fur": "#f28c28", "belly": "#fff1d6", "dark": "#2a1d17", "eye": "#ffffff"},
+    {"fur": "#9aa5b1", "belly": "#e8eef4", "dark": "#232a31", "eye": "#ffffff"},
+    {"fur": "#7a5cff", "belly": "#e5dcff", "dark": "#1d1738", "eye": "#ffffff"},
+    {"fur": "#4fd1a1", "belly": "#e0fff2", "dark": "#12332a", "eye": "#ffffff"}
+  ],
+  "parts": [
+    {"type": "limb", "from": "Hips", "to": "Chest", "shape": "capsule", "w": 0.30, "d": 0.23, "mat": "fur", "extend": [0.03, 0.05]},
+    {"type": "prop", "joint": "Spine1", "frame": "body", "shape": "sphere", "pos": [0, 0.02, 0.07], "size": [0.1, 0.16, 0.06], "mat": "belly"},
+    {"type": "limb", "from": "Neck1", "to": "Head", "shape": "capsule", "r": 0.05, "mat": "fur"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "sphere", "pos": [0, 0.07, 0], "size": [0.13, 0.115, 0.12], "mat": "fur"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "cone", "pos": [0, 0.045, 0.14], "size": [0.05, 0.11, 0.05], "rot": [90, 0, 0], "mat": "belly"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "sphere", "pos": [0, 0.05, 0.2], "size": [0.02, 0.02, 0.02], "mat": "dark"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "cone", "pos": [-0.075, 0.2, -0.01], "size": [0.05, 0.13, 0.04], "rot": [0, 0, 12], "mat": "fur"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "cone", "pos": [0.075, 0.2, -0.01], "size": [0.05, 0.13, 0.04], "rot": [0, 0, -12], "mat": "fur"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "cone", "pos": [-0.075, 0.195, 0.0], "size": [0.03, 0.09, 0.02], "rot": [0, 0, 12], "mat": "dark"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "cone", "pos": [0.075, 0.195, 0.0], "size": [0.03, 0.09, 0.02], "rot": [0, 0, -12], "mat": "dark"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "sphere", "pos": [-0.05, 0.1, 0.1], "size": [0.026, 0.032, 0.016], "mat": "eye"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "sphere", "pos": [0.05, 0.1, 0.1], "size": [0.026, 0.032, 0.016], "mat": "eye"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "sphere", "pos": [-0.05, 0.1, 0.112], "size": [0.014, 0.018, 0.01], "mat": "dark"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "sphere", "pos": [0.05, 0.1, 0.112], "size": [0.014, 0.018, 0.01], "mat": "dark"},
+    {"type": "limb", "from": ["L_Shoulder", "R_Shoulder"], "to": ["L_Elbow", "R_Elbow"], "shape": "capsule", "r": 0.047, "mat": "fur", "cap": true},
+    {"type": "limb", "from": ["L_Elbow", "R_Elbow"], "to": ["L_Wrist", "R_Wrist"], "shape": "capsule", "r": 0.04, "mat": "dark", "cap": true},
+    {"type": "prop", "joint": ["L_HandC", "R_HandC"], "shape": "sphere", "size": [0.055, 0.05, 0.05], "mat": "belly"},
+    {"type": "limb", "from": ["L_Hip", "R_Hip"], "to": ["L_Knee", "R_Knee"], "shape": "capsule", "r": 0.072, "mat": "fur", "cap": true},
+    {"type": "limb", "from": ["L_Knee", "R_Knee"], "to": ["L_Ankle", "R_Ankle"], "shape": "capsule", "r": 0.055, "mat": "dark", "cap": true},
+    {"type": "limb", "from": ["L_Heel", "R_Heel"], "to": ["L_Toe", "R_Toe"], "shape": "capsule", "w": 0.075, "d": 0.055, "mat": "belly", "extend": [0.03, 0.04]},
+    {"type": "chain", "joint": "Hips", "dir": [0, 0.35, -1], "n": 6, "len": 0.1, "r": [0.065, 0.02], "mat": "fur", "lag": 0.45, "tip": "belly"}
+  ]
+}

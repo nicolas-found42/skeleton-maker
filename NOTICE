@@ -15,7 +15,13 @@ This project bundles or derives from third-party work:
    Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES
    License: MIT
 
-3. Object detection
+3. Three.js r170 (3D rendering for the character stage)
+   File: skeleton_maker/web/three.module.min.js
+   Source: https://github.com/mrdoob/three.js (build/three.module.min.js)
+   Copyright (c) 2010-2024 three.js authors
+   License: MIT
+
+4. Object detection
    Ultralytics YOLO (AGPL-3.0). Installed as a dependency, not vendored.
    Review the Ultralytics licence before commercial use.
 

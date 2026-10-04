@@ -1,0 +1,37 @@
+{
+  "name": "robot",
+  "description": "A blocky tin robot with glowing eyes and an antenna.",
+  "materials": {
+    "main":   {"type": "standard", "roughness": 0.35, "metalness": 0.6},
+    "accent": {"type": "standard", "roughness": 0.5,  "metalness": 0.4},
+    "joint":  {"type": "standard", "roughness": 0.7,  "metalness": 0.2},
+    "glow":   {"type": "basic"}
+  },
+  "palettes": [
+    {"main": "#c9d2dc", "accent": "#e8553d", "joint": "#3a3f47", "glow": "#43e6ff"},
+    {"main": "#e9c46a", "accent": "#2a9d8f", "joint": "#3a3f47", "glow": "#ff5d8f"},
+    {"main": "#9bb7ff", "accent": "#f4a261", "joint": "#2b2d42", "glow": "#9dff7a"},
+    {"main": "#d4a5ff", "accent": "#3a86ff", "joint": "#2b2d42", "glow": "#ffe45e"}
+  ],
+  "parts": [
+    {"type": "limb", "from": "Hips", "to": "Spine2", "shape": "box", "w": 0.27, "d": 0.19, "mat": "accent"},
+    {"type": "limb", "from": "Spine2", "to": "Chest", "shape": "box", "w": 0.36, "d": 0.23, "mat": "main", "extend": [0.0, 0.05]},
+    {"type": "limb", "from": "Neck1", "to": "Head", "shape": "cylinder", "r": 0.035, "mat": "joint"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "box", "pos": [0, 0.065, 0], "size": [0.21, 0.2, 0.22], "mat": "main"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "box", "pos": [-0.048, 0.085, 0.112], "size": [0.05, 0.03, 0.02], "mat": "glow"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "box", "pos": [0.048, 0.085, 0.112], "size": [0.05, 0.03, 0.02], "mat": "glow"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "box", "pos": [0, 0.03, 0.112], "size": [0.09, 0.012, 0.02], "mat": "joint"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "cylinder", "pos": [0, 0.21, 0], "size": [0.008, 0.1, 0.008], "mat": "joint"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "sphere", "pos": [0, 0.27, 0], "size": [0.025, 0.025, 0.025], "mat": "glow"},
+    {"type": "prop", "joint": ["L_Shoulder", "R_Shoulder"], "shape": "sphere", "size": [0.065, 0.065, 0.065], "mat": "accent"},
+    {"type": "limb", "from": ["L_Shoulder", "R_Shoulder"], "to": ["L_Elbow", "R_Elbow"], "shape": "cylinder", "r": 0.04, "mat": "main"},
+    {"type": "prop", "joint": ["L_Elbow", "R_Elbow"], "shape": "sphere", "size": [0.048, 0.048, 0.048], "mat": "joint"},
+    {"type": "limb", "from": ["L_Elbow", "R_Elbow"], "to": ["L_Wrist", "R_Wrist"], "shape": "cylinder", "r": 0.036, "mat": "main"},
+    {"type": "prop", "joint": ["L_HandC", "R_HandC"], "shape": "box", "size": [0.085, 0.085, 0.085], "mat": "accent"},
+    {"type": "prop", "joint": ["L_Hip", "R_Hip"], "shape": "sphere", "size": [0.075, 0.075, 0.075], "mat": "joint"},
+    {"type": "limb", "from": ["L_Hip", "R_Hip"], "to": ["L_Knee", "R_Knee"], "shape": "cylinder", "r": 0.068, "mat": "main"},
+    {"type": "prop", "joint": ["L_Knee", "R_Knee"], "shape": "sphere", "size": [0.06, 0.06, 0.06], "mat": "joint"},
+    {"type": "limb", "from": ["L_Knee", "R_Knee"], "to": ["L_Ankle", "R_Ankle"], "shape": "cylinder", "r": 0.052, "mat": "main"},
+    {"type": "limb", "from": ["L_Heel", "R_Heel"], "to": ["L_Toe", "R_Toe"], "shape": "box", "w": 0.1, "d": 0.07, "mat": "accent", "extend": [0.02, 0.02]}
+  ]
+}

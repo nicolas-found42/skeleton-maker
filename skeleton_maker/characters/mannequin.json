@@ -1,0 +1,24 @@
+{
+  "name": "mannequin",
+  "description": "A wooden artist's mannequin: egg head, ball joints, tapered limbs.",
+  "materials": {"wood": {"type": "standard", "roughness": 0.55, "metalness": 0.0}, "joint": {"type": "standard", "roughness": 0.4, "metalness": 0.0}},
+  "palettes": [
+    {"wood": "#d9a066", "joint": "#7a4a2b"},
+    {"wood": "#e8e1d4", "joint": "#9a9486"},
+    {"wood": "#8ecae6", "joint": "#219ebc"},
+    {"wood": "#f4a6b8", "joint": "#c9506f"}
+  ],
+  "parts": [
+    {"type": "limb", "from": "Hips", "to": "Spine2", "shape": "capsule", "w": 0.24, "d": 0.17, "mat": "wood", "extend": [0.03, 0.0]},
+    {"type": "limb", "from": "Spine2", "to": "Chest", "shape": "capsule", "w": 0.31, "d": 0.19, "mat": "wood", "extend": [0.0, 0.06]},
+    {"type": "limb", "from": "Neck1", "to": "Head", "shape": "capsule", "r": 0.032, "mat": "joint"},
+    {"type": "prop", "joint": "Head", "frame": "head", "shape": "sphere", "pos": [0, 0.075, 0.005], "size": [0.085, 0.115, 0.1], "mat": "wood"},
+    {"type": "prop", "joint": ["L_Shoulder", "R_Shoulder", "L_Elbow", "R_Elbow", "L_Wrist", "R_Wrist", "L_Hip", "R_Hip", "L_Knee", "R_Knee", "L_Ankle", "R_Ankle"], "shape": "sphere", "size": [0.042, 0.042, 0.042], "mat": "joint"},
+    {"type": "limb", "from": ["L_Shoulder", "R_Shoulder"], "to": ["L_Elbow", "R_Elbow"], "shape": "capsule", "r": 0.037, "r2": 0.03, "mat": "wood"},
+    {"type": "limb", "from": ["L_Elbow", "R_Elbow"], "to": ["L_Wrist", "R_Wrist"], "shape": "capsule", "r": 0.03, "r2": 0.022, "mat": "wood"},
+    {"type": "prop", "joint": ["L_HandC", "R_HandC"], "shape": "sphere", "size": [0.04, 0.05, 0.03], "mat": "wood"},
+    {"type": "limb", "from": ["L_Hip", "R_Hip"], "to": ["L_Knee", "R_Knee"], "shape": "capsule", "r": 0.062, "r2": 0.045, "mat": "wood"},
+    {"type": "limb", "from": ["L_Knee", "R_Knee"], "to": ["L_Ankle", "R_Ankle"], "shape": "capsule", "r": 0.045, "r2": 0.032, "mat": "wood"},
+    {"type": "limb", "from": ["L_Heel", "R_Heel"], "to": ["L_Toe", "R_Toe"], "shape": "capsule", "w": 0.055, "d": 0.04, "mat": "wood", "extend": [0.02, 0.03]}
+  ]
+}
