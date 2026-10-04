@@ -160,6 +160,12 @@ Tools evaluated and deliberately not adopted yet. Adopt one when its trigger fir
 
 Rejected: `osv-scanner` and `pip-audit` (redundant with `uv audit` for a single ecosystem), `gh-aw` (heavy, tied to one vendor's tokens), and agent-specific hooks or actions (the repo must work for any agent).
 
-## Maintainer settings (not done by PRs)
+## Repository settings (applied by the maintainer, not by PRs)
 
-Applied by the maintainer once the required CI check names exist: a `main` ruleset (PR required, required checks, no force-push or deletion, admin bypass kept), squash-only merges with delete-branch-on-merge, and GitHub secret-scanning push protection.
+These live in GitHub, not in the repo, so a PR cannot change them:
+
+- **`main` ruleset** (name `main`, active): a pull request is required (squash merge only, no approvals needed), the `ci-ok` check must pass, and force-pushes and deletion are blocked. The repository admin role can bypass it, so a maintainer can still fix things directly; agents should not rely on that.
+- **Merge settings**: squash only (merge commits and rebase merges are off), the head branch is deleted on merge, and the squash commit uses the PR title with an empty body.
+- **Secret scanning with push protection** is on. Dependabot security updates are off.
+
+Because `ci-ok` is the single required check, adding or renaming matrix jobs in `ci.yml` needs no ruleset change, but renaming `ci-ok` itself does. To inspect the ruleset: `gh api repos/nicolas-found42/skeleton-maker/rules/branches/main`.
