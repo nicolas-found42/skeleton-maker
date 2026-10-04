@@ -43,7 +43,7 @@ There is no `build` type. With squash merge the PR title becomes the commit on `
 
 ## Issues
 
-Use the templates in `.github/ISSUE_TEMPLATE/`: `bug-report.md` for defects, `feature-request.md` for features and chores. They are derived from the `issue-authoring` and `pr` skills, so an agent with those skills and an agent without them produce the same structure.
+Use the templates in `.github/ISSUE_TEMPLATE/`: `bug-report.md` for defects, `feature-request.md` for features and chores. They are derived from the `issue-authoring` and `pr` skills, so an agent with those skills and an agent without them produce the same structure. The bug template is the skill's template plus project-specific hints in the Environment and Evidence comments (version and ffmpeg/video details to record, and a reminder to strip `NVIDIA_API_KEY` and `nvapi-` tokens from logs).
 
 A bug report has ten sections: Summary, Impact, Environment, Preconditions, Steps to reproduce, Expected behavior, Actual behavior, Evidence, Acceptance criteria, Scope and developer notes. A feature or chore keeps Summary, Acceptance criteria and Scope, and replaces the reproduction sections with Problem and current workflow, Desired behavior, a Concrete example, Alternatives considered, and Out of scope and dependencies.
 

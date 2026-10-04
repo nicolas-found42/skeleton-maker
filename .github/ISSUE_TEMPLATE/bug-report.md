@@ -15,7 +15,11 @@ labels: needs-triage
 
 ## Environment
 
-<!-- Product/build or commit, test date, local/staging/production URL, browser/OS, relevant configuration and live/mock mode. Record unknown versions honestly. -->
+<!-- Product/build or commit, test date, local/staging/production URL, browser/OS, relevant configuration and live/mock mode. Record unknown versions honestly.
+     For skeleton-maker: `skeleton-maker --version` (or the commit), Python and OS versions, the first line of `ffmpeg -version`,
+     and the input video's codec, resolution and frame rate:
+     ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate -of csv=p=0 <file>
+     Say whether the NIM call was live or stubbed. -->
 
 ## Preconditions
 
@@ -35,7 +39,9 @@ labels: needs-triage
 
 ## Evidence
 
-<!-- Caption and embedded screenshot(s) for UI findings; concise logs/repro artifact for nonvisual findings. State console/network coverage and gaps. -->
+<!-- Caption and embedded screenshot(s) for UI findings; concise logs/repro artifact for nonvisual findings. State console/network coverage and gaps.
+     Remove secrets first: never paste NVIDIA_API_KEY, any `nvapi-` token or an environment dump, and redact gRPC metadata and request headers in logs.
+     Do not attach video you lack the rights to share; describe it or reproduce with a synthetic clip, e.g. ffmpeg -f lavfi -i testsrc=duration=2:size=320x240:rate=15 clip.mp4 -->
 
 ## Acceptance criteria
 
