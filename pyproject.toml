@@ -76,8 +76,16 @@ fail_under = 82
 show_missing = true
 
 [tool.typos.files]
-# Vendored, minified third-party code (three.js): not ours to spell-check.
-extend-exclude = ["skeleton_maker/web/three.module.min.js"]
+# Vendored, minified third-party code (three.js): not ours to spell-check. YouTube video IDs in the
+# corpus manifest are random strings that the spell checker mistakes for words.
+extend-exclude = [
+  "skeleton_maker/web/three.module.min.js",
+  "docs/research/environment-corpus-manifest.json",
+]
+
+[tool.typos.default]
+# An 11-character video ID in a Markdown code span.
+extend-ignore-re = ["`[A-Za-z0-9_-]{11}`"]
 
 [tool.typos.default.extend-words]
 # A real three.js material property (MeshStandardMaterial.metalness), used in the character specs.
