@@ -10,6 +10,13 @@ skeletons drawn on top.
 skeleton-maker all myclip.mp4
 ```
 
+![3D body-pose skeletons tracked across the players on a basketball court](docs/demo.gif)
+
+*A few seconds of a 20-second run. YOLO tracks the players, the NIM returns a
+77-joint skeleton for each one, and the overlay draws them — boxes and ids per
+tracked body in colour, 2D keypoints in green. Poses came back for 599 of the 600
+frames.*
+
 ## What it actually does
 
 The NIM is a pose model, not a detector. It estimates a pose **once per supplied
@@ -71,7 +78,7 @@ annotation, the poses and the overlay, and verifies the result at the end.
 
 ```bash
 skeleton-maker download "https://www.youtube.com/watch?v=..." \
-    --start 778 --duration 20 --out in/clip.mp4
+    --start 120 --duration 20 --out in/clip.mp4
 skeleton-maker all in/clip.mp4 --out out/overlay.mp4
 ```
 
@@ -84,7 +91,7 @@ Each stage stands alone, which is what you want when you are tuning a window.
 skeleton-maker scan long-video.mp4 --interval 2
 
 # 2. Cut the window and make it conformant (constant frame rate, 4:2:0 8-bit, faststart).
-skeleton-maker clip long-video.mp4 --start 778 --duration 20 --out clip.mp4
+skeleton-maker clip long-video.mp4 --start 120 --duration 20 --out clip.mp4
 
 # 3. Detect and track people -> annotation. Frame ids are relative to the clip.
 skeleton-maker track clip.mp4 --out boxes.txt
