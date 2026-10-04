@@ -93,7 +93,7 @@ The gates below are rolled out issue by issue. The Status column says what is li
 | Reproducible installs | `uv.lock`, `uv sync --locked`, `just` recipes | live (#5) |
 | Vulnerability audit | `uv audit` (weekly workflow `audit.yml`, non-blocking, experimental) | live (#5) |
 | Types | `ty` (version pinned; bump in its own PR), blocking, run by `just type` | live (#6) |
-| Coverage | `pytest-cov` with a `fail_under` floor that only ratchets up | planned (#7) |
+| Coverage | `pytest-cov` with a `fail_under` floor in `pyproject.toml` that only ratchets up | live (#7) |
 
 CI is the backstop: hooks can be skipped locally, CI cannot. Run the same commands CI runs before pushing.
 
@@ -105,10 +105,10 @@ Install [just](https://github.com/casey/just) (`uv tool install rust-just` or `b
 
 ```bash
 just setup   # uv sync --locked, and install the git hooks
-just check   # hooks + lint + types + tests: what CI runs, locally
+just check   # hooks + lint + types + tests with coverage: what CI runs, locally
 ```
 
-Other recipes: `just lint`, `just fmt`, `just hooks`, `just type`, `just test [pytest args]`, `just audit`. Coverage joins `just check` in its own issue.
+Other recipes: `just lint`, `just fmt`, `just hooks`, `just type`, `just test [pytest args]`, `just audit`.
 
 Dependencies:
 
@@ -116,6 +116,17 @@ Dependencies:
 - `uv.lock` is committed. Any change to dependencies must include the updated lock (`uv lock`). CI runs `uv lock --check` and `uv sync --locked`, so a stale lock fails the build.
 - End users still install with `uv pip install -e ".[download]"`; there is no `dev` extra.
 - The weekly `audit` workflow runs `uv audit` (experimental, uv pinned to a version in the workflow) and is not part of `ci-ok`. A red run means someone should look; it never blocks a merge.
+
+## Coverage floor
+
+`pytest --cov` (always on in `just test` and in CI) fails when total coverage drops below `fail_under` in `[tool.coverage.report]` of `pyproject.toml`. Generated gRPC stubs (`skeleton_maker/_gen`) are omitted from measurement.
+
+The floor is a ratchet:
+
+- It only goes up. Never lower it to make a PR pass; add the missing tests instead.
+- A PR that adds tests should raise it to the new measured total, rounded down.
+- Measure twice, then use the lower number. Total coverage is slightly different on a fresh checkout (the tests build the gRPC stubs, which covers that code) than when `skeleton_maker/_gen` already exists. The first run is what CI sees; the second is what you see on every later local run. At the time the floor was set these were 36.3% and 34.2%, so the floor is 34.
+- Do not add or change tests only to inflate the number; coverage that does not assert behaviour is worse than none.
 
 ## Local hooks
 
