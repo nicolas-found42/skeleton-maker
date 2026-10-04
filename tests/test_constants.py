@@ -37,14 +37,15 @@ def test_the_tree_is_acyclic():
 
 def test_skeleton_links_match_the_parents():
     expected = [(i, p) for i, p in enumerate(NOVA77_PARENTS) if p >= 0]
-    assert NOVA77_SKELETON_LINKS == expected
+    assert expected == NOVA77_SKELETON_LINKS
     assert len(NOVA77_SKELETON_LINKS) == NUM_JOINTS - 1
 
 
 def test_draw_configs_are_valid():
     assert set(DRAW_KEYPOINTS_CONFIGS) == {"2d", "3d", "both"}
     for flags in DRAW_KEYPOINTS_CONFIGS.values():
-        assert len(flags) == 2 and any(flags)
+        assert len(flags) == 2
+        assert any(flags)
     assert DRAW_KEYPOINTS_CONFIGS["2d"] == (True, False)
     assert DRAW_KEYPOINTS_CONFIGS["3d"] == (False, True)
 
