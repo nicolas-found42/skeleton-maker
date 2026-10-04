@@ -105,10 +105,10 @@ Install [just](https://github.com/casey/just) (`uv tool install rust-just` or `b
 
 ```bash
 just setup   # uv sync --locked, and install the git hooks
-just check   # hooks + lint + types + tests with coverage: what CI runs, locally
+just check   # hooks + lint + types + workflow audit + tests with coverage: what CI runs, locally
 ```
 
-Other recipes: `just lint`, `just fmt`, `just hooks`, `just type`, `just test [pytest args]`, `just audit`.
+Other recipes: `just lint`, `just fmt`, `just hooks`, `just type`, `just workflows`, `just test [pytest args]`, `just audit`.
 
 Dependencies:
 
