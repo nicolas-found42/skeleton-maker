@@ -253,12 +253,13 @@ def make_stage_html(
         "title": title or os.path.basename(pose_json),
     }
     if video:
-        options["video"] = quote(
-            Path(
-                os.path.relpath(os.path.abspath(video), os.path.dirname(os.path.abspath(out)))
-            ).as_posix(),
-            safe="/",
-        )
+        video_path = Path(video).resolve()
+        try:
+            relative = os.path.relpath(video_path, Path(out).resolve().parent)
+        except ValueError:  # Windows paths on different drives have no relative form.
+            options["video"] = video_path.as_uri()
+        else:
+            options["video"] = quote(Path(relative).as_posix(), safe="/")
     html = build_html(stage, specs, options, options["title"])
     os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
     with open(out, "w") as fh:

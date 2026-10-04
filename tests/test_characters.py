@@ -218,3 +218,20 @@ def test_missing_spec_is_named_before_output(tmp_path):
             "unused.json", str(out), extra_specs=[str(tmp_path / "missing.json")]
         )
     assert not out.exists()
+
+
+def test_cross_drive_video_uses_an_absolute_file_url(tmp_path, monkeypatch):
+    from tests.test_stage import clip
+
+    pose = tmp_path / "pose.json"
+    pose.write_text("\n".join(json.dumps({"frame_id": f, "detections": d}) for f, d in clip(20)))
+    video = tmp_path / "a#b.mp4"
+    out = tmp_path / "stage.html"
+
+    def cross_drive(*_):
+        raise ValueError("path is on a different drive")
+
+    monkeypatch.setattr(character.os.path, "relpath", cross_drive)
+    character.make_stage_html(str(pose), str(out), video=str(video))
+    options = out.read_text().split('id="options">')[1].split("</script>")[0]
+    assert json.loads(options)["video"] == video.resolve().as_uri()
