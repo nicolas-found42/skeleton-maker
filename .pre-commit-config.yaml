@@ -25,6 +25,10 @@ repos:
     rev: 00f422f3b19c57bc6338715ebfe3316d38768461  # frozen: v1.50.3
     hooks:
       - id: typos
+        # The upstream hook defaults to --write-changes, which silently rewrites files. A
+        # "fix" can break identifiers (it wanted metalness -> metallicity in three.js code),
+        # so only report; decide each correction by hand.
+        args: [--force-exclude]
 
   - repo: https://github.com/rvben/rumdl-pre-commit
     rev: 83cecb6b523a053d7d3dfdc4798d705b505a88f9  # frozen: v0.2.78
