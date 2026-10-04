@@ -1,0 +1,12 @@
+# Configuration for the Qodo / PR-Agent review bot (https://github.com/qodo-ai/pr-agent).
+# Keys verified against pr_agent/settings/configuration.toml in that repo.
+
+[config]
+# By default the bot keeps only the first 500 tokens (about 2,700 characters) of a PR description
+# when it rewrites it, which cut the evidence and Merge Danger sections of this repo's PRs.
+max_description_tokens = 2000
+
+[pr_description]
+# Post the bot's summary as a comment instead of editing the PR description, so the description
+# the author wrote (Summary, Evidence, Merge Danger) is left alone.
+publish_description_as_comment = true

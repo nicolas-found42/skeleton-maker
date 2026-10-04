@@ -12,6 +12,7 @@ import json
 import os
 import sys
 import time
+from typing import cast
 
 from .bbox import read_annotation
 from .constants import (
@@ -43,14 +44,16 @@ def _generate_stubs() -> None:
     protos = []
     for root, _dirs, files in os.walk(PROTO_DIR):
         protos.extend(os.path.join(root, f) for f in files if f.endswith(".proto"))
-    code = protoc.main([
-        "protoc",
-        f"-I{PROTO_DIR}",
-        f"-I{well_known}",
-        f"--python_out={GEN_DIR}",
-        f"--grpc_python_out={GEN_DIR}",
-        *protos,
-    ])
+    code = protoc.main(
+        [
+            "protoc",
+            f"-I{PROTO_DIR}",
+            f"-I{well_known}",
+            f"--python_out={GEN_DIR}",
+            f"--grpc_python_out={GEN_DIR}",
+            *protos,
+        ]
+    )
     if code != 0:
         raise SystemExit(f"error: protoc failed with code {code}")
 
@@ -136,8 +139,10 @@ def run(
         frame_boxes = [
             pb2.FrameBoxes(
                 frame_id=fid,
-                boxes=[pb2.BoundingBox(x=x, y=y, width=w, height=h, tracking_id=tid)
-                       for tid, x, y, w, h in rows],
+                boxes=[
+                    pb2.BoundingBox(x=x, y=y, width=w, height=h, tracking_id=tid)
+                    for tid, x, y, w, h in rows
+                ],
             )
             for fid, rows in sorted(boxes_by_frame.items())
         ]
@@ -178,11 +183,13 @@ def run(
                         "server_request_id": response.service_info.server_request_id,
                     }
                     if verbose:
-                        print(f"NIM {service_info['feature_name']} "
-                              f"{service_info['feature_version']} "
-                              f"({service_info['model_info']}), "
-                              f"request {service_info['server_request_id']}",
-                              file=sys.stderr)
+                        print(
+                            f"NIM {service_info['feature_name']} "
+                            f"{service_info['feature_version']} "
+                            f"({service_info['model_info']}), "
+                            f"request {service_info['server_request_id']}",
+                            file=sys.stderr,
+                        )
                     continue
                 if response.focal_length > 0.0:
                     focal_seen = response.focal_length
@@ -190,10 +197,11 @@ def run(
                     continue
                 if out is None:
                     os.makedirs(os.path.dirname(os.path.abspath(output)), exist_ok=True)
-                    out = open(output, "w")
+                    out = open(output, "w")  # noqa: SIM115  opened on the first response, closed in the finally block
                 detections = [body_to_dict(pb2, b) for b in response.bodies]
-                out.write(json.dumps({"frame_id": response.frame_id,
-                                      "detections": detections}) + "\n")
+                out.write(
+                    json.dumps({"frame_id": response.frame_id, "detections": detections}) + "\n"
+                )
                 frames_written += 1
                 if detections:
                     frames_with_bodies += 1
@@ -202,13 +210,17 @@ def run(
                 if response.stream_flushed:
                     break
         except grpc.RpcError as err:
-            code = err.code()
-            detail = (err.details() or "").strip()
+            # Errors raised by a call are also grpc.Call; the RpcError base type omits code/details.
+            call = cast("grpc.Call", err)
+            code = call.code()
+            detail = (call.details() or "").strip()
             if code in transient and attempt < attempts:
                 if verbose:
-                    print(f"attempt {attempt}/{attempts} failed ({code.name}: {detail}); "
-                          f"retrying", file=sys.stderr)
-                time.sleep(min(2 ** attempt, 10))
+                    print(
+                        f"attempt {attempt}/{attempts} failed ({code.name}: {detail}); retrying",
+                        file=sys.stderr,
+                    )
+                time.sleep(min(2**attempt, 10))
                 continue
             if code == grpc.StatusCode.RESOURCE_EXHAUSTED:
                 raise SystemExit(
@@ -230,11 +242,13 @@ def run(
         if frames_written == 0:
             if attempt < attempts:
                 if verbose:
-                    print(f"attempt {attempt}/{attempts} returned no poses; retrying",
-                          file=sys.stderr)
+                    print(
+                        f"attempt {attempt}/{attempts} returned no poses; retrying", file=sys.stderr
+                    )
                 continue
-            raise SystemExit("error: the NIM returned no poses after "
-                             f"{attempts} attempts; check the server log")
+            raise SystemExit(
+                f"error: the NIM returned no poses after {attempts} attempts; check the server log"
+            )
         break
 
     return {
@@ -252,32 +266,60 @@ def add_cli(subparsers) -> None:
     p.add_argument("video", help="input video (MP4/H.264, constant frame rate)")
     p.add_argument("bbox", help="tracked bounding-box annotation from `track`")
     p.add_argument("--out", required=True, help="pose output path (JSON Lines)")
-    p.add_argument("--target", default=DEFAULT_TARGET, help=f"gRPC endpoint (default: {DEFAULT_TARGET})")
+    p.add_argument(
+        "--target", default=DEFAULT_TARGET, help=f"gRPC endpoint (default: {DEFAULT_TARGET})"
+    )
     p.add_argument("--function-id", default=DEFAULT_FUNCTION_ID, help="NVCF function id")
     p.add_argument("--api-key", default=None, help="NVIDIA API key (default: $NVIDIA_API_KEY)")
-    p.add_argument("--focal-length", type=float, default=0.0,
-                   help="pinhole focal length in pixels; 0 asks for the server default")
+    p.add_argument(
+        "--focal-length",
+        type=float,
+        default=0.0,
+        help="pinhole focal length in pixels; 0 asks for the server default",
+    )
     contact = p.add_mutually_exclusive_group()
-    contact.add_argument("--enable-contact", dest="enable_contact", action="store_true", default=None,
-                         help="request static-camera contact correction (slower)")
-    contact.add_argument("--no-enable-contact", dest="enable_contact", action="store_false",
-                         help="request no contact correction")
+    contact.add_argument(
+        "--enable-contact",
+        dest="enable_contact",
+        action="store_true",
+        default=None,
+        help="request static-camera contact correction (slower)",
+    )
+    contact.add_argument(
+        "--no-enable-contact",
+        dest="enable_contact",
+        action="store_false",
+        help="request no contact correction",
+    )
     p.add_argument("--timeout", type=float, default=DEFAULT_TIMEOUT, help="RPC deadline in seconds")
-    p.add_argument("--attempts", type=int, default=3,
-                   help="retries when the hosted endpoint cannot place a worker (default: 3)")
+    p.add_argument(
+        "--attempts",
+        type=int,
+        default=3,
+        help="retries when the hosted endpoint cannot place a worker (default: 3)",
+    )
     p.add_argument("--session-id", default=None, help="your own session id, echoed by the server")
 
 
 def run_cli(args) -> int:
     summary = run(
-        args.video, args.bbox, args.out,
-        api_key=args.api_key, target=args.target, function_id=args.function_id,
-        focal_length=args.focal_length, enable_contact=args.enable_contact,
-        timeout=args.timeout, session_id=args.session_id, attempts=args.attempts,
+        args.video,
+        args.bbox,
+        args.out,
+        api_key=args.api_key,
+        target=args.target,
+        function_id=args.function_id,
+        focal_length=args.focal_length,
+        enable_contact=args.enable_contact,
+        timeout=args.timeout,
+        session_id=args.session_id,
+        attempts=args.attempts,
     )
-    print(f"wrote {args.out}: {summary['frames']} frames "
-          f"({summary['frames_with_bodies']} with bodies) in {summary['seconds']}s")
+    print(
+        f"wrote {args.out}: {summary['frames']} frames "
+        f"({summary['frames_with_bodies']} with bodies) in {summary['seconds']}s"
+    )
     return 0
 
 
-__all__ = ["run", "body_to_dict", "load_stubs", "add_cli", "run_cli", "NUM_JOINTS"]
+__all__ = ["NUM_JOINTS", "add_cli", "body_to_dict", "load_stubs", "run", "run_cli"]

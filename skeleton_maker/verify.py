@@ -9,9 +9,7 @@ to boxes by frame index, so a silent off-by-one would look like success.
 import collections
 import json
 import math
-import os
 import subprocess
-import sys
 
 import cv2
 import numpy as np
@@ -28,24 +26,41 @@ def check(name: str, ok: bool, detail: str = "") -> bool:
 
 def _probe(path: str) -> dict:
     ffprobe = require_tool("ffprobe", "It ships with ffmpeg.")
-    out = subprocess.run(
-        [ffprobe, "-v", "error", "-select_streams", "v:0",
-         "-show_entries", "stream=width,height,nb_frames,codec_name,pix_fmt,r_frame_rate",
-         "-show_entries", "format=duration", "-of", "json", path],
-        capture_output=True, text=True, check=True,
+    out = subprocess.run(  # noqa: S603  argument list, no shell; ffprobe path from shutil.which
+        [
+            ffprobe,
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=width,height,nb_frames,codec_name,pix_fmt,r_frame_rate",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "json",
+            path,
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
     ).stdout
     j = json.loads(out)
     s = j["streams"][0]
     return {
-        "w": int(s["width"]), "h": int(s["height"]), "n": int(s.get("nb_frames", 0) or 0),
-        "codec": s.get("codec_name"), "pix": s.get("pix_fmt"),
+        "w": int(s["width"]),
+        "h": int(s["height"]),
+        "n": int(s.get("nb_frames", 0) or 0),
+        "codec": s.get("codec_name"),
+        "pix": s.get("pix_fmt"),
         "r_fps": s.get("r_frame_rate"),
         "dur": float(j["format"]["duration"]),
     }
 
 
-def run(clip: str, boxes: str, poses: str, overlay: str | None = None,
-        *, report: bool = True) -> bool:
+def run(
+    clip: str, boxes: str, poses: str, overlay: str | None = None, *, report: bool = True
+) -> bool:
     """Run every check. Returns True when all pass."""
     failures = []
 
@@ -57,10 +72,16 @@ def run(clip: str, boxes: str, poses: str, overlay: str | None = None,
     sent_ids = {row[0] for rows in sent.values() for row in rows}
     sent_boxes = sum(len(rows) for rows in sent.values())
     max_per_frame = max((len(rows) for rows in sent.values()), default=0)
-    record("annotation header within 1..50", 1 <= len(sent_ids) <= MAX_BODIES,
-           f"{len(sent_ids)} bodies")
-    record("no frame exceeds the per-frame box limit", max_per_frame <= MAX_BODIES,
-           f"max {max_per_frame}")
+    record(
+        "annotation header within 1..50",
+        1 <= len(sent_ids) <= MAX_BODIES,
+        f"{len(sent_ids)} bodies",
+    )
+    record(
+        "no frame exceeds the per-frame box limit",
+        max_per_frame <= MAX_BODIES,
+        f"max {max_per_frame}",
+    )
 
     records = []
     with open(poses) as fh:
@@ -69,22 +90,30 @@ def run(clip: str, boxes: str, poses: str, overlay: str | None = None,
                 records.append(json.loads(line))
     frame_ids = [r["frame_id"] for r in records]
     dets = [d for r in records for d in r["detections"]]
-    dets_per_frame = collections.Counter(r["frame_id"] for r in records
-                                         for _ in r["detections"])
+    dets_per_frame = collections.Counter(r["frame_id"] for r in records for _ in r["detections"])
 
     # The NIM emits one record per decoded frame, while the annotation may
     # legitimately skip frames where nobody was tracked. So the ids need not be
     # equal: the file must be contiguous from 0, and every annotated frame must
     # come back with its detections.
-    record("pose frame ids are contiguous from 0",
-           frame_ids == list(range(len(frame_ids))),
-           f"{len(records)} records, ids {frame_ids[0]}..{frame_ids[-1]}"
-           if frame_ids else "no records")
+    record(
+        "pose frame ids are contiguous from 0",
+        frame_ids == list(range(len(frame_ids))),
+        f"{len(records)} records, ids {frame_ids[0]}..{frame_ids[-1]}"
+        if frame_ids
+        else "no records",
+    )
     unposed = [f for f in sorted(sent) if dets_per_frame.get(f, 0) == 0]
-    record("every annotated frame came back with poses", not unposed,
-           f"{len(sent)} annotated frames" + (f", missing {unposed}" if unposed else ""))
-    record("every submitted box produced a detection", len(dets) == sent_boxes,
-           f"{len(dets)} detections vs {sent_boxes} boxes submitted")
+    record(
+        "every annotated frame came back with poses",
+        not unposed,
+        f"{len(sent)} annotated frames" + (f", missing {unposed}" if unposed else ""),
+    )
+    record(
+        "every submitted box produced a detection",
+        len(dets) == sent_boxes,
+        f"{len(dets)} detections vs {sent_boxes} boxes submitted",
+    )
 
     bad = 0
     for det in dets:
@@ -112,24 +141,30 @@ def run(clip: str, boxes: str, poses: str, overlay: str | None = None,
     record(f"all {NUM_JOINTS}-joint arrays are well formed", bad == 0, f"{bad} malformed")
 
     if dets:
-        norms = [math.sqrt(sum(c * c for c in q))
-                 for det in dets for q in det["joint_rotations"]]
-        record("joint rotations are unit quaternions",
-               all(abs(n - 1.0) < 0.05 for n in norms),
-               f"norm {min(norms):.3f}..{max(norms):.3f}")
+        norms = [math.sqrt(sum(c * c for c in q)) for det in dets for q in det["joint_rotations"]]
+        record(
+            "joint rotations are unit quaternions",
+            all(abs(n - 1.0) < 0.05 for n in norms),
+            f"norm {min(norms):.3f}..{max(norms):.3f}",
+        )
 
     clip_info = _probe(clip)
-    record("clip is H.264 yuv420p at a constant frame rate",
-           clip_info["codec"] == "h264" and clip_info["pix"] == "yuv420p"
-           and clip_info["r_fps"] == clip_info["r_fps"],
-           f"{clip_info['w']}x{clip_info['h']} {clip_info['codec']} "
-           f"{clip_info['pix']} {clip_info['r_fps']} {clip_info['dur']:.3f}s")
+    record(
+        "clip is H.264 yuv420p at a constant frame rate",
+        clip_info["codec"] == "h264"
+        and clip_info["pix"] == "yuv420p"
+        and clip_info["r_fps"] == clip_info["r_fps"],
+        f"{clip_info['w']}x{clip_info['h']} {clip_info['codec']} "
+        f"{clip_info['pix']} {clip_info['r_fps']} {clip_info['dur']:.3f}s",
+    )
 
     if overlay:
         info = _probe(overlay)
-        record("overlay matches the clip's geometry and frame count",
-               (info["w"], info["h"], info["n"]) == (clip_info["w"], clip_info["h"], clip_info["n"]),
-               f"{info['w']}x{info['h']} {info['n']} frames")
+        record(
+            "overlay matches the clip's geometry and frame count",
+            (info["w"], info["h"], info["n"]) == (clip_info["w"], clip_info["h"], clip_info["n"]),
+            f"{info['w']}x{info['h']} {info['n']} frames",
+        )
         cap_a, cap_b = cv2.VideoCapture(clip), cv2.VideoCapture(overlay)
         diffs, idx = [], 0
         while True:
@@ -144,10 +179,13 @@ def run(clip: str, boxes: str, poses: str, overlay: str | None = None,
             idx += 1
         cap_a.release()
         cap_b.release()
-        record("overlay actually differs from the source clip",
-               bool(diffs) and all(d > 0.5 for d in diffs),
-               f"{len(diffs)} sampled frames, mean abs luma diff "
-               f"{sum(diffs) / len(diffs):.2f}" if diffs else "no frames compared")
+        record(
+            "overlay actually differs from the source clip",
+            bool(diffs) and all(d > 0.5 for d in diffs),
+            f"{len(diffs)} sampled frames, mean abs luma diff {sum(diffs) / len(diffs):.2f}"
+            if diffs
+            else "no frames compared",
+        )
 
     if report:
         print()

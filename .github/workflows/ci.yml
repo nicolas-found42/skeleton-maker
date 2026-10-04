@@ -5,21 +5,157 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  test:
+  lint:
+    name: lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: false
 
-      - name: Install ffmpeg
+      - name: Lockfile is current
+        run: uv lock --check
+
+      - name: Install dev tools
+        run: uv sync --locked --only-group dev
+
+      - name: Ruff check
+        run: uv run --no-sync ruff check .
+
+      - name: Ruff format
+        run: uv run --no-sync ruff format --check .
+
+  coverage-floor:
+    name: coverage-floor
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The floor in pyproject.toml may only go up: compare with the base commit
+      # (the PR's base, or the previous tip of main on a push).
+      - name: Coverage floor does not decrease
+        env:
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            echo "no base commit to compare with"
+            exit 0
+          fi
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          git show "$BASE_SHA:pyproject.toml" > "$RUNNER_TEMP/base-pyproject.toml"
+          python3 scripts/check_coverage_floor.py "$RUNNER_TEMP/base-pyproject.toml" pyproject.toml
+
+  prek:
+    name: prek
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Same config as local hooks (.pre-commit-config.yaml). The branch guard is
+      # for local commits; it does not apply to a CI checkout.
+      - uses: j178/prek-action@4e14d07f9231acabce116ccfca13b13dd9755ece # v3.0.0
+        env:
+          SKIP: no-commit-to-branch
+        with:
+          extra-args: --all-files
+
+  ty:
+    name: ty
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: false
+
+      # ty resolves imports against the installed environment, so install everything.
+      - name: Install dependencies from uv.lock
+        run: uv sync --locked --python 3.12
+
+      - name: Type check
+        run: uv run --no-sync ty check
+
+  zizmor:
+    name: zizmor
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Audit workflows
+        uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
+        with:
+          advanced-security: false
+
+  test:
+    name: test (${{ matrix.os }}, py${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, python: "3.10" }
+          - { os: ubuntu-latest, python: "3.11" }
+          - { os: ubuntu-latest, python: "3.12" }
+          - { os: macos-latest, python: "3.12" }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: false
+
+      - name: Install ffmpeg (Linux)
+        if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
-      - name: Install package
-        run: |
-          uv venv --python 3.11 .venv
-          uv pip install --python .venv/bin/python -e ".[dev]"
+      - name: Install ffmpeg (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ffmpeg
+
+      - name: Install dependencies from uv.lock
+        env:
+          PYTHON_VERSION: ${{ matrix.python }}
+        run: uv sync --locked --python "$PYTHON_VERSION"
 
       - name: Test
-        run: .venv/bin/python -m pytest -q
+        run: uv run --no-sync python -m pytest -q --cov --cov-config=pyproject.toml
+
+  # One stable name for the branch ruleset to require. It fails if any job
+  # above failed or was skipped, so the matrix can change without editing the ruleset.
+  ci-ok:
+    name: ci-ok
+    if: always()
+    needs: [lint, coverage-floor, prek, ty, zizmor, test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check upstream jobs
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "job results: $RESULTS"
+          for r in $RESULTS; do
+            [ "$r" = "success" ] || { echo "a required job did not succeed"; exit 1; }
+          done

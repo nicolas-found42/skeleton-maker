@@ -6,7 +6,7 @@ Point it at a clip; it tracks the people, asks NVIDIA's [3D Body Pose NIM](https
 for a 77-joint 3D skeleton per person per frame, and writes a video with the
 skeletons drawn on top.
 
-```
+```bash
 skeleton-maker all myclip.mp4
 ```
 
@@ -21,10 +21,10 @@ frames.*
 
 The NIM is a pose model, not a detector. It estimates a pose **once per supplied
 box**, so it needs someone to say where the people are and to keep a stable id on
-each one. This tool supplies that with [Ultralytics YOLO](https://docs.ultralytics.com)
-+ ByteTrack, then calls the hosted NIM over gRPC and renders the result.
+each one. This tool supplies that with [Ultralytics YOLO](https://docs.ultralytics.com) +
+ByteTrack, then calls the hosted NIM over gRPC and renders the result.
 
-```
+```text
 your video ──▶ conform (ffmpeg) ──▶ detect + track (YOLO/ByteTrack)
                                           │
                                           ▼
@@ -129,7 +129,7 @@ than there are people on screen (the sample run hit 141 ids for ~6 people). The
 annotation header must stay within 1..50, so `track` keeps the most persistent
 ids and drops the rest, reporting what that cost:
 
-```
+```text
 bodies=50 rows=2842 coverage=75.9% frames_with_boxes=599/600 max_boxes_in_a_frame=9
 ```
 

@@ -15,7 +15,7 @@ def test_bundled_protos_are_present():
     from skeleton_maker.nim import PROTO_DIR
 
     found = []
-    for root, _dirs, files in os.walk(PROTO_DIR):
+    for _root, _dirs, files in os.walk(PROTO_DIR):
         found.extend(f for f in files if f.endswith(".proto"))
     assert "body_pose.proto" in " ".join(found), f"protos missing under {PROTO_DIR}: {found}"
     assert "service_info.proto" in " ".join(found)
@@ -36,10 +36,12 @@ def test_request_message_accepts_config_and_boxes():
     pb2, _ = load_stubs()
     req = pb2.BodyPoseRequest(
         config=pb2.BodyPoseConfig(focal_length=0.0),
-        tracked_bboxes=[pb2.FrameBoxes(
-            frame_id=0,
-            boxes=[pb2.BoundingBox(x=1.0, y=2.0, width=3.0, height=4.0, tracking_id=7)],
-        )],
+        tracked_bboxes=[
+            pb2.FrameBoxes(
+                frame_id=0,
+                boxes=[pb2.BoundingBox(x=1.0, y=2.0, width=3.0, height=4.0, tracking_id=7)],
+            )
+        ],
     )
     assert req.config.focal_length == 0.0
     assert req.tracked_bboxes[0].boxes[0].tracking_id == 7

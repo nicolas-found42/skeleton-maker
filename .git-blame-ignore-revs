@@ -1,0 +1,3 @@
+# Commits that mostly rewrite whole files mechanically. `git blame --ignore-revs-file` and GitHub skip them.
+# style: adopt ruff config and reformat the codebase (#9): ruff config, the ruff format pass, and small lint fixes
+326da4364a988d2143d623cc2fb6ad8debdbf418

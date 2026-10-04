@@ -24,8 +24,19 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=7"]
 download = ["yt-dlp>=2024.1.1"]
+
+# Dev tools (PEP 735). `uv sync` installs this group by default.
+# ruff and ty are pinned exactly: ty is beta and 0.0.x releases can add new errors,
+# so bump either deliberately, in its own PR. Keep ruff in step with
+# .pre-commit-config.yaml (the ruff-pre-commit rev).
+[dependency-groups]
+dev = [
+    "pytest>=7",
+    "pytest-cov>=5",
+    "ruff==0.16.10",
+    "ty==0.0.84",
+]
 
 [project.scripts]
 skeleton-maker = "skeleton_maker.cli:main"
@@ -39,3 +50,42 @@ skeleton_maker = ["proto/**/*.proto"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.ty.environment]
+# Check against the oldest supported Python, so 3.10-incompatible code is caught.
+python-version = "3.10"
+
+[tool.ty.src]
+include = ["skeleton_maker", "tests"]
+# Generated gRPC stubs are rebuilt from proto/ on demand and gitignored.
+exclude = ["skeleton_maker/_gen"]
+
+[tool.coverage.run]
+source = ["skeleton_maker"]
+# Keep the data file inside the already-ignored .pytest_cache.
+data_file = ".pytest_cache/.coverage"
+# Generated gRPC stubs are rebuilt from proto/ on demand and gitignored.
+omit = ["skeleton_maker/_gen/*"]
+
+[tool.coverage.report]
+# Ratchet: this floor may only ever go up. Raise it when a PR adds tests; never lower it.
+fail_under = 34
+show_missing = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+# Generated gRPC stubs are rebuilt from proto/ on demand and gitignored.
+extend-exclude = ["skeleton_maker/_gen"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "C4", "PT", "S"]
+# The formatter owns line length.
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["skeleton_maker"]
+
+[tool.ruff.lint.per-file-ignores]
+# assert is how pytest tests are written.
+"tests/**" = ["S101"]

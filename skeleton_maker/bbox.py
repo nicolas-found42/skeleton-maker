@@ -68,8 +68,16 @@ def write_annotation(frames: list[dict], path: str) -> dict:
                     raise ValueError(
                         f"frame {fr['frame_id']} has a box with non-positive size: {det['bbox']}"
                     )
-                writer.writerow([fr["frame_id"], det["tracking_id"],
-                                 f"{x:.2f}", f"{y:.2f}", f"{w:.2f}", f"{h:.2f}"])
+                writer.writerow(
+                    [
+                        fr["frame_id"],
+                        det["tracking_id"],
+                        f"{x:.2f}",
+                        f"{y:.2f}",
+                        f"{w:.2f}",
+                        f"{h:.2f}",
+                    ]
+                )
                 rows += 1
                 per_frame[fr["frame_id"]] += 1
 
@@ -107,9 +115,7 @@ def read_annotation(path: str) -> dict[int, list[tuple]]:
             if not fields:
                 continue
             if len(fields) != 6:
-                raise ValueError(
-                    f"{path}: line {lineno} has {len(fields)} fields, expected 6"
-                )
+                raise ValueError(f"{path}: line {lineno} has {len(fields)} fields, expected 6")
             frame_id, tracking_id = int(fields[0]), int(fields[1])
             x, y, w, h = (float(v) for v in fields[2:])
             if (x, y, w, h) == ABSENT_BBOX:

@@ -1,0 +1,50 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # Wait a week after a release before proposing it, to let supply-chain
+    # compromises surface first.
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "ci"
+    labels: []
+
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      python-dependencies:
+        patterns: ["*"]
+        # ty (beta, 0.0.x) and ruff are bumped deliberately, each in its own PR.
+        exclude-patterns: ["ty", "ruff"]
+    ignore:
+      # Major bumps change behaviour (numpy 2, opencv 5, ...) and the tests here are offline, so
+      # a green CI says nothing about the real YOLO and NIM pipeline. Upgrade majors by hand.
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+      # opencv-python-headless 4.14+ requires numpy>=2, but pyproject.toml caps numpy<2, so
+      # Dependabot's forced bump is unresolvable and its job fails. Patch updates stay allowed.
+      # Remove this entry when the numpy cap is lifted (see "Later, with triggers" in
+      # docs/agents/dev-workflow.md).
+      - dependency-name: "opencv-python-headless"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      # The gRPC stubs are generated for the NIM and these pins move together, so only patch
+      # releases are proposed for them (security fixes arrive as patches).
+      - dependency-name: "grpcio"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "grpcio-tools"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "protobuf"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+    commit-message:
+      prefix: "chore"
+    labels: []

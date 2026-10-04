@@ -6,11 +6,10 @@ Each stage is also usable on its own; ``all`` chains them for a local video.
 
 import argparse
 import os
-import shutil
 import sys
 
-from . import __version__, bbox, character, detection, nim, render, verify
-from .constants import CFR_FPS, CONFORM_ENCODE_ARGS
+from . import __version__, character, detection, nim, render, verify
+from .constants import CONFORM_ENCODE_ARGS
 from .utils import die, is_streamable_mp4, probe_video, require_tool, run_ffmpeg
 
 
@@ -29,27 +28,37 @@ def cmd_clip(args) -> int:
     ff_args += ["-i", args.video]
     if args.duration:
         ff_args += ["-t", str(args.duration)]
-    ff_args += CONFORM_ENCODE_ARGS + [args.out, "-y"]
+    ff_args += [*CONFORM_ENCODE_ARGS, args.out, "-y"]
     run_ffmpeg(ff_args, f"cutting {args.out}")
 
     out = probe_video(args.out)
-    print(f"source : {src['width']}x{src['height']} {src['codec']} "
-          f"{src['r_fps']:.3f}fps {src['duration']:.2f}s")
-    print(f"clip   : {out['width']}x{out['height']} {out['codec']} "
-          f"{out['pix_fmt']} {out['r_fps']:.3f}fps {out['duration']:.2f}s "
-          f"{out['size'] / 1e6:.1f}MB -> {args.out}")
+    print(
+        f"source : {src['width']}x{src['height']} {src['codec']} "
+        f"{src['r_fps']:.3f}fps {src['duration']:.2f}s"
+    )
+    print(
+        f"clip   : {out['width']}x{out['height']} {out['codec']} "
+        f"{out['pix_fmt']} {out['r_fps']:.3f}fps {out['duration']:.2f}s "
+        f"{out['size'] / 1e6:.1f}MB -> {args.out}"
+    )
 
     notes = []
     if out["size"] > 50_000_000:
-        notes.append(f"the hosted endpoint caps input at 50MB; this clip is "
-                     f"{out['size'] / 1e6:.1f}MB. Use a shorter window, lower "
-                     f"resolution, or higher --crf.")
+        notes.append(
+            f"the hosted endpoint caps input at 50MB; this clip is "
+            f"{out['size'] / 1e6:.1f}MB. Use a shorter window, lower "
+            f"resolution, or higher --crf."
+        )
     if abs(out["r_fps"] - out["avg_fps"]) > 0.01:
-        notes.append(f"frame rate is not constant ({out['r_fps']:.3f} vs "
-                     f"{out['avg_fps']:.3f}); the NIM rejects variable frame rate")
+        notes.append(
+            f"frame rate is not constant ({out['r_fps']:.3f} vs "
+            f"{out['avg_fps']:.3f}); the NIM rejects variable frame rate"
+        )
     if not is_streamable_mp4(args.out):
-        notes.append("the MP4 is not streamable (moov after mdat), so the NIM will "
-                     "buffer the whole file before processing")
+        notes.append(
+            "the MP4 is not streamable (moov after mdat), so the NIM will "
+            "buffer the whole file before processing"
+        )
     if out["pix_fmt"] != "yuv420p":
         notes.append(f"pixel format is {out['pix_fmt']}, not yuv420p")
     for note in notes:
@@ -79,28 +88,44 @@ def cmd_all(args) -> int:
 
     print(f"== work directory: {work}")
     print("== 1/4 conforming the clip")
-    rc = cmd_clip(argparse.Namespace(video=args.video, out=clip,
-                                     start=args.start, duration=args.duration))
+    rc = cmd_clip(
+        argparse.Namespace(video=args.video, out=clip, start=args.start, duration=args.duration)
+    )
     if rc:
         return rc
 
     print("== 2/4 detecting and tracking people")
-    rc = detection.run_track(argparse.Namespace(
-        video=clip, out_bbox=boxes, out_json=None,
-        model=args.model, imgsz=args.imgsz, conf=args.conf,
-        tracker=args.tracker, device=args.device, max_bodies=args.max_bodies))
+    rc = detection.run_track(
+        argparse.Namespace(
+            video=clip,
+            out_bbox=boxes,
+            out_json=None,
+            model=args.model,
+            imgsz=args.imgsz,
+            conf=args.conf,
+            tracker=args.tracker,
+            device=args.device,
+            max_bodies=args.max_bodies,
+        )
+    )
     if rc:
         return rc
 
     print("== 3/4 estimating poses with the NIM")
-    summary = nim.run(clip, boxes, poses, focal_length=args.focal_length,
-                      timeout=args.timeout)
-    print(f"   {summary['frames']} frames ({summary['frames_with_bodies']} with bodies) "
-          f"in {summary['seconds']}s")
+    summary = nim.run(clip, boxes, poses, focal_length=args.focal_length, timeout=args.timeout)
+    print(
+        f"   {summary['frames']} frames ({summary['frames_with_bodies']} with bodies) "
+        f"in {summary['seconds']}s"
+    )
 
     print("== 4/4 rendering the overlay")
-    render.render(clip, poses, overlay, draw=args.draw,
-                  focal_length=args.focal_length or summary["focal_length"])
+    render.render(
+        clip,
+        poses,
+        overlay,
+        draw=args.draw,
+        focal_length=args.focal_length or summary["focal_length"],
+    )
 
     print("== verifying")
     ok = verify.run(clip, boxes, poses, overlay, report=True)
@@ -110,17 +135,28 @@ def cmd_all(args) -> int:
 
 def cmd_download(args) -> int:
     """Grab a window of a video with yt-dlp, NIM-conformant."""
-    require_tool("yt-dlp", "Install it: uv pip install yt-dlp")
+    yt_dlp = require_tool("yt-dlp", "Install it: uv pip install yt-dlp")
     ffmpeg = require_tool("ffmpeg")
     os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
     section = f"*{args.start}-{args.start + args.duration}" if args.duration else "*"
     import subprocess
 
-    cmd = [shutil.which("yt-dlp"), "--no-warnings", "--no-playlist",
-           "--download-sections", section, "--force-keyframes-at-cuts",
-           "--ffmpeg-location", ffmpeg,
-           "-f", args.format, "-o", args.out, args.url]
-    proc = subprocess.run(cmd, text=True)
+    cmd = [
+        yt_dlp,
+        "--no-warnings",
+        "--no-playlist",
+        "--download-sections",
+        section,
+        "--force-keyframes-at-cuts",
+        "--ffmpeg-location",
+        ffmpeg,
+        "-f",
+        args.format,
+        "-o",
+        args.out,
+        args.url,
+    ]
+    proc = subprocess.run(cmd, text=True)  # noqa: S603  argument list, no shell; yt-dlp resolved above
     if proc.returncode != 0:
         die("yt-dlp failed; try a different --format")
     print(f"downloaded {args.out}")
@@ -130,8 +166,7 @@ def cmd_download(args) -> int:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="skeleton-maker",
-        description="Draw 3D body-pose skeletons on any video with the NVIDIA "
-                    "3D Body Pose NIM.",
+        description="Draw 3D body-pose skeletons on any video with the NVIDIA 3D Body Pose NIM.",
     )
     parser.add_argument("--version", action="version", version=f"skeleton-maker {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
