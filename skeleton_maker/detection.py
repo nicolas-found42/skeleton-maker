@@ -79,7 +79,7 @@ def scan(
             net.predict(
                 frame, imgsz=imgsz, conf=conf, classes=[PERSON_CLASS], device=device, verbose=False
             )
-        )[0]
+        )[0]  # noqa: RUF015  one result per frame; [0] keeps IndexError on an empty result
         hits = list(_person_boxes(res))
         heights = sorted(max(0.0, y2 - y1) for (_x1, y1, _x2, y2), _c, _t in hits)
         area = 0.0
