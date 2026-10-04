@@ -8,6 +8,7 @@ on each one across frames. Ultralytics YOLO plus ByteTrack does both.
 
 import argparse
 import json
+import logging
 import sys
 
 import cv2
@@ -26,8 +27,8 @@ def pick_device(requested: str = "auto") -> str:
             return "mps"
         if torch.cuda.is_available():
             return "0"
-    except Exception:
-        pass
+    except Exception as exc:
+        logging.getLogger(__name__).debug("device probe failed, using cpu: %s", exc)
     return "cpu"
 
 
@@ -68,7 +69,7 @@ def scan(
     fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
     n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     rows = []
-    step = max(1, int(round(interval * fps)))
+    step = max(1, round(interval * fps))
     for frame_idx in range(0, n_frames, step):
         cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
         ok, frame = cap.read()

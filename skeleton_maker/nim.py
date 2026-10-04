@@ -196,7 +196,7 @@ def run(
                     continue
                 if out is None:
                     os.makedirs(os.path.dirname(os.path.abspath(output)), exist_ok=True)
-                    out = open(output, "w")
+                    out = open(output, "w")  # noqa: SIM115  opened on the first response, closed in the finally block
                 detections = [body_to_dict(pb2, b) for b in response.bodies]
                 out.write(
                     json.dumps({"frame_id": response.frame_id, "detections": detections}) + "\n"
@@ -319,4 +319,4 @@ def run_cli(args) -> int:
     return 0
 
 
-__all__ = ["run", "body_to_dict", "load_stubs", "add_cli", "run_cli", "NUM_JOINTS"]
+__all__ = ["NUM_JOINTS", "add_cli", "body_to_dict", "load_stubs", "run", "run_cli"]

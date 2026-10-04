@@ -8,7 +8,6 @@ does not report which focal the model actually ran with, so ``--focus auto``
 reuses the focal length the NIM echoed on the stream when there is one.
 """
 
-import argparse
 import json
 
 import cv2

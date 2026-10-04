@@ -15,7 +15,7 @@ def test_bundled_protos_are_present():
     from skeleton_maker.nim import PROTO_DIR
 
     found = []
-    for root, _dirs, files in os.walk(PROTO_DIR):
+    for _root, _dirs, files in os.walk(PROTO_DIR):
         found.extend(f for f in files if f.endswith(".proto"))
     assert "body_pose.proto" in " ".join(found), f"protos missing under {PROTO_DIR}: {found}"
     assert "service_info.proto" in " ".join(found)

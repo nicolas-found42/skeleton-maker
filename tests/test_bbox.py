@@ -78,7 +78,7 @@ def test_write_rejects_an_empty_annotation(tmp_path):
 def test_read_rejects_a_bad_header(tmp_path):
     path = tmp_path / "bad.txt"
     path.write_text("0\n")
-    with pytest.raises(ValueError, match="outside 1..50"):
+    with pytest.raises(ValueError, match=r"outside 1\.\.50"):
         read_annotation(str(path))
 
 

@@ -9,8 +9,8 @@ import os
 import shutil
 import sys
 
-from . import __version__, bbox, detection, nim, render, verify
-from .constants import CFR_FPS, CONFORM_ENCODE_ARGS
+from . import __version__, detection, nim, render, verify
+from .constants import CONFORM_ENCODE_ARGS
 from .utils import die, is_streamable_mp4, probe_video, require_tool, run_ffmpeg
 
 
@@ -29,7 +29,7 @@ def cmd_clip(args) -> int:
     ff_args += ["-i", args.video]
     if args.duration:
         ff_args += ["-t", str(args.duration)]
-    ff_args += CONFORM_ENCODE_ARGS + [args.out, "-y"]
+    ff_args += [*CONFORM_ENCODE_ARGS, args.out, "-y"]
     run_ffmpeg(ff_args, f"cutting {args.out}")
 
     out = probe_video(args.out)
@@ -157,7 +157,7 @@ def cmd_download(args) -> int:
         args.out,
         args.url,
     ]
-    proc = subprocess.run(cmd, text=True)
+    proc = subprocess.run(cmd, text=True)  # noqa: S603  argument list, no shell; yt-dlp resolved above
     if proc.returncode != 0:
         die("yt-dlp failed; try a different --format")
     print(f"downloaded {args.out}")

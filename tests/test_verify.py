@@ -8,7 +8,6 @@ These exercise the exact failure the NIM's frame-indexed protocol makes possible
 import json
 import shutil
 import subprocess
-import sys
 
 import pytest
 
@@ -21,8 +20,8 @@ pytestmark = pytest.mark.skipif(
 
 
 def _make_video(path, frames=30, size="64x48", crf="18"):
-    subprocess.run(
-        [
+    subprocess.run(  # noqa: S603  fixed arguments to build a test fixture
+        [  # noqa: S607  ffmpeg resolved from PATH; the test is skipped without it
             "ffmpeg",
             "-hide_banner",
             "-loglevel",

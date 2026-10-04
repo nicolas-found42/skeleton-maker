@@ -9,9 +9,7 @@ to boxes by frame index, so a silent off-by-one would look like success.
 import collections
 import json
 import math
-import os
 import subprocess
-import sys
 
 import cv2
 import numpy as np
@@ -28,7 +26,7 @@ def check(name: str, ok: bool, detail: str = "") -> bool:
 
 def _probe(path: str) -> dict:
     ffprobe = require_tool("ffprobe", "It ships with ffmpeg.")
-    out = subprocess.run(
+    out = subprocess.run(  # noqa: S603  argument list, no shell; ffprobe path from shutil.which
         [
             ffprobe,
             "-v",

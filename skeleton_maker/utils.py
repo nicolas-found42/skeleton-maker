@@ -23,7 +23,7 @@ def require_tool(name: str, hint: str = "") -> str:
 def run_ffmpeg(args, desc: str) -> None:
     """Run ffmpeg with the standard quiet flags and report failures usefully."""
     ffmpeg = require_tool("ffmpeg", "Install it from https://ffmpeg.org/download.html")
-    proc = subprocess.run(
+    proc = subprocess.run(  # noqa: S603  argument list, no shell; ffmpeg path from shutil.which
         [ffmpeg, "-hide_banner", "-loglevel", "error", *args],
         capture_output=True,
         text=True,
@@ -37,7 +37,7 @@ def run_ffmpeg(args, desc: str) -> None:
 def probe_video(path: str) -> dict:
     """Return the video stream's geometry, codec and frame rate."""
     ffprobe = require_tool("ffprobe", "It ships with ffmpeg.")
-    out = subprocess.run(
+    out = subprocess.run(  # noqa: S603  argument list, no shell; ffprobe path from shutil.which
         [
             ffprobe,
             "-v",
