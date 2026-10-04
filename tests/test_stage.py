@@ -225,3 +225,19 @@ def test_far_people_do_not_overflow_the_int16_packing():
     p = _first(st)
     assert np.isfinite(p).all()
     assert np.nanmedian(p[:, CANON_INDEX["Hips"], 2]) == pytest.approx(-45.0, abs=0.2)
+
+
+def test_missing_feet_keep_valid_core_tracks_without_claiming_a_floor():
+    from skeleton_maker.stage import FOOT_JOINTS
+
+    frames = clip(20)
+    for _, detections in frames:
+        for detection in detections:
+            for joint in FOOT_JOINTS:
+                detection["keypoints_confidence"][joint] = 0
+    stage = build_stage(frames)
+    assert len(stage.meta["shots"]) == 1
+    shot = stage.meta["shots"][0]
+    assert shot["floor_source"] == "camera_origin"
+    assert shot["tracks"][0]["n"] == 20
+    assert np.isfinite(stage.positions(0, 0)[:, CANON_INDEX["Chest"]]).all()

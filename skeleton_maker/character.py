@@ -16,6 +16,8 @@ import os
 import re
 import sys
 from importlib import resources
+from pathlib import Path
+from urllib.parse import quote
 
 from .nova77 import CANON
 from .stage import Options, build_stage, load_frames
@@ -137,6 +139,8 @@ def validate_spec(spec: dict) -> dict:
                 if key in p:
                     _vector(p[key], f"{where}.{key}", positive=key == "size")
         elif kind == "chain":
+            if not isinstance(p.get("joint"), str):
+                raise SpecError(f"{where}.joint: needs a single joint name")
             _joint_names(p.get("joint"), where + ".joint")
             for key in ("dir", "n", "len", "r", "mat", "lag"):
                 if key not in p:
@@ -188,8 +192,8 @@ def build_html(stage, specs: dict, options: dict, title: str) -> str:
     """Assemble the single-file viewer."""
     page = _asset("stage.html")
 
-    def js(obj) -> str:  # JSON inside <script>: "</" must not end the element
-        return json.dumps(obj, separators=(",", ":")).replace("</", "<\\/")
+    def js(obj) -> str:  # Keep script-data parser control sequences out of user JSON.
+        return json.dumps(obj, separators=(",", ":")).replace("<", "\\u003c")
 
     replacements = {
         "__TITLE__": htmllib.escape(title),
@@ -225,11 +229,13 @@ def make_stage_html(
     _number(min_conf, "min_conf", unit=True)
     specs = builtin_specs()
     for path in extra_specs or []:
-        with open(path) as fh:
-            try:
+        try:
+            with open(path) as fh:
                 spec = validate_spec(json.load(fh))
-            except json.JSONDecodeError as exc:
-                raise SpecError(f"{path}: {exc.msg} at line {exc.lineno}") from exc
+        except OSError as exc:
+            raise SpecError(f"cannot read spec {path}: {exc.strerror}") from exc
+        except json.JSONDecodeError as exc:
+            raise SpecError(f"{path}: {exc.msg} at line {exc.lineno}") from exc
         specs[spec["name"]] = spec
     if character != "auto" and character not in specs:
         die(f"unknown character {character!r}. Available: {', '.join(sorted(specs))}")
@@ -247,8 +253,11 @@ def make_stage_html(
         "title": title or os.path.basename(pose_json),
     }
     if video:
-        options["video"] = os.path.relpath(
-            os.path.abspath(video), os.path.dirname(os.path.abspath(out))
+        options["video"] = quote(
+            Path(
+                os.path.relpath(os.path.abspath(video), os.path.dirname(os.path.abspath(out)))
+            ).as_posix(),
+            safe="/",
         )
     html = build_html(stage, specs, options, options["title"])
     os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
@@ -323,10 +332,10 @@ def run_cli(args) -> int:
             title=args.title,
         )
     except SpecError as exc:
-        print(f"error: invalid character spec: {exc}", file=sys.stderr)
+        print(f"error: {exc}", file=sys.stderr)
         return 2
     print(
-        f"wrote {out} ({info['bytes'] / 1e6:.1f} MB): {info['tracks']} people in {info['shots']} shot(s), {info['frames']} frames"
+        f"wrote {out} ({info['bytes'] / 1e6:.1f} MB): {info['tracks']} track segments in {info['shots']} shot(s), {info['frames']} frames"
     )
     print(f"open it in a browser; characters: {', '.join(info['characters'])}")
     return 0

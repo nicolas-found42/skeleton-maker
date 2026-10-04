@@ -259,11 +259,15 @@ def _resolve_sides(world: np.ndarray) -> tuple:
     The person's forward is where their toes point; with up = +Y their left is
     ``up x forward``. Returns ``(a_is_left, confident)``.
     """
-    fwd = np.nanmedian(
-        np.concatenate([world[:, 71] - world[:, 69], world[:, 76] - world[:, 74]]), axis=0
-    )
+    directions = np.concatenate([world[:, 71] - world[:, 69], world[:, 76] - world[:, 74]])
+    directions = directions[np.isfinite(directions).all(axis=1)]
+    lateral = world[:, 12] - world[:, 40]
+    lateral = lateral[np.isfinite(lateral).all(axis=1)]
+    if not len(directions) or not len(lateral):
+        return True, False
+    fwd = np.median(directions, axis=0)
     fwd[1] = 0.0
-    lat = np.nanmedian(world[:, 12] - world[:, 40], axis=0)
+    lat = np.median(lateral, axis=0)
     lat[1] = 0.0
     n = np.linalg.norm(fwd)
     if not np.isfinite(n) or n < 0.03 or not np.isfinite(lat).all():
@@ -356,7 +360,8 @@ def build_stage(frames: list, opts: Options | None = None, *, video: dict | None
         # floor: low percentile of sole height pooled over people in a +-1.5 s window
         samples = [[] for _ in range(n)]
         for _, s, w in world:
-            h = np.nanmin(w[:, list(FOOT_JOINTS), 1], axis=1)
+            soles = w[:, list(FOOT_JOINTS), 1]
+            h = np.min(np.where(np.isfinite(soles), soles, np.inf), axis=1)
             for t, v in enumerate(h):
                 if np.isfinite(v):
                     samples[s + t].append(v)
@@ -367,9 +372,14 @@ def build_stage(frames: list, opts: Options | None = None, *, video: dict | None
             if pool:
                 floor[t] = np.percentile(pool, 8)
         ok = np.isfinite(floor)
+        floor_source = "feet"
         if not ok.any():
-            continue
-        floor = np.interp(np.arange(n), np.flatnonzero(ok), floor[ok])
+            # Retain drawable core joints in camera coordinates; absent feet give
+            # no evidence for moving the ground plane to an inferred height.
+            floor = np.zeros(n)
+            floor_source = "camera_origin"
+        else:
+            floor = np.interp(np.arange(n), np.flatnonzero(ok), floor[ok])
         floor = _smooth_segment(floor[:, None], 8.0)[:, 0]
 
         all_pts = np.concatenate([w[:, 0] for _, _, w in world])
@@ -405,6 +415,7 @@ def build_stage(frames: list, opts: Options | None = None, *, video: dict | None
         shots_meta.append(
             {
                 "frame0": int(f0),
+                "floor_source": floor_source,
                 "n": int(n),
                 "center": [round(float(c), 3) for c in center],
                 "camera": {

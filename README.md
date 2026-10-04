@@ -196,7 +196,7 @@ What the stage does to the raw 3D joints:
 
 - splits the clip into **shots** at camera cuts (disjoint tracker ids, or the root jumping more than 1.2 m) so a cut does not drag a character across the scene;
 - fills gaps of up to 5 frames, drops frames without hips, chest and head, and smooths the motion;
-- levels the world from the people themselves: a spine-up estimate, then a ground-plane fit, then a per-frame floor under each person's feet;
+- levels the world from the people themselves: a spine-up estimate, then a ground-plane fit, then a per-frame floor under each person's feet; when feet are absent, retains core tracks at the camera origin and records `floor_source: camera_origin` without claiming an inferred floor;
 - works out which side is left from the direction the toes point, since the model's two sides are not always the person's left and right;
 - measures each person's leg length so one character spec fits adults and children.
 

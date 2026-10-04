@@ -137,7 +137,14 @@ class Rig {
       this.trails.push({ joint: j, N, line, base, hist: [] });
     }
   }
-  dispose() { for (const m of Object.values(this.mats)) m.dispose(); this.group.traverse((o) => { if (o.isLine) { o.geometry.dispose(); o.material.dispose(); } }); }
+  dispose() {
+    for (const m of Object.values(this.mats)) m.dispose();
+    const shared = new Set(Object.values(G));
+    this.group.traverse((o) => {
+      if (o.geometry && !shared.has(o.geometry)) o.geometry.dispose();
+      if (o.isLine) o.material.dispose();
+    });
+  }
 }
 
 // ---- pose evaluation -------------------------------------------------------
@@ -158,8 +165,12 @@ function loadFrame(stage, shot, track, k, out, outOk) {
 const F = { up: new THREE.Vector3(), left: new THREE.Vector3(), fwd: new THREE.Vector3(), hup: new THREE.Vector3(), hleft: new THREE.Vector3(), hfwd: new THREE.Vector3() };
 function computeFrames() {
   const up = F.up.copy(pos.Chest).sub(pos.Hips); if (up.lengthSq() < 1e-6) up.set(0, 1, 0); up.normalize();
-  const left = F.left.copy(pos.L_Shoulder).sub(pos.R_Shoulder);
-  left.addScaledVector(up, -left.dot(up)); if (left.lengthSq() < 1e-6) left.set(1, 0, 0); left.normalize();
+  const left = F.left;
+  if (ok.L_Shoulder && ok.R_Shoulder) left.copy(pos.L_Shoulder).sub(pos.R_Shoulder);
+  else left.set(1, 0, 0);
+  left.addScaledVector(up, -left.dot(up));
+  if (left.lengthSq() < 1e-6) { left.set(0, 0, 1); left.addScaledVector(up, -left.dot(up)); }
+  left.normalize();
   F.fwd.crossVectors(left, up).normalize(); // x=left, y=up -> z = x cross y
   // head: lateral from the head-side markers, up from head-top, falls back to the body
   const hu = F.hup.copy(pos.HeadTop).sub(pos.Head); if (!ok.HeadTop || hu.lengthSq() < 1e-6) hu.copy(up); hu.normalize();
@@ -173,7 +184,7 @@ const _t = new THREE.Vector3(), _col = new THREE.Color();
 function applyRig(rig, k, time) {
   const stage = rig.stage, shot = rig.shot, track = rig.track;
   loadFrame(stage, shot, track, k, pos, ok);
-  if (!(ok.Hips && ok.Chest && ok.Head && ok.L_Shoulder && ok.R_Shoulder)) { rig.group.visible = false; return; }
+  if (!(ok.Hips && ok.Chest && ok.Head)) { rig.group.visible = false; return; }
   rig.group.visible = true;
   computeFrames();
   const u = track.unit * (OPTIONS.scale ?? 1);
@@ -189,7 +200,7 @@ function applyRig(rig, k, time) {
       p.mesh.visible = true;
       const a = _a.copy(pos[p.from]), b = _b.copy(pos[p.to]);
       const dir = _c.copy(b).sub(a); const len = dir.length();
-      if (len < 1e-5) { p.mesh.visible = false; continue; }
+      if (len < 1e-5) { p.mesh.visible = false; if (p.caps) p.caps.forEach((c) => (c.visible = false)); continue; }
       dir.divideScalar(len);
       a.addScaledVector(dir, -p.ext[0] * u); b.addScaledVector(dir, p.ext[1] * u);
       const L = a.distanceTo(b);
@@ -225,6 +236,8 @@ function applyRig(rig, k, time) {
   }
   for (const ch of rig.chains) {
     const sp = ch.spec, a = pos[sp.joint];
+    if (!ok[sp.joint]) { ch.segs.forEach((sg) => { sg.mesh.visible = false; sg.init = false; }); continue; }
+    ch.segs.forEach((sg) => { sg.mesh.visible = true; });
     const dirw = _t.set(0, 0, 0).addScaledVector(F.left, sp.dir[0]).addScaledVector(F.up, sp.dir[1]).addScaledVector(F.fwd, sp.dir[2]).normalize();
     let prev = a.clone();
     ch.segs.forEach((sg, i) => {
@@ -483,8 +496,8 @@ async function boot() {
   document.addEventListener("keydown", (e) => {
     if (e.target.tagName === "SELECT" || e.target.tagName === "INPUT" && e.target.type !== "range") return;
     if (e.code === "Space") { e.preventDefault(); $("play").click(); }
-    if (e.code === "ArrowRight") { current.playing = false; setFrame(current.frame + (e.shiftKey ? 10 : 1)); render(); }
-    if (e.code === "ArrowLeft") { current.playing = false; setFrame(current.frame - (e.shiftKey ? 10 : 1)); render(); }
+    if (e.code === "ArrowRight") { e.preventDefault(); current.playing = false; setFrame(current.frame + (e.shiftKey ? 10 : 1)); render(); }
+    if (e.code === "ArrowLeft") { e.preventDefault(); current.playing = false; setFrame(current.frame - (e.shiftKey ? 10 : 1)); render(); }
   });
   setupPointer();
   buildStyleUI(); initVideo();
@@ -533,16 +546,26 @@ let recorder = null, chunks = [];
 function toggleRecord() {
   const btn = $("rec");
   if (recorder) { recorder.stop(); return; }
-  const stream = renderer.domElement.captureStream(stage.meta.fps);
+  const unavailable = () => { btn.textContent = "Recording unavailable"; btn.title = "Use a browser supporting canvas capture and WebM recording."; btn.disabled = true; };
+  if (typeof MediaRecorder === "undefined" || !renderer.domElement.captureStream) { unavailable(); return; }
   const mime = ["video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"].find((m) => MediaRecorder.isTypeSupported(m));
-  recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 8e6 }); chunks = [];
+  if (!mime) { unavailable(); return; }
+  let stream;
+  try {
+    stream = renderer.domElement.captureStream(stage.meta.fps);
+    recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 8e6 });
+  } catch (_) { if (stream) stream.getTracks().forEach((t) => t.stop()); recorder = null; unavailable(); return; }
+  chunks = [];
   recorder.ondataavailable = (e) => e.data.size && chunks.push(e.data);
   recorder.onstop = () => {
     const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(chunks, { type: "video/webm" })); a.download = "skeleton-stage.webm"; a.click();
     recorder = null; btn.textContent = "● Record"; btn.classList.remove("on");
+    stream.getTracks().forEach((t) => t.stop());
   };
+  recorder.onerror = () => { stream.getTracks().forEach((t) => t.stop()); recorder = null; btn.classList.remove("on"); unavailable(); };
   setFrame(0); current.playing = true; $("play").textContent = "❚❚";
-  recorder.start(); btn.textContent = "■ Stop & save"; btn.classList.add("on");
+  try { recorder.start(); btn.textContent = "■ Stop & save"; btn.classList.add("on"); }
+  catch (_) { stream.getTracks().forEach((t) => t.stop()); recorder = null; unavailable(); }
 }
 
 boot().catch((err) => { $("loading").textContent = "Could not load the stage: " + err.message; console.error(err); });

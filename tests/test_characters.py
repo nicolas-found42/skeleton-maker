@@ -180,3 +180,41 @@ def test_html_is_self_contained_and_escapes_titles():
     # the options JSON must not be able to close its own script element
     opts = page.split('id="options">')[1].split("</script>")[0]
     assert json.loads(opts.replace("<\\/", "</"))["title"] == "</script><b>x"
+
+
+def test_chain_requires_a_single_joint_name():
+    s = copy.deepcopy(builtin_specs()["critter"])
+    chain = next(p for p in s["parts"] if p["type"] == "chain")
+    chain["joint"] = ["Hips", "Chest"]
+    with pytest.raises(SpecError, match="single joint"):
+        validate_spec(s)
+
+
+def test_script_json_escapes_html_parser_control_sequences():
+    from skeleton_maker.stage import Stage
+
+    title = "<!--<script>"
+    page = character.build_html(Stage({"shots": []}, b""), builtin_specs(), {"title": title}, title)
+    options = page.split('id="options">')[1].split("</script>")[0]
+    assert "<" not in options
+    assert json.loads(options)["title"] == title
+
+
+def test_video_filename_is_encoded_as_a_url(tmp_path):
+    from tests.test_stage import clip
+
+    pose = tmp_path / "pose.json"
+    pose.write_text("\n".join(json.dumps({"frame_id": f, "detections": d}) for f, d in clip(20)))
+    out = tmp_path / "stage.html"
+    character.make_stage_html(str(pose), str(out), video=str(tmp_path / "a#b?c%d.mp4"))
+    options = out.read_text().split('id="options">')[1].split("</script>")[0]
+    assert json.loads(options)["video"] == "a%23b%3Fc%25d.mp4"
+
+
+def test_missing_spec_is_named_before_output(tmp_path):
+    out = tmp_path / "stage.html"
+    with pytest.raises(SpecError, match=r"cannot read spec.*missing\.json"):
+        character.make_stage_html(
+            "unused.json", str(out), extra_specs=[str(tmp_path / "missing.json")]
+        )
+    assert not out.exists()
