@@ -316,6 +316,8 @@ function frameCamera(si) {
   sun.shadow.camera.left = -R; sun.shadow.camera.right = R; sun.shadow.camera.top = R; sun.shadow.camera.bottom = -R;
   sun.shadow.camera.updateProjectionMatrix();
   floor.position.set(shot.center[0], -0.002, shot.center[2]); grid.position.set(shot.center[0], 0, shot.center[2]);
+  floor.visible = shot.floor_source !== "camera_origin";
+  grid.visible = floor.visible && $("gridbox").checked;
 }
 
 function orbitApply() {
@@ -489,7 +491,7 @@ async function boot() {
   $("speed").onchange = (e) => (current.speed = +e.target.value);
   $("view-original").onclick = enterOriginal; $("view-orbit").onclick = enterOrbit;
   $("shadows").onchange = (e) => { sun.castShadow = e.target.checked; };
-  $("gridbox").onchange = (e) => { grid.visible = e.target.checked; };
+  $("gridbox").onchange = (e) => { grid.visible = floor.visible && e.target.checked; };
   $("labelbox").onchange = (e) => { showLabels = e.target.checked; };
   $("shot-png").onclick = () => { renderer.render(scene, camera); const a = document.createElement("a"); a.href = renderer.domElement.toDataURL("image/png"); a.download = "skeleton-stage.png"; a.click(); };
   $("rec").onclick = toggleRecord;
