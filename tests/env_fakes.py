@@ -17,11 +17,22 @@ class FakeBackend:
 
     name = "fake"
 
-    def __init__(self, *, devices=("cpu",), geometry=False, mutate=None, raises=None):
+    def __init__(
+        self,
+        *,
+        devices=("cpu",),
+        geometry=False,
+        mutate=None,
+        raises=None,
+        identity=None,
+        frame_limit=None,
+    ):
         self.devices = list(devices)
         self.geometry = geometry
         self.mutate = mutate
         self.raises = raises
+        self.identity = identity
+        self.frame_limit = frame_limit
         self.requests = []
 
     def available_devices(self):
@@ -29,6 +40,12 @@ class FakeBackend:
 
     def supports_geometry(self):
         return self.geometry
+
+    def max_frames(self):
+        return self.frame_limit
+
+    def cache_identity(self):
+        return None if self.identity is None else dict(self.identity)
 
     def run(self, request, assets_dir):
         self.requests.append(copy.deepcopy(request))
