@@ -549,7 +549,7 @@ function toggleRecord() {
   const btn = $("rec");
   if (recorder) { recorder.stop(); return; }
   const unavailable = () => { btn.textContent = "Recording unavailable"; btn.title = "Use a browser supporting canvas capture and WebM recording."; btn.disabled = true; };
-  if (typeof MediaRecorder === "undefined" || !renderer.domElement.captureStream) { unavailable(); return; }
+  if (typeof MediaRecorder === "undefined" || typeof MediaRecorder.isTypeSupported !== "function" || !renderer.domElement.captureStream) { unavailable(); return; }
   const mime = ["video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"].find((m) => MediaRecorder.isTypeSupported(m));
   if (!mime) { unavailable(); return; }
   let stream;
@@ -558,16 +558,19 @@ function toggleRecord() {
     recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 8e6 });
   } catch (_) { if (stream) stream.getTracks().forEach((t) => t.stop()); recorder = null; unavailable(); return; }
   chunks = [];
+  let recordingFailed = false;
   recorder.ondataavailable = (e) => e.data.size && chunks.push(e.data);
   recorder.onstop = () => {
+    stream.getTracks().forEach((t) => t.stop());
+    recorder = null;
+    if (recordingFailed) return;
     const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(chunks, { type: "video/webm" })); a.download = "skeleton-stage.webm"; a.click();
     recorder = null; btn.textContent = "● Record"; btn.classList.remove("on");
-    stream.getTracks().forEach((t) => t.stop());
   };
-  recorder.onerror = () => { stream.getTracks().forEach((t) => t.stop()); recorder = null; btn.classList.remove("on"); unavailable(); };
+  recorder.onerror = () => { recordingFailed = true; stream.getTracks().forEach((t) => t.stop()); recorder = null; btn.classList.remove("on"); unavailable(); };
   setFrame(0); current.playing = true; $("play").textContent = "❚❚";
   try { recorder.start(); btn.textContent = "■ Stop & save"; btn.classList.add("on"); }
-  catch (_) { stream.getTracks().forEach((t) => t.stop()); recorder = null; unavailable(); }
+  catch (_) { recordingFailed = true; stream.getTracks().forEach((t) => t.stop()); recorder = null; unavailable(); }
 }
 
 boot().catch((err) => { $("loading").textContent = "Could not load the stage: " + err.message; console.error(err); });

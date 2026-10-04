@@ -80,6 +80,40 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || "playwright");
       "recast disposes owned taper geometries",
     );
     await p.evaluate(() => {
+      window.MediaRecorder = class {
+        static isTypeSupported() {
+          return true;
+        }
+        start() {
+          setTimeout(() => {
+            this.onerror();
+            this.ondataavailable({ data: new Blob(["partial"]) });
+            this.onstop();
+            window.failureSequenceFinished = true;
+          }, 0);
+        }
+      };
+      window.failedRecordingDownloads = 0;
+      HTMLAnchorElement.prototype.click = () => {
+        window.failedRecordingDownloads++;
+      };
+    });
+    await p.click("#rec");
+    await p.waitForFunction(() => window.failureSequenceFinished);
+    const failedRecording = await p.evaluate(() => ({
+      message: document.querySelector("#rec").textContent,
+      downloads: window.failedRecordingDownloads,
+    }));
+    check(
+      /unavailable/i.test(failedRecording.message),
+      "error followed by stop retains unavailable state",
+    );
+    check(
+      failedRecording.downloads === 0,
+      "failed recording does not save a partial file",
+    );
+    await p.evaluate(() => {
+      document.querySelector("#rec").disabled = false;
       window.MediaRecorder = undefined;
     });
     await p.click("#rec");
@@ -88,7 +122,17 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || "playwright");
     check(errors.length === 0, "no runtime errors");
     console.log(
       JSON.stringify(
-        { frame, collapse, missing, owned, disposed, record, errors, failures },
+        {
+          frame,
+          collapse,
+          missing,
+          owned,
+          disposed,
+          record,
+          failedRecording,
+          errors,
+          failures,
+        },
         null,
         2,
       ),
