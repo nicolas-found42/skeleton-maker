@@ -124,7 +124,7 @@ def render(
     fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
 
     tmp = output + ".raw.mp4"
-    writer = cv2.VideoWriter(tmp, cv2.VideoWriter_fourcc(*"mp4v"), fps, (width, height))
+    writer = cv2.VideoWriter(tmp, cv2.VideoWriter.fourcc(*"mp4v"), fps, (width, height))
     if not writer.isOpened():
         cap.release()
         raise SystemExit(f"error: cannot write {tmp}")

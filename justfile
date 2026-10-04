@@ -25,12 +25,16 @@ fmt:
 hooks:
     SKIP=no-commit-to-branch uvx prek run --all-files
 
+# Type check with ty (blocking in CI). The version is pinned in pyproject.toml.
+type:
+    uv run --locked ty check
+
 # Run the offline test suite. Extra pytest arguments are passed through.
 test *args:
     uv run --locked python -m pytest -q {{ args }}
 
-# Everything CI runs locally. Type checking and coverage are added by later issues.
-check: hooks lint test
+# Everything CI runs locally. Coverage is added by a later issue.
+check: hooks lint type test
 
 # Audit locked dependencies for known vulnerabilities (experimental in uv).
 audit:

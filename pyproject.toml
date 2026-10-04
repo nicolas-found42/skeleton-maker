@@ -51,6 +51,15 @@ skeleton_maker = ["proto/**/*.proto"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
+[tool.ty.environment]
+# Check against the oldest supported Python, so 3.10-incompatible code is caught.
+python-version = "3.10"
+
+[tool.ty.src]
+include = ["skeleton_maker", "tests"]
+# Generated gRPC stubs are rebuilt from proto/ on demand and gitignored.
+exclude = ["skeleton_maker/_gen"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py310"

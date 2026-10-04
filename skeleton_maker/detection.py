@@ -75,8 +75,10 @@ def scan(
         ok, frame = cap.read()
         if not ok:
             break
-        res = net.predict(
-            frame, imgsz=imgsz, conf=conf, classes=[PERSON_CLASS], device=device, verbose=False
+        res = list(  # noqa: RUF015  one result per frame; [0] keeps IndexError on an empty result
+            net.predict(
+                frame, imgsz=imgsz, conf=conf, classes=[PERSON_CLASS], device=device, verbose=False
+            )
         )[0]
         hits = list(_person_boxes(res))
         heights = sorted(max(0.0, y2 - y1) for (_x1, y1, _x2, y2), _c, _t in hits)

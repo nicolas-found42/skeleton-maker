@@ -92,12 +92,12 @@ The gates below are rolled out issue by issue. The Status column says what is li
 | Local hooks | `prek` (commit stage: `ruff`, `typos`, `rumdl`, file hygiene), also run in CI | live (#4) |
 | Reproducible installs | `uv.lock`, `uv sync --locked`, `just` recipes | live (#5) |
 | Vulnerability audit | `uv audit` (weekly workflow `audit.yml`, non-blocking, experimental) | live (#5) |
-| Types | `ty` (version pinned; bump in its own PR) | planned (#6) |
+| Types | `ty` (version pinned; bump in its own PR), blocking, run by `just type` | live (#6) |
 | Coverage | `pytest-cov` with a `fail_under` floor that only ratchets up | planned (#7) |
 
 CI is the backstop: hooks can be skipped locally, CI cannot. Run the same commands CI runs before pushing.
 
-CI jobs (`.github/workflows/ci.yml`): `lint` (ruff check and format), `prek` (the local hook config over all files), `zizmor` (workflow audit), `test` (Ubuntu on Python 3.10, 3.11, 3.12 and macOS on 3.12), and `ci-ok`, an aggregate that fails if any other job failed or was skipped. The `main` ruleset requires only `ci-ok`, so the matrix can change without editing the ruleset. Every action is pinned to a full commit SHA with a version comment; Dependabot proposes updates weekly with a 7-day cooldown.
+CI jobs (`.github/workflows/ci.yml`): `lint` (ruff check and format), `ty` (type check), `prek` (the local hook config over all files), `zizmor` (workflow audit), `test` (Ubuntu on Python 3.10, 3.11, 3.12 and macOS on 3.12), and `ci-ok`, an aggregate that fails if any other job failed or was skipped. The `main` ruleset requires only `ci-ok`, so the matrix can change without editing the ruleset. Every action is pinned to a full commit SHA with a version comment; Dependabot proposes updates weekly with a 7-day cooldown.
 
 ## Everyday commands
 
@@ -105,10 +105,10 @@ Install [just](https://github.com/casey/just) (`uv tool install rust-just` or `b
 
 ```bash
 just setup   # uv sync --locked, and install the git hooks
-just check   # hooks + lint + tests: what CI runs, locally
+just check   # hooks + lint + types + tests: what CI runs, locally
 ```
 
-Other recipes: `just lint`, `just fmt`, `just hooks`, `just test [pytest args]`, `just audit`. Types and coverage join `just check` in their own issues.
+Other recipes: `just lint`, `just fmt`, `just hooks`, `just type`, `just test [pytest args]`, `just audit`. Coverage joins `just check` in its own issue.
 
 Dependencies:
 
