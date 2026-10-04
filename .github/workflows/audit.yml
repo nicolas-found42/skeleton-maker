@@ -1,0 +1,33 @@
+name: audit
+
+# Weekly vulnerability audit of the locked dependencies. `uv audit` is experimental, so this is
+# its own workflow: it is not part of ci-ok and never blocks a merge. A red run means "look".
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: audit-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  uv-audit:
+    name: uv audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          # Pinned: `uv audit` is experimental and may change between uv releases.
+          version: "0.12.21"
+          enable-cache: false
+
+      - name: Audit locked dependencies
+        run: uv audit --locked --preview-features audit-command

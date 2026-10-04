@@ -12,10 +12,6 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  # Keep in sync with the ruff pin in pyproject.toml.
-  RUFF_VERSION: "0.16.10"
-
 jobs:
   lint:
     name: lint
@@ -29,11 +25,17 @@ jobs:
         with:
           enable-cache: false
 
+      - name: Lockfile is current
+        run: uv lock --check
+
+      - name: Install dev tools
+        run: uv sync --locked --only-group dev
+
       - name: Ruff check
-        run: uvx ruff@"$RUFF_VERSION" check .
+        run: uv run --no-sync ruff check .
 
       - name: Ruff format
-        run: uvx ruff@"$RUFF_VERSION" format --check .
+        run: uv run --no-sync ruff format --check .
 
   prek:
     name: prek
@@ -92,15 +94,13 @@ jobs:
         if: runner.os == 'macOS'
         run: brew install ffmpeg
 
-      - name: Install package
+      - name: Install dependencies from uv.lock
         env:
           PYTHON_VERSION: ${{ matrix.python }}
-        run: |
-          uv venv --python "$PYTHON_VERSION" .venv
-          uv pip install --python .venv/bin/python -e ".[dev]"
+        run: uv sync --locked --python "$PYTHON_VERSION"
 
       - name: Test
-        run: .venv/bin/python -m pytest -q
+        run: uv run --no-sync python -m pytest -q
 
   # One stable name for the branch ruleset to require. It fails if any job
   # above failed or was skipped, so the matrix can change without editing the ruleset.

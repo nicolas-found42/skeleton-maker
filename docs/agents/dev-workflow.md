@@ -88,16 +88,34 @@ The gates below are rolled out issue by issue. The Status column says what is li
 | Tests | `pytest` (offline) | live |
 | Lint and format | `ruff` (line length 100, rules `E,F,W,I,B,UP,SIM,RUF,C4,PT,S`; formatter owns line length) | live: tree is clean (#2), enforced by the `lint` CI job (#3) |
 | Workflow security | `zizmor`, SHA-pinned actions, least-privilege permissions | live (#3) |
-| Dependency updates | Dependabot with `cooldown` | `github-actions` live (#3); `uv` ecosystem planned (#5) |
+| Dependency updates | Dependabot with `cooldown` (`github-actions` and `uv`; `ty` and `ruff` are excluded from grouping and bumped deliberately) | live (#3, #5) |
 | Local hooks | `prek` (commit stage: `ruff`, `typos`, `rumdl`, file hygiene), also run in CI | live (#4) |
-| Reproducible installs | `uv.lock`, `uv sync --locked`, `just` recipes | planned (#5) |
-| Vulnerability audit | `uv audit` (weekly, non-blocking, experimental) | planned (#5) |
+| Reproducible installs | `uv.lock`, `uv sync --locked`, `just` recipes | live (#5) |
+| Vulnerability audit | `uv audit` (weekly workflow `audit.yml`, non-blocking, experimental) | live (#5) |
 | Types | `ty` (version pinned; bump in its own PR) | planned (#6) |
 | Coverage | `pytest-cov` with a `fail_under` floor that only ratchets up | planned (#7) |
 
 CI is the backstop: hooks can be skipped locally, CI cannot. Run the same commands CI runs before pushing.
 
 CI jobs (`.github/workflows/ci.yml`): `lint` (ruff check and format), `prek` (the local hook config over all files), `zizmor` (workflow audit), `test` (Ubuntu on Python 3.10, 3.11, 3.12 and macOS on 3.12), and `ci-ok`, an aggregate that fails if any other job failed or was skipped. The `main` ruleset requires only `ci-ok`, so the matrix can change without editing the ruleset. Every action is pinned to a full commit SHA with a version comment; Dependabot proposes updates weekly with a 7-day cooldown.
+
+## Everyday commands
+
+Install [just](https://github.com/casey/just) (`uv tool install rust-just` or `brew install just`), then from a fresh clone:
+
+```bash
+just setup   # uv sync --locked, and install the git hooks
+just check   # hooks + lint + tests: what CI runs, locally
+```
+
+Other recipes: `just lint`, `just fmt`, `just hooks`, `just test [pytest args]`, `just audit`. Types and coverage join `just check` in their own issues.
+
+Dependencies:
+
+- Dev tools live in `[dependency-groups] dev` in `pyproject.toml` (PEP 735); `uv sync` installs them by default. `ruff` and `ty` are pinned exactly; bump either deliberately, in its own PR. Keep the `ruff` pin in step with the `ruff-pre-commit` rev in `.pre-commit-config.yaml`.
+- `uv.lock` is committed. Any change to dependencies must include the updated lock (`uv lock`). CI runs `uv lock --check` and `uv sync --locked`, so a stale lock fails the build.
+- End users still install with `uv pip install -e ".[download]"`; there is no `dev` extra.
+- The weekly `audit` workflow runs `uv audit` (experimental, uv pinned to a version in the workflow) and is not part of `ci-ok`. A red run means someone should look; it never blocks a merge.
 
 ## Local hooks
 

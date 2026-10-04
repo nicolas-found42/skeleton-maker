@@ -14,7 +14,7 @@ The full workflow is in [`docs/agents/dev-workflow.md`](docs/agents/dev-workflow
 - Use the issue and PR templates in `.github/`. A PR needs evidence (commands run, before/after) and a one-line Merge Danger.
 - Tests must run offline and need no API key. A bug fix starts with a failing regression test.
 - Never commit secrets (`.env`, `NVIDIA_API_KEY`), model weights or media. They are gitignored.
-- Run the checks listed under "Quality gates" in the workflow doc before pushing. CI runs the same checks.
+- Run `just check` before pushing (set up once with `just setup`; see "Everyday commands" in the workflow doc). CI runs the same checks.
 
 If your agent supports skills for writing issues or PRs (for example `issue-authoring` or `pr`), use them as helpers. The templates in `.github/` are the requirement; the skills are optional helpers that produce the same structure.
 
