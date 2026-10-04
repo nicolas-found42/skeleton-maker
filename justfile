@@ -36,7 +36,7 @@ type:
 # Run the offline test suite with coverage; fails below the floor in pyproject.toml.
 # Extra pytest arguments are passed through.
 test *args:
-    uv run --locked python -m pytest -q --cov {{ args }}
+    uv run --locked python -m pytest -q --cov --cov-config=pyproject.toml {{ args }}
 
 # Everything CI runs locally.
 check: hooks lint type workflows test

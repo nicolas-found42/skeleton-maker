@@ -99,7 +99,7 @@ The gates below are rolled out issue by issue. The Status column says what is li
 
 CI is the backstop: hooks can be skipped locally, CI cannot. Run the same commands CI runs before pushing.
 
-CI jobs (`.github/workflows/ci.yml`): `lint` (ruff check and format), `ty` (type check), `prek` (the local hook config over all files), `zizmor` (workflow audit), `test` (Ubuntu on Python 3.10, 3.11, 3.12 and macOS on 3.12), and `ci-ok`, an aggregate that fails if any other job failed or was skipped. The `main` ruleset requires only `ci-ok`, so the matrix can change without editing the ruleset. Every action is pinned to a full commit SHA with a version comment; Dependabot proposes updates weekly with a 7-day cooldown.
+CI jobs (`.github/workflows/ci.yml`): `lint` (ruff check and format), `coverage-floor` (the floor may not decrease), `ty` (type check), `prek` (the local hook config over all files), `zizmor` (workflow audit), `test` (Ubuntu on Python 3.10, 3.11, 3.12 and macOS on 3.12), and `ci-ok`, an aggregate that fails if any other job failed or was skipped. The `main` ruleset requires only `ci-ok`, so the matrix can change without editing the ruleset. Every action is pinned to a full commit SHA with a version comment; Dependabot proposes updates weekly with a 7-day cooldown.
 
 ## Everyday commands
 
@@ -125,7 +125,7 @@ Dependencies:
 
 The floor is a ratchet:
 
-- It only goes up. Never lower it to make a PR pass; add the missing tests instead.
+- It only goes up. Never lower it to make a PR pass; add the missing tests instead. The `coverage-floor` CI job enforces this: it fails a PR whose `fail_under` is lower than on its base (`scripts/check_coverage_floor.py`).
 - A PR that adds tests should raise it to the new measured total, rounded down.
 - Measure twice, then use the lower number. Total coverage is slightly different on a fresh checkout (the tests build the gRPC stubs, which covers that code) than when `skeleton_maker/_gen` already exists. The first run is what CI sees; the second is what you see on every later local run. At the time the floor was set these were 36.3% and 34.2%, so the floor is 34.
 - Do not add or change tests only to inflate the number; coverage that does not assert behaviour is worse than none.
