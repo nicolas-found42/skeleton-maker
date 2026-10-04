@@ -132,7 +132,7 @@ The floor is a ratchet:
 
 ## Local hooks
 
-`prek` (a fast Rust drop-in for `pre-commit`) runs the config in `.pre-commit-config.yaml` at commit time: file hygiene (TOML and YAML validity, merge-conflict markers, large files over 500 KB, end-of-file, trailing whitespace), `ruff` check and format, `typos`, `rumdl` (Markdown) and a guard that refuses commits directly on `main`. `ty` and `pytest` are not hooks because they are slow; CI runs them.
+`prek` (a fast Rust drop-in for `pre-commit`) runs the config in `.pre-commit-config.yaml` at commit time: file hygiene (TOML and YAML validity, merge-conflict markers, large files over 500 KB, end-of-file, trailing whitespace), `ruff` check and format, `typos` (report-only; it never rewrites files), `rumdl` (Markdown) and a guard that refuses commits directly on `main`. `ty` and `pytest` are not hooks because they are slow; CI runs them.
 
 - Once per clone: `prek install` (install prek with `uv tool install prek`, or run it as `uvx prek`).
 - Any time: `prek run --all-files`.
