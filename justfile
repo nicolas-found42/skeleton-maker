@@ -29,11 +29,12 @@ hooks:
 type:
     uv run --locked ty check
 
-# Run the offline test suite. Extra pytest arguments are passed through.
+# Run the offline test suite with coverage; fails below the floor in pyproject.toml.
+# Extra pytest arguments are passed through.
 test *args:
-    uv run --locked python -m pytest -q {{ args }}
+    uv run --locked python -m pytest -q --cov {{ args }}
 
-# Everything CI runs locally. Coverage is added by a later issue.
+# Everything CI runs locally.
 check: hooks lint type test
 
 # Audit locked dependencies for known vulnerabilities (experimental in uv).

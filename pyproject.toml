@@ -60,6 +60,18 @@ include = ["skeleton_maker", "tests"]
 # Generated gRPC stubs are rebuilt from proto/ on demand and gitignored.
 exclude = ["skeleton_maker/_gen"]
 
+[tool.coverage.run]
+source = ["skeleton_maker"]
+# Keep the data file inside the already-ignored .pytest_cache.
+data_file = ".pytest_cache/.coverage"
+# Generated gRPC stubs are rebuilt from proto/ on demand and gitignored.
+omit = ["skeleton_maker/_gen/*"]
+
+[tool.coverage.report]
+# Ratchet: this floor may only ever go up. Raise it when a PR adds tests; never lower it.
+fail_under = 34
+show_missing = true
+
 [tool.ruff]
 line-length = 100
 target-version = "py310"
