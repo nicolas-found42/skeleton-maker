@@ -21,6 +21,10 @@ lint:
 fmt:
     uv run --locked ruff format .
 
+# Audit workflows with zizmor (offline mode; the zizmor CI job also runs the online SHA checks).
+workflows:
+    uvx zizmor@1.30.1 --no-progress .github/workflows/
+
 # Run every local hook over all files (what the `prek` CI job runs).
 hooks:
     SKIP=no-commit-to-branch uvx prek run --all-files
@@ -35,7 +39,7 @@ test *args:
     uv run --locked python -m pytest -q --cov {{ args }}
 
 # Everything CI runs locally.
-check: hooks lint type test
+check: hooks lint type workflows test
 
 # Audit locked dependencies for known vulnerabilities (experimental in uv).
 audit:
