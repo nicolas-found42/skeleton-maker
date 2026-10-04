@@ -1,0 +1,32 @@
+name: Feature or chore
+description: A new capability, an improvement, or maintenance work.
+title: "feat: "
+labels: [needs-triage]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Context
+      description: The problem or need, with facts you measured. Mark anything unknown as unknown.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: What to build or change.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Each item checkable by running a command or inspecting a file or page.
+      placeholder: "- [ ] ..."
+    validations:
+      required: true
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+      description: Related work that belongs in another issue. Add a "Blocked by #N" line if this depends on another issue.
