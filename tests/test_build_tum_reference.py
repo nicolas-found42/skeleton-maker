@@ -129,6 +129,15 @@ def test_the_outputs_satisfy_the_projects_own_loaders(tmp_path):
     assert result["annotation"]["provenance"]["kind"] == "published_dataset"
 
 
+def test_the_clip_can_be_cut_to_a_bounded_number_of_samples(tmp_path):
+    result = _build(tmp_path, max_samples=8)
+
+    assert result["report"]["frames"] == 71  # (8 - 1) * 10 + 1
+    assert result["annotation"]["shots"] == [{"first_frame": 0, "last_frame": 70}]
+    assert all(a["frame_id"] <= 70 for a in result["reference"]["anchors"])
+    assert result["report"]["parameters"]["max_samples"] == 8
+
+
 def test_anchor_frames_lie_on_the_sampling_grid(tmp_path):
     result = _build(tmp_path)
 
@@ -188,6 +197,15 @@ def test_frames_without_a_close_depth_image_are_never_anchors(tmp_path):
 
     assert result["report"]["frames_without_association"] == 30
     assert all(a["frame_id"] >= 30 for a in result["reference"]["anchors"])
+
+
+def test_a_sequence_whose_depth_and_pose_disagree_is_refused(tmp_path):
+    def yawing(i):
+        half = math.radians(1.0 * i) / 2  # a degree a frame, while the depth never changes
+        return 0.0, math.sin(half), math.cos(half)
+
+    with pytest.raises(tum.ReferenceError_, match="disagree"):
+        _build(tmp_path, sequence={"poses": yawing})
 
 
 def test_a_sequence_without_depth_cannot_yield_anchors(tmp_path):

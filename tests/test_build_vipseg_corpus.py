@@ -221,3 +221,72 @@ def test_mask_only_statistics_summarise_a_video(dataset):
     assert stats["object_classes"] == ["table_or_desk"]
     assert stats["person_frames"] == FRAMES
     assert stats["even_size"] is True
+
+
+def test_the_command_line_keeps_the_default_aliases_unless_a_file_replaces_them(
+    dataset, tmp_path, monkeypatch
+):
+    seen = []
+
+    def fake_build(*args, **kwargs):
+        seen.append(kwargs["aliases"])
+        return {"annotation": {"tags": []}}
+
+    monkeypatch.setattr(vip, "build", fake_build)
+    out = str(tmp_path / "out")
+    base = ["convert", str(dataset), "v1", out, "--name", "c", "--split", "heldout"]
+    custom = tmp_path / "aliases.json"
+    custom.write_text('{"mug": "bottle_or_cup"}')
+
+    assert vip.main(base) == 0
+    assert vip.main([*base, "--aliases", str(custom)]) == 0
+
+    assert seen == [None, {"mug": "bottle_or_cup"}]  # None makes build() use ALIASES
+
+
+def test_a_window_keeps_a_cut_clear_of_its_ends():
+    shots = [(0, 20), (21, 45)]  # a cut at frame 21 of 46, like one of the real clips
+
+    start = vip.choose_window(46, shots, 5, 16)
+
+    assert start == 8  # the cut sits at index 13: three frames before it are kept, three from it on
+    assert vip.choose_window(46, [(0, 45)], 5, 16) == 0
+    assert vip.choose_window(10, shots, 5, 16) == 0  # a short video is kept whole
+
+
+def test_a_window_keeps_a_cut_and_a_two_second_run_inside_one_shot(dataset, tmp_path, monkeypatch):
+    monkeypatch.setattr(vip, "CUT_MARGIN", 1)  # the 14-frame fixture has no room for a wider one
+    result = _build(dataset, tmp_path, shots_override=[(0, 11), (12, 13)], max_frames=12)
+
+    assert result["report"]["source_frames"][0] == FIRST + STRIDE  # the window starts at frame 1
+    assert len(result["annotation"]["frames"]) == 12
+    assert result["annotation"]["shots"] == [
+        {"first_frame": 0, "last_frame": 10},
+        {"first_frame": 11, "last_frame": 11},
+    ]
+    assert result["annotation"]["tracking_intervals"] == [{"first_frame": 0, "last_frame": 10}]
+    assert "edited_cut" in result["annotation"]["tags"]
+
+
+def test_a_window_starts_at_the_first_frame_when_the_video_has_no_cut(dataset, tmp_path):
+    result = _build(dataset, tmp_path, max_frames=12)
+
+    assert result["report"]["source_frames"][0] == FIRST
+    assert len(result["annotation"]["frames"]) == 12
+
+
+def test_no_window_that_holds_a_two_second_run_is_refused(dataset, tmp_path):
+    with pytest.raises(vip.ConversionError, match="two-second"):
+        _build(dataset, tmp_path, shots_override=[(0, 6), (7, 13)], max_frames=12)
+
+
+def test_frames_and_masks_are_scaled_together_to_the_target_width(dataset, tmp_path):
+    result = _build(dataset, tmp_path, max_width=10)
+
+    assert (result["annotation"]["width"], result["annotation"]["height"]) == (10, 8)
+    annotation = load_annotation(tmp_path / "out" / "clip.json")
+    frame = annotation["frames"][0]
+    floor = next(s for s in frame["surfaces"] if s["class"] == "floor")
+    assert load_mask(annotation, floor["mask"], (8, 10)).shape == (8, 10)
+    assert vip.target_size(20, 16, None) == (20, 16)
+    assert vip.target_size(1278, 720, 640) == (640, 360)

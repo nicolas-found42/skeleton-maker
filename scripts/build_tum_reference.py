@@ -119,6 +119,16 @@ class Sequence:
     def __len__(self) -> int:
         return len(self.rgb)
 
+    def truncate(self, frames: int) -> None:
+        """Keep only the first ``frames`` colour frames and the trajectory up to the last one."""
+        if frames >= len(self.rgb):
+            return
+        self.rgb = self.rgb[:frames]
+        self.depth_file = self.depth_file[:frames]
+        self.pose = self.pose[:frames]
+        self.association_s = self.association_s[:frames]
+        self.poses = self.poses[self.poses[:, 0] <= self.rgb[-1][0] + MAX_ASSOCIATION_S]
+
     def usable(self, frame: int) -> bool:
         return self.pose[frame] is not None
 
@@ -388,12 +398,23 @@ def build(
     encode: bool = True,
     clip_sha256: str | None = None,
     extra_tags: tuple[str, ...] = ("indoor",),
+    max_samples: int | None = None,
 ) -> dict:
     seq = Sequence(root, camera)
+    if max_samples is not None:
+        seq.truncate((max_samples - 1) * sample_step + 1)
     out_dir.mkdir(parents=True, exist_ok=True)
     anchors = build_anchors(seq, sample_step)
     dimension = build_dimension(anchors["check"])
     motion = camera_motion(seq.poses)
+    agreement = depth_pose_agreement(
+        seq, list(zip(anchors["fit_frames"], anchors["check_frames"], strict=True))
+    )
+    if agreement["median_abs_error_m"] > ANCHOR_UNCERTAINTY_M:
+        raise ReferenceError_(
+            f"depth and pose disagree by a median {agreement['median_abs_error_m']:.3f} m, above "
+            f"the {ANCHOR_UNCERTAINTY_M} m anchor uncertainty; this sequence cannot supply anchors"
+        )
     sha = write_clip(seq, out_dir / f"{name}.mp4", frame_rate) if encode else clip_sha256
     if sha is None:
         raise ReferenceError_("clip_sha256 is required when the clip is not encoded")
@@ -466,12 +487,10 @@ def build(
             "pose": max(b for _, b in seq.association_s),
         },
         "camera_motion": motion,
-        "depth_pose_agreement": depth_pose_agreement(
-            seq,
-            [(f, g) for f, g in zip(anchors["fit_frames"], anchors["check_frames"], strict=True)],
-        ),
+        "depth_pose_agreement": agreement,
         "parameters": {
             "sample_step": sample_step,
+            "max_samples": max_samples,
             "frame_rate": frame_rate,
             "max_association_s": MAX_ASSOCIATION_S,
             "depth_range_m": DEPTH_RANGE_M,
@@ -497,6 +516,12 @@ def main(argv=None) -> int:
     parser.add_argument("--name", required=True)
     parser.add_argument("--split", choices=("development", "heldout"), required=True)
     parser.add_argument("--sample-step", type=int, default=30)
+    parser.add_argument(
+        "--max-samples",
+        type=int,
+        help="keep only the first frames that give this many samples (the geometry worker "
+        "takes at most 16 sampled frames per shot)",
+    )
     args = parser.parse_args(argv)
     try:
         result = build(
@@ -505,6 +530,7 @@ def main(argv=None) -> int:
             name=args.name,
             split=args.split,
             sample_step=args.sample_step,
+            max_samples=args.max_samples,
         )
     except ReferenceError_ as exc:
         print(f"error: {exc}", file=sys.stderr)

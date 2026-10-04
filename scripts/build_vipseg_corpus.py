@@ -89,6 +89,8 @@ POLICY = {
 }
 FRAME_RATE = 5
 INTERVAL_S = 2.0
+#: A cut kept in a window needs this many frames on each side, or the shot detector misses it.
+CUT_MARGIN = 3
 #: A frame is "well labelled" for a class-negative claim when under this share is unlabelled.
 MAX_VOID_FRACTION = 0.05
 MIN_NEGATIVE_FRACTION = 0.0
@@ -222,19 +224,59 @@ def _write_png(path: Path, region: np.ndarray) -> str:
     return path.name
 
 
-def encode_clip(images: list[Path], destination: Path, frame_rate: int) -> str:
+def encode_clip(
+    images: list[Path], destination: Path, frame_rate: int, size: tuple[int, int] | None = None
+) -> str:
     if shutil.which("ffmpeg") is None:
         raise ConversionError("ffmpeg is required to encode the clip")
     with tempfile.TemporaryDirectory() as tmp:
         for index, image in enumerate(images):
             (Path(tmp) / f"{index:06d}.jpg").symlink_to(image.resolve())
+        scale = ["-vf", f"scale={size[0]}:{size[1]}:flags=area"] if size else []
         command = [
             "ffmpeg", "-loglevel", "error", "-y", "-framerate", str(frame_rate),
-            "-i", str(Path(tmp) / "%06d.jpg"), "-c:v", "libx264", "-crf", "12",
+            "-i", str(Path(tmp) / "%06d.jpg"), *scale, "-c:v", "libx264", "-crf", "12",
             "-pix_fmt", "yuv420p", "-threads", "1", "-movflags", "+faststart", str(destination),
         ]  # fmt: skip
         subprocess.run(command, check=True)  # noqa: S603 - fixed argument list, no shell
     return hashlib.sha256(destination.read_bytes()).hexdigest()
+
+
+def target_size(width: int, height: int, max_width: int | None) -> tuple[int, int]:
+    """The encoded size: unchanged, or ``max_width`` wide with an even height of the same aspect."""
+    if max_width is None or width <= max_width:
+        return width, height
+    return max_width, 2 * round(max_width * height / width / 2)
+
+
+def choose_window(
+    total: int, shots: list[tuple[int, int]], rate: int, max_frames: int | None
+) -> int:
+    """First annotated frame of the window kept: a cut stays inside it when the video has one."""
+    if max_frames is None or total <= max_frames:
+        return 0
+    cuts = [first for first, _ in shots[1:]]
+    need = int(INTERVAL_S * rate)
+
+    def holds_interval(start: int) -> bool:
+        end = start + max_frames - 1
+        return any(
+            min(last, end) - max(first, start) >= need for first, last in shots if first <= end
+        )
+
+    starts = range(total - max_frames + 1)
+    if cuts:
+        for start in starts:
+            inside = any(
+                start + CUT_MARGIN <= cut <= start + max_frames - 1 - (CUT_MARGIN - 1)
+                for cut in cuts
+            )
+            if inside and holds_interval(start):
+                return start
+    for start in starts:
+        if holds_interval(start):
+            return start
+    raise ConversionError(f"no {max_frames}-frame window holds a two-second run inside one shot")
 
 
 def background_shift(images: list[Path]) -> float:
@@ -359,6 +401,8 @@ def build(
     clip_sha256: str | None = None,
     shots_override: list[tuple[int, int]] | None = None,
     shift_override: float | None = None,
+    max_width: int | None = None,
+    max_frames: int | None = None,
 ) -> dict:
     cats = load_categories(root)
     images = sorted((root / "imgs" / video).glob("*.jpg"))
@@ -373,22 +417,46 @@ def build(
     if height % 2 or width % 2:
         raise ConversionError(f"{video}: odd frame size {width}x{height} cannot be encoded")
     out_dir.mkdir(parents=True, exist_ok=True)
+    out_width, out_height = target_size(width, height, max_width)
     if encode:
-        sha = encode_clip(images, out_dir / f"{name}.mp4", frame_rate)
         from skeleton_maker import shots as shot_module
 
-        cuts = [c["frame_id"] for c in shot_module.detect_cuts(
-            str(out_dir / f"{name}.mp4"), len(images), range(len(images)))]  # fmt: skip
-        starts = [0, *cuts]
-        shots = [(a, b - 1) for a, b in zip(starts, [*cuts, len(images)], strict=True)]
+        def detect(path: Path, count: int) -> list[tuple[int, int]]:
+            cuts = [c["frame_id"] for c in shot_module.detect_cuts(str(path), count, range(count))]
+            starts = [0, *cuts]
+            return [(a, b - 1) for a, b in zip(starts, [*cuts, count], strict=True)]
+
+        if max_frames is not None and len(images) > max_frames:
+            with tempfile.TemporaryDirectory() as probe:
+                encode_clip(images, Path(probe) / "full.mp4", frame_rate, (320, 180))
+                full_shots = detect(Path(probe) / "full.mp4", len(images))
+            first_kept = choose_window(len(images), full_shots, frame_rate, max_frames)
+            images = images[first_kept : first_kept + max_frames]
+            masks = masks[first_kept : first_kept + max_frames]
+            numbers = numbers[first_kept : first_kept + max_frames]
+        sha = encode_clip(images, out_dir / f"{name}.mp4", frame_rate, (out_width, out_height))
+        shots = detect(out_dir / f"{name}.mp4", len(images))
     else:
         if clip_sha256 is None or shots_override is None:
             raise ConversionError("clip_sha256 and shots_override are required without encoding")
         sha, shots = clip_sha256, shots_override
+        first_kept = choose_window(len(images), shots, frame_rate, max_frames)
+        if max_frames is not None:
+            end = first_kept + max_frames - 1
+            shots = [
+                (max(a, first_kept) - first_kept, min(b, end) - first_kept)
+                for a, b in shots
+                if a <= end and b >= first_kept
+            ]
+            images = images[first_kept : first_kept + max_frames]
+            masks = masks[first_kept : first_kept + max_frames]
+            numbers = numbers[first_kept : first_kept + max_frames]
     labelled = []
     records = []
     for index, path in enumerate(masks):
         mask = cv2.imread(str(path), cv2.IMREAD_UNCHANGED)
+        if (out_width, out_height) != (width, height):
+            mask = cv2.resize(mask, (out_width, out_height), interpolation=cv2.INTER_NEAREST)
         labels = frame_labels(mask, cats)
         category, _ = decode(mask)
         labels["sky"] = float((category == 28).mean())
@@ -427,7 +495,7 @@ def build(
             record["ignore"] = [{"mask": f"masks/{ignore_name}"}]
         records.append(record)
     shift = shift_override if shift_override is not None else background_shift(images)
-    tags, measured = measure_tags(labelled, width, shift, len(shots))
+    tags, measured = measure_tags(labelled, out_width, shift, len(shots))
     interval = longest_interval(list(range(len(images))), shots, frame_rate)
     annotation = {
         "schema": ANNOTATION_SCHEMA,
@@ -435,8 +503,8 @@ def build(
         "source_sha256": sha,
         "split": split,
         "scope": "semantic",
-        "width": width,
-        "height": height,
+        "width": out_width,
+        "height": out_height,
         "frame_rate": [frame_rate, 1],
         "tags": tags,
         "aliases": ALIASES if aliases is None else aliases,
@@ -457,6 +525,8 @@ def build(
     report = {
         "video": video,
         "source_frames": numbers,
+        "source_size": [width, height],
+        "encoded_size": [out_width, out_height],
         "clip_sha256": sha,
         "frame_rate": frame_rate,
         "policy": POLICY,
@@ -482,6 +552,8 @@ def main(argv=None) -> int:
     convert.add_argument("--name", required=True)
     convert.add_argument("--split", choices=("development", "heldout"), required=True)
     convert.add_argument("--aliases", type=Path, help="JSON object: model label -> VIPSeg class")
+    convert.add_argument("--max-width", type=int, help="scale frames and masks down to this width")
+    convert.add_argument("--max-frames", type=int, help="keep at most this many annotated frames")
     args = parser.parse_args(argv)
     try:
         if args.command == "stats":
@@ -495,7 +567,7 @@ def main(argv=None) -> int:
             args.out.write_text(json.dumps(rows, indent=1) + "\n")
             print(f"{len(rows)} videos")
         else:
-            aliases = json.loads(args.aliases.read_text()) if args.aliases else {}
+            aliases = json.loads(args.aliases.read_text()) if args.aliases else None
             result = build(
                 args.root,
                 args.video,
@@ -503,6 +575,8 @@ def main(argv=None) -> int:
                 name=args.name,
                 split=args.split,
                 aliases=aliases,
+                max_width=args.max_width,
+                max_frames=args.max_frames,
             )
             print(f"{args.name}: tags {result['annotation']['tags']}")
     except ConversionError as exc:
