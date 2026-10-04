@@ -1,0 +1,7 @@
+[files]
+# YouTube video IDs are random strings that the spell checker mistakes for words.
+extend-exclude = ["docs/research/environment-corpus-manifest.json"]
+
+[default]
+# An 11-character video ID in a Markdown code span.
+extend-ignore-re = ["`[A-Za-z0-9_-]{11}`"]
