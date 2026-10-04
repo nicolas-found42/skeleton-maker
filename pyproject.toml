@@ -84,8 +84,9 @@ extend-exclude = [
 ]
 
 [tool.typos.default]
-# An 11-character video ID in a Markdown code span.
-extend-ignore-re = ["`[A-Za-z0-9_-]{11}`"]
+# An 11-character video ID in a Markdown code span, and a VIPSeg video name (number, underscore,
+# then the 11-character YouTube ID).
+extend-ignore-re = ["`[A-Za-z0-9_-]{11}`", "\\b[0-9]+_[A-Za-z0-9_-]{11}\\b"]
 
 [tool.typos.default.extend-words]
 # A real three.js material property (MeshStandardMaterial.metalness), used in the character specs.
