@@ -71,7 +71,7 @@ omit = ["skeleton_maker/_gen/*"]
 
 [tool.coverage.report]
 # Ratchet: this floor may only ever go up. Raise it when a PR adds tests; never lower it.
-fail_under = 71
+fail_under = 73
 show_missing = true
 
 [tool.typos.files]

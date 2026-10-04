@@ -8,8 +8,6 @@ does not report which focal the model actually ran with, so ``--focus auto``
 reuses the focal length the NIM echoed on the stream when there is one.
 """
 
-import json
-
 import cv2
 import numpy as np
 
@@ -21,20 +19,8 @@ from .constants import (
     NOVA77_SKELETON_LINKS,
     TRACK_COLORS,
 )
+from .poses import load_poses
 from .utils import run_ffmpeg
-
-
-def load_poses(path: str) -> dict:
-    """Read the JSON Lines pose file into ``{frame_id: [detection, ...]}``."""
-    poses = {}
-    with open(path) as fh:
-        for line in fh:
-            line = line.strip()
-            if not line:
-                continue
-            record = json.loads(line)
-            poses[record["frame_id"]] = record["detections"]
-    return poses
 
 
 def _pixel(point) -> tuple:

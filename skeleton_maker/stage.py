@@ -30,6 +30,7 @@ from itertools import pairwise
 import numpy as np
 
 from .nova77 import CANON, CANON_INDEX, canon_sources
+from .poses import load_poses
 
 NUM_JOINTS = 77
 MISSING = -32768  # int16 sentinel for "no data" in the packed blob
@@ -88,14 +89,7 @@ class Stage:
 
 def load_frames(path: str) -> list:
     """``[(frame_id, [detection, ...]), ...]`` sorted by frame id."""
-    frames = {}
-    with open(path) as fh:
-        for line in fh:
-            line = line.strip()
-            if line:
-                rec = json.loads(line)
-                frames[rec["frame_id"]] = rec["detections"]
-    return sorted(frames.items())
+    return sorted(load_poses(path).items())
 
 
 def _root(det) -> np.ndarray:

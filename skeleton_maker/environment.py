@@ -27,7 +27,7 @@ from fractions import Fraction
 from pathlib import Path
 from typing import NoReturn, Protocol
 
-from . import __version__, artifacts, envmanifest
+from . import __version__, artifacts, envmanifest, poses
 from .envmanifest import SCHEMA_VERSION, ManifestError
 from .utils import die, probe_video
 
@@ -77,6 +77,10 @@ def add_cli(subparsers) -> None:
     )
     p.add_argument("video", help="the conformed clip (the one whose frame ids any poses describe)")
     p.add_argument("--out", help="manifest to write (default: <video>.environment.json)")
+    p.add_argument(
+        "--poses",
+        help="existing pose output (JSON Lines) for this exact clip; reused, no NIM call",
+    )
     p.add_argument(
         "--backend",
         default=DEFAULT_BACKEND,
@@ -137,6 +141,29 @@ def _probe(video: str) -> dict:
     if info["frame_count"] <= 0:
         _fail_options(f"{video} contains no frames")
     return info
+
+
+def _load_pose_join(path: str, info: dict, clip_sha256: str) -> dict:
+    """Read and validate existing poses for this clip; the NIM is never involved."""
+    if not os.path.isfile(path):
+        _fail_options(f"no such file: {path}")
+    try:
+        records = poses.read_records(path)
+        association = poses.check_against_clip(
+            records,
+            frame_count=info["frame_count"],
+            width=info["width"],
+            height=info["height"],
+            clip_sha256=clip_sha256,
+        )
+    except poses.PoseFileError as exc:
+        _fail_options(str(exc))
+    return {
+        "path": str(Path(path).resolve()),
+        "association": association,
+        "frame_count": len(records),
+        **poses.summarize(records),
+    }
 
 
 def _resolve_backend(name: str) -> Backend:
@@ -245,6 +272,8 @@ def run_cli(args) -> int:
         )
     if out.resolve() == Path(video).resolve():
         _fail_options("--out would overwrite the source video")
+    source_sha256 = artifacts.sha256_file(video)
+    pose_block = _load_pose_join(args.poses, info, source_sha256) if args.poses else None
     backend = _resolve_backend(args.backend)
     device = _resolve_device(backend, args.device)
     if args.geometry == "required" and not backend.supports_geometry():
@@ -262,7 +291,7 @@ def run_cli(args) -> int:
         )
     source = {
         "path": os.path.abspath(video),
-        "sha256": artifacts.sha256_file(video),
+        "sha256": source_sha256,
         "width": info["width"],
         "height": info["height"],
         "frame_rate": [info["rate"].numerator, info["rate"].denominator],
@@ -277,6 +306,7 @@ def run_cli(args) -> int:
         "device": device,
         "geometry": args.geometry,
         "requested_labels": [],
+        "poses": pose_block,
         "source": {k: source[k] for k in ("width", "height", "frame_rate", "frame_count")},
         "frames": frames,
     }
@@ -313,6 +343,7 @@ def run_cli(args) -> int:
                 {"frame_id": i, "time": clock.time_pair(i), "time_s": float(clock.time(i))}
                 for i in frame_ids
             ],
+            "poses": pose_block,
             "frame_range": [frame_ids[0], frame_ids[-1]],
             "shots": resp["shots"],
             "entities": resp["entities"],
