@@ -127,7 +127,7 @@ The floor is a ratchet:
 
 - It only goes up. Never lower it to make a PR pass; add the missing tests instead. The `coverage-floor` CI job enforces this: it fails a PR whose `fail_under` is lower than on its base (`scripts/check_coverage_floor.py`).
 - A PR that adds tests should raise it to the new measured total, rounded down.
-- Measure twice, then use the lower number. Total coverage is slightly different on a fresh checkout (the tests build the gRPC stubs, which covers that code) than when `skeleton_maker/_gen` already exists. The first run is what CI sees; the second is what you see on every later local run. At the time the floor was set these were 36.3% and 34.2%, so the floor is 34.
+- Measure twice, then use the lower number. Total coverage is slightly different on a fresh checkout (the tests build the gRPC stubs, which covers that code) than when `skeleton_maker/_gen` already exists. The first run is what CI sees; the second is what you see on every later local run. When the floor was last set these were 51.6% and 50.2%, so the floor is 50.
 - Do not add or change tests only to inflate the number; coverage that does not assert behaviour is worse than none.
 
 ## Local hooks
