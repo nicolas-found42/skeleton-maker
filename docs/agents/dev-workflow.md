@@ -89,7 +89,7 @@ The gates below are rolled out issue by issue. The Status column says what is li
 | Lint and format | `ruff` (line length 100, rules `E,F,W,I,B,UP,SIM,RUF,C4,PT,S`; formatter owns line length) | live: tree is clean (#2), enforced by the `lint` CI job (#3) |
 | Workflow security | `zizmor`, SHA-pinned actions, least-privilege permissions | live (#3) |
 | Dependency updates | Dependabot with `cooldown` | `github-actions` live (#3); `uv` ecosystem planned (#5) |
-| Local hooks | `prek` (commit stage: `ruff`, `typos`, `rumdl`, file hygiene) | planned (#4) |
+| Local hooks | `prek` (commit stage: `ruff`, `typos`, `rumdl`, file hygiene), also run in CI | live (#4) |
 | Reproducible installs | `uv.lock`, `uv sync --locked`, `just` recipes | planned (#5) |
 | Vulnerability audit | `uv audit` (weekly, non-blocking, experimental) | planned (#5) |
 | Types | `ty` (version pinned; bump in its own PR) | planned (#6) |
@@ -97,7 +97,18 @@ The gates below are rolled out issue by issue. The Status column says what is li
 
 CI is the backstop: hooks can be skipped locally, CI cannot. Run the same commands CI runs before pushing.
 
-CI jobs (`.github/workflows/ci.yml`): `lint` (ruff check and format), `zizmor` (workflow audit), `test` (Ubuntu on Python 3.10, 3.11, 3.12 and macOS on 3.12), and `ci-ok`, an aggregate that fails if any other job failed or was skipped. The `main` ruleset requires only `ci-ok`, so the matrix can change without editing the ruleset. Every action is pinned to a full commit SHA with a version comment; Dependabot proposes updates weekly with a 7-day cooldown.
+CI jobs (`.github/workflows/ci.yml`): `lint` (ruff check and format), `prek` (the local hook config over all files), `zizmor` (workflow audit), `test` (Ubuntu on Python 3.10, 3.11, 3.12 and macOS on 3.12), and `ci-ok`, an aggregate that fails if any other job failed or was skipped. The `main` ruleset requires only `ci-ok`, so the matrix can change without editing the ruleset. Every action is pinned to a full commit SHA with a version comment; Dependabot proposes updates weekly with a 7-day cooldown.
+
+## Local hooks
+
+`prek` (a fast Rust drop-in for `pre-commit`) runs the config in `.pre-commit-config.yaml` at commit time: file hygiene (TOML and YAML validity, merge-conflict markers, large files over 500 KB, end-of-file, trailing whitespace), `ruff` check and format, `typos`, `rumdl` (Markdown) and a guard that refuses commits directly on `main`. `ty` and `pytest` are not hooks because they are slow; CI runs them.
+
+- Once per clone: `prek install` (install prek with `uv tool install prek`, or run it as `uvx prek`).
+- Any time: `prek run --all-files`.
+- Do not bypass hooks with `--no-verify`. If a hook is wrong, fix the hook config in its own PR.
+- Update hook versions with `prek autoupdate --freeze --cooldown-days 7`, then check the diff: `--freeze` stores commit SHAs, and a repo with several tag families (such as `typos`) can resolve to the wrong tag, so confirm each `# frozen:` comment is the release you intend.
+- `rumdl` is configured in `.rumdl.toml` (the 80-column rule is off because prose is one paragraph per line).
+- For local `git blame`, run `git config blame.ignoreRevsFile .git-blame-ignore-revs` once; GitHub reads that file automatically.
 
 ## Later, with triggers
 

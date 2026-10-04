@@ -35,6 +35,22 @@ jobs:
       - name: Ruff format
         run: uvx ruff@"$RUFF_VERSION" format --check .
 
+  prek:
+    name: prek
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Same config as local hooks (.pre-commit-config.yaml). The branch guard is
+      # for local commits; it does not apply to a CI checkout.
+      - uses: j178/prek-action@4e14d07f9231acabce116ccfca13b13dd9755ece # v3.0.0
+        env:
+          SKIP: no-commit-to-branch
+        with:
+          extra-args: --all-files
+
   zizmor:
     name: zizmor
     runs-on: ubuntu-latest
@@ -91,7 +107,7 @@ jobs:
   ci-ok:
     name: ci-ok
     if: always()
-    needs: [lint, zizmor, test]
+    needs: [lint, prek, zizmor, test]
     runs-on: ubuntu-latest
     steps:
       - name: Check upstream jobs

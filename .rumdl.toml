@@ -1,0 +1,8 @@
+[global]
+# Prose is written one paragraph per line, so the default 80-column limit is noise.
+disable = ["MD013"]
+
+[per-file-ignores]
+# One-line import of AGENTS.md, and a PR template whose headings start at level 2 by design.
+"CLAUDE.md" = ["MD041"]
+".github/pull_request_template.md" = ["MD041"]
