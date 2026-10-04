@@ -30,7 +30,8 @@ Schema `skeleton-maker.environment/1`. Loaders must reject any other version.
 | `source` | `path`, `sha256`, `width`, `height`, `frame_rate` as `[numerator, denominator]`, `frame_count`, `frame_count_source` (`container` or `duration_estimate`), `duration_s` |
 | `processed_frames` | scanned source frames: `frame_id`, `time` as an exact `[numerator, denominator]` of seconds, `time_s` (display float) |
 | `frame_range` | `[first, last]` scanned frame id |
-| `shots` | `id`, `first_frame`, `last_frame`; entity ids are scoped by shot |
+| `shots` | visual shots tiling the whole clip: `id`, `first_frame`, `last_frame`, `first_time`, `last_time` (exact `[numerator, denominator]` seconds). Entity ids are scoped by shot and an entity is only observed inside its shot |
+| `shot_detection` | `method`, `version`, `parameters`, `pose_stage_shots` (`null` without `--poses`), `boundaries` (`frame_id`, `time`, `distance`, `isolation`, `agreement`) and `pose_only` gaps, see [Shots](#shots) |
 | `entities` | `id`, `shot`, `family` (`surface`, `object`, `vehicle`, `person`), `motion` (`static`, `dynamic`, `unknown`), `labels.native` and `labels.normalized`, and for `person` entities `skeleton_id` |
 | `observations` | `id`, `entity`, `frame_id` (a processed frame), `bbox` `[x0, y0, x1, y1]` in full decoded source pixels, `mask` (`null` or `{"asset": "<relative path>"}`), `score`, `score_meaning`, `visibility` (`visible`, `occluded`, `absent`, `uncertain`) |
 | `poses` | `null` without `--poses`; otherwise `path`, `association`, `frame_count`, `skeletons` (`id`, `first_frame`, `last_frame`, `frames`) and `person_free_ranges` as `[first, last]` frame ids |
@@ -45,13 +46,21 @@ Loading (`skeleton_maker.envmanifest.load_manifest`) checks the schema version, 
 
 A `registered_relative` geometry result has no solved metric scale and must not be overlaid on the NIM's meter-valued skeletons.
 
+## Shots
+
+The command finds visual shot boundaries from the video itself, so a cut during a person-free stretch is found too, and passes the shots to the backend; the backend does not decide them. Identities are shot-local: an entity names one shot and is only observed inside it, and nothing claims an identity across a cut.
+
+A cut is a frame whose colour histogram is at least 0.40 away (0 to 1) from the previous frame's and at least 3 times farther than every frame pair within 2 frames of it. Requiring that the change stands out from its neighbours is what keeps fades, gradual lighting changes and whip pans (many small changes, or motion without a colour change) from counting as cuts. Detection is coarse to fine: the sampled frames find intervals where the scene changed, and only those are decoded frame by frame to place the cut on its exact first frame. A cut within 3 frames of the previous cut or the end of the clip is treated as a flash and dropped. The parameters are recorded in `shot_detection.parameters`. Dissolves longer than a few frames are, by design, not cuts.
+
+With `--poses`, the shots the character stage derives from the poses are recorded in `pose_stage_shots`. That stage only sees frames with people, so its boundary lies somewhere in the gap between a shot's last frame and the next shot's first. Each visual cut gets an `agreement`: `agrees` (inside such a gap), `visual_only` (inside a pose shot: the tracker kept its ids across the cut), `outside_pose_coverage` (before the first or after the last pose frame; the poses say nothing there) or `no_poses`. A gap with no visual cut in it is listed under `pose_only`. The visual shots are never rewritten to match the poses.
+
 ## Reusing poses
 
 ```bash
 skeleton-maker environment demo.skeleton/clip.mp4 --poses demo.skeleton/pose.json --out demo.skeleton/environment.json
 ```
 
-The poses must describe the same clip. The NIM emits one record per decoded frame, so the file must have exactly one record per clip frame with ids `0..N-1`, no duplicates, and every `bbox` (`[x, y, width, height]` in pose files, unlike the manifest's `[x0, y0, x1, y1]`) within the frame plus a 25% margin. Anything else exits 2 naming the mismatch and writes nothing.
+The poses must describe the same clip. The NIM emits one record per decoded frame, so the file must have exactly one record per clip frame with ids `0..N-1`, no duplicates, and every detection carries an integer `tracking_id` and a finite `root_pose.translation`, and every `bbox` (`[x, y, width, height]` in pose files, unlike the manifest's `[x0, y0, x1, y1]`) within the frame plus a 25% margin. Anything else exits 2 naming the mismatch and writes nothing.
 
 Pose files carry no fingerprint, so a matching length is not proof of identity: the manifest records `association: "user-supplied"`. If every record carries a `source_sha256` it is compared with the clip's hash: a match records `hash-verified`, a mismatch is rejected.
 
@@ -71,11 +80,12 @@ Request (`poses` is `null`, or the manifest's `poses` block):
   "geometry": "auto",
   "requested_labels": [],
   "poses": null,
+  "shots": [{"id": "shot-0", "first_frame": 0, "last_frame": 19}, {"id": "shot-1", "first_frame": 20, "last_frame": 39}],
   "source": {"width": 64, "height": 48, "frame_rate": [30, 1], "frame_count": 30},
   "frames": [{"frame_id": 0, "time": [0, 1]}, {"frame_id": 15, "time": [1, 2]}]
 }
 ```
 
-Response: `contract`, `status` (`complete` or `partial` with a `reason`), `backend` (`name`, `version`, `checkpoints`), `device`, `shots`, `entities`, `observations` and `geometry`, shaped as in the manifest. Masks are files the backend writes under `assets_dir`, referenced by relative path. A response that fails validation, a raised exception or a keyboard interrupt is a failed run; nothing is written.
+Response: `contract`, `status` (`complete` or `partial` with a `reason`), `backend` (`name`, `version`, `checkpoints`), `device`, `entities`, `observations` and `geometry`, shaped as in the manifest. Masks are files the backend writes under `assets_dir`, referenced by relative path. A response that fails validation, a raised exception or a keyboard interrupt is a failed run; nothing is written.
 
 Tests substitute the inference boundary only, by registering a deterministic fake in `BACKENDS` (see `tests/env_fakes.py`). There is no flag or environment variable that selects a fake.

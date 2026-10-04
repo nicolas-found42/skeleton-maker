@@ -36,6 +36,15 @@ class FakeBackend:
             raise self.raises
         frames = request["frames"]
         first, last = frames[0]["frame_id"], frames[-1]["frame_id"]
+
+        def shot_of(frame_id):
+            return next(
+                sh["id"]
+                for sh in request["shots"]
+                if sh["first_frame"] <= frame_id <= sh["last_frame"]
+            )
+
+        floor_shot, chair_shot = shot_of(first), shot_of(last)
         (assets_dir / "masks").mkdir(parents=True, exist_ok=True)
         (assets_dir / "masks" / "floor-0.png").write_bytes(b"\x89PNG fake floor mask")
         response = {
@@ -47,18 +56,17 @@ class FakeBackend:
                 "checkpoints": [{"name": "fake-weights", "sha256": "0" * 64, "license": "none"}],
             },
             "device": request["device"],
-            "shots": [{"id": "shot-0", "first_frame": first, "last_frame": last}],
             "entities": [
                 {
-                    "id": "shot-0/floor-1",
-                    "shot": "shot-0",
+                    "id": f"{floor_shot}/floor-1",
+                    "shot": floor_shot,
                     "family": "surface",
                     "labels": {"native": "floor", "normalized": "floor"},
                     "motion": "static",
                 },
                 {
-                    "id": "shot-0/chair-1",
-                    "shot": "shot-0",
+                    "id": f"{chair_shot}/chair-1",
+                    "shot": chair_shot,
                     "family": "object",
                     "labels": {"native": "chair", "normalized": "chair"},
                     "motion": "unknown",
@@ -67,7 +75,7 @@ class FakeBackend:
             "observations": [
                 {
                     "id": "obs-0",
-                    "entity": "shot-0/floor-1",
+                    "entity": f"{floor_shot}/floor-1",
                     "frame_id": first,
                     "bbox": [0.0, 20.0, 63.0, 47.0],
                     "mask": {"asset": "masks/floor-0.png"},
@@ -77,7 +85,7 @@ class FakeBackend:
                 },
                 {
                     "id": "obs-1",
-                    "entity": "shot-0/chair-1",
+                    "entity": f"{chair_shot}/chair-1",
                     "frame_id": last,
                     "bbox": [10.0, 10.0, 20.0, 30.0],
                     "mask": None,

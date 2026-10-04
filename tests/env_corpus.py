@@ -180,7 +180,15 @@ class Clip:
             ],
             "poses": None,
             "frame_range": [min(self.scanned), last] if self.scanned else [0, 0],
-            "shots": [{"id": "shot-0", "first_frame": min(self.scanned), "last_frame": last}],
+            "shots": [
+                {
+                    "id": "shot-0",
+                    "first_frame": 0,
+                    "last_frame": last,
+                    "first_time": [0, 1],
+                    "last_time": [last, self.fps],
+                }
+            ],
             "entities": list(self.entities.values()),
             "observations": self.observations,
             "geometry": {"mode": "auto", **self.pred_geometry},

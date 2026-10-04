@@ -84,6 +84,16 @@ def _check_bounds(records: list[dict], width: int, height: int) -> None:
                 raise PoseFileError(
                     f"frame {record['frame_id']}: a detection has no integer tracking_id"
                 )
+            root = det.get("root_pose")
+            translation = root.get("translation") if isinstance(root, dict) else None
+            if (
+                not isinstance(translation, list)
+                or len(translation) != 3
+                or not all(isinstance(v, (int, float)) and math.isfinite(v) for v in translation)
+            ):
+                raise PoseFileError(
+                    f"frame {record['frame_id']}: detection {tid} has no root_pose.translation"
+                )
             box = det.get("bbox")
             if (
                 not isinstance(box, list)

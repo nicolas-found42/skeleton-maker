@@ -9,6 +9,7 @@ number and every asset path is checked before a renderer sees the result.
 import json
 import math
 import os
+from fractions import Fraction
 from pathlib import Path
 
 from .artifacts import sha256_file
@@ -89,6 +90,7 @@ def validate_content(doc: dict, *, width: int, height: int, frame_ids) -> None:
     frame_set = set(frame_ids)
     shots = _need(doc, "shots", list, "manifest")
     shot_ids = set()
+    shot_range = {}
     for i, shot in enumerate(shots):
         where = f"shots[{i}]"
         sid = _need(shot, "id", str, where)
@@ -99,8 +101,10 @@ def validate_content(doc: dict, *, width: int, height: int, frame_ids) -> None:
         last = _need(shot, "last_frame", int, where)
         if first > last:
             raise ManifestError(f"{where}: first_frame {first} is after last_frame {last}")
+        shot_range[sid] = (first, last)
 
     entity_ids = set()
+    entity_shot: dict = {}
     person_keys: set = set()
     for i, ent in enumerate(_need(doc, "entities", list, "manifest")):
         where = f"entities[{i}]"
@@ -110,6 +114,7 @@ def validate_content(doc: dict, *, width: int, height: int, frame_ids) -> None:
         entity_ids.add(eid)
         if _need(ent, "shot", str, where) not in shot_ids:
             raise ManifestError(f"{where}: shot {ent['shot']!r} is not declared in shots")
+        entity_shot[eid] = ent["shot"]
         _one_of(_need(ent, "family", str, where), FAMILIES, f"{where}.family")
         _one_of(_need(ent, "motion", str, where), MOTIONS, f"{where}.motion")
         skeleton = ent.get("skeleton_id")
@@ -139,6 +144,12 @@ def validate_content(doc: dict, *, width: int, height: int, frame_ids) -> None:
             raise ManifestError(f"{where}: entity {obs['entity']!r} does not exist")
         if _need(obs, "frame_id", int, where) not in frame_set:
             raise ManifestError(f"{where}: frame_id {obs['frame_id']} was not a processed frame")
+        first, last = shot_range[entity_shot[obs["entity"]]]
+        if not first <= obs["frame_id"] <= last:
+            raise ManifestError(
+                f"{where}: frame {obs['frame_id']} is outside its shot "
+                f"{entity_shot[obs['entity']]!r} ({first}-{last}); identities are shot-local"
+            )
         bbox = _need(obs, "bbox", list, where)
         if len(bbox) != 4 or any(
             isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v)
@@ -200,8 +211,48 @@ def validate_manifest(doc: dict) -> None:
     config = _need(doc, "config", dict, "manifest")
     _need(config, "requested_labels", list, "config")
     _need(doc, "assets", list, "manifest")
+    _validate_shot_times(doc, tuple(rate), source["frame_count"])
     validate_content(doc, width=width, height=height, frame_ids=ids)
     _validate_poses(doc)
+
+
+def _validate_shot_times(doc: dict, rate: tuple, frame_count: int) -> None:
+    """Shots tile the clip exactly and their times are the frame ids at the clip's rate."""
+    clock_rate = Fraction(*rate)
+    expected = 0
+    for i, shot in enumerate(doc["shots"]):
+        if shot["first_frame"] != expected:
+            raise ManifestError(
+                f"shots[{i}]: must start at frame {expected} (shots are contiguous), "
+                f"found {shot['first_frame']}"
+            )
+        expected = shot["last_frame"] + 1
+    if expected != frame_count:
+        raise ManifestError(
+            f"shots must cover the clip: they end at frame {expected - 1} but the clip has "
+            f"{frame_count} frames"
+        )
+    for i, shot in enumerate(doc["shots"]):
+        for key, frame in (("first_time", shot["first_frame"]), ("last_time", shot["last_frame"])):
+            pair = _need(shot, key, list, f"shots[{i}]")
+            if (
+                len(pair) != 2
+                or not all(isinstance(v, int) and not isinstance(v, bool) for v in pair)
+                or pair[1] <= 0
+                or Fraction(pair[0], pair[1]) != Fraction(frame) / clock_rate
+            ):
+                raise ManifestError(
+                    f"shots[{i}].{key}: {pair} does not follow the frame rate "
+                    f"{rate[0]}/{rate[1]} for frame {frame}"
+                )
+    detection = doc.get("shot_detection")
+    if detection is not None:
+        starts = [s["first_frame"] for s in doc["shots"][1:]]
+        found = [b.get("frame_id") for b in _need(detection, "boundaries", list, "shot_detection")]
+        if starts != found:
+            raise ManifestError(
+                f"shot_detection.boundaries {found} do not match the shot starts {starts}"
+            )
 
 
 POSE_ASSOCIATIONS = ("user-supplied", "hash-verified")

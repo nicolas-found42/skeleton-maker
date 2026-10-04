@@ -10,14 +10,17 @@ Backend contract (``skeleton-maker.environment-backend/1``)
 ``Backend.run(request, assets_dir)`` receives a JSON-able request::
 
     {"contract": ..., "video": "/abs/clip.mp4", "device": "cpu", "geometry": "off|auto|required",
-     "requested_labels": [], "source": {width, height, frame_rate, frame_count},
+     "requested_labels": [], "poses": null, "source": {width, height, frame_rate, frame_count},
+     "shots": [{"id": "shot-0", "first_frame": 0, "last_frame": 19}, ...],
      "frames": [{"frame_id": 0, "time": [0, 1]}, ...]}
 
 and returns a response ``dict`` carrying ``contract``, ``status`` (``complete`` or
 ``partial`` plus a ``reason``), ``backend`` (``name``, ``version``, ``checkpoints``),
-``device``, ``shots``, ``entities``, ``observations`` and ``geometry``. Observation masks are
-files the backend wrote under ``assets_dir`` and names by relative path. Coordinates are
-full decoded source-frame pixels. Anything that does not validate is a failed run.
+``device``, ``entities``, ``observations`` and ``geometry``. Observation masks are
+files the backend wrote under ``assets_dir`` and names by relative path. Shots are decided by
+the command from the video (see :mod:`skeleton_maker.shots`); entities name one of the
+request's shot ids and are only observed inside it. Coordinates are full decoded
+source-frame pixels. Anything that does not validate is a failed run.
 """
 
 import os
@@ -27,7 +30,7 @@ from fractions import Fraction
 from pathlib import Path
 from typing import NoReturn, Protocol
 
-from . import __version__, artifacts, envmanifest, poses
+from . import __version__, artifacts, envmanifest, poses, shots
 from .envmanifest import SCHEMA_VERSION, ManifestError
 from .utils import die, probe_video
 
@@ -143,7 +146,7 @@ def _probe(video: str) -> dict:
     return info
 
 
-def _load_pose_join(path: str, info: dict, clip_sha256: str) -> dict:
+def _load_pose_join(path: str, info: dict, clip_sha256: str) -> tuple[dict, list[dict]]:
     """Read and validate existing poses for this clip; the NIM is never involved."""
     if not os.path.isfile(path):
         _fail_options(f"no such file: {path}")
@@ -158,12 +161,13 @@ def _load_pose_join(path: str, info: dict, clip_sha256: str) -> dict:
         )
     except poses.PoseFileError as exc:
         _fail_options(str(exc))
-    return {
+    block = {
         "path": str(Path(path).resolve()),
         "association": association,
         "frame_count": len(records),
         **poses.summarize(records),
     }
+    return block, records
 
 
 def _resolve_backend(name: str) -> Backend:
@@ -215,7 +219,7 @@ def _validate_response(resp, request: dict, mode: str) -> None:
     src = request["source"]
     try:
         envmanifest.validate_content(
-            resp,
+            {**resp, "shots": request["shots"]},
             width=src["width"],
             height=src["height"],
             frame_ids=[f["frame_id"] for f in request["frames"]],
@@ -273,7 +277,9 @@ def run_cli(args) -> int:
     if out.resolve() == Path(video).resolve():
         _fail_options("--out would overwrite the source video")
     source_sha256 = artifacts.sha256_file(video)
-    pose_block = _load_pose_join(args.poses, info, source_sha256) if args.poses else None
+    pose_block, pose_records = (
+        _load_pose_join(args.poses, info, source_sha256) if args.poses else (None, None)
+    )
     backend = _resolve_backend(args.backend)
     device = _resolve_device(backend, args.device)
     if args.geometry == "required" and not backend.supports_geometry():
@@ -300,6 +306,17 @@ def run_cli(args) -> int:
         "duration_s": info["duration"],
     }
     frames = [{"frame_id": i, "time": clock.time_pair(i)} for i in frame_ids]
+    print("environment: detecting shot boundaries")
+    try:
+        cuts = shots.detect_cuts(video, info["frame_count"], frame_ids)
+    except shots.ShotDetectionError as exc:
+        die(f"environment scan failed: {exc}")
+    shot_list = shots.build_shots(cuts, info["frame_count"], clock)
+    detection = shots.reconcile(
+        cuts,
+        shots.pose_stage_shots(pose_records, float(info["rate"])) if pose_records else None,
+        clock,
+    )
     request = {
         "contract": BACKEND_CONTRACT,
         "video": source["path"],
@@ -308,6 +325,7 @@ def run_cli(args) -> int:
         "requested_labels": [],
         "poses": pose_block,
         "source": {k: source[k] for k in ("width", "height", "frame_rate", "frame_count")},
+        "shots": [{k: sh[k] for k in ("id", "first_frame", "last_frame")} for sh in shot_list],
         "frames": frames,
     }
     print(
@@ -345,7 +363,8 @@ def run_cli(args) -> int:
             ],
             "poses": pose_block,
             "frame_range": [frame_ids[0], frame_ids[-1]],
-            "shots": resp["shots"],
+            "shots": shot_list,
+            "shot_detection": detection,
             "entities": resp["entities"],
             "observations": resp["observations"],
             "geometry": _geometry_block(args.geometry, backend, resp),

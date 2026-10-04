@@ -19,7 +19,11 @@ pytestmark = pytest.mark.skipif(
 
 
 def _det(tid, bbox=(5.0, 5.0, 30.0, 40.0)):
-    return {"tracking_id": tid, "bbox": list(bbox)}
+    return {
+        "tracking_id": tid,
+        "bbox": list(bbox),
+        "root_pose": {"translation": [0.0, 0.0, 3.0], "rotation": [0.0, 0.0, 0.0, 1.0]},
+    }
 
 
 def _write_poses(path, frame_ids, people=None, extra=None):
@@ -168,6 +172,18 @@ def test_detection_without_a_tracking_id_is_a_pointed_error(clip, fake, tmp_path
 
     assert "frame 0: a detection has no integer tracking_id" in err
     assert not (tmp_path / "environment.json").exists()
+
+
+def test_detection_without_a_root_pose_is_a_pointed_error(clip, fake, tmp_path, capsys):
+    pose_file = tmp_path / "pose.json"
+    detection = {"tracking_id": 1, "bbox": [5, 5, 20, 20]}
+    with pose_file.open("w") as fh:
+        for f in range(30):
+            fh.write(json.dumps({"frame_id": f, "detections": [detection]}) + "\n")
+
+    err = _run_failing(_argv(clip, tmp_path, "--poses", str(pose_file)), capsys)
+
+    assert "detection 1 has no root_pose.translation" in err
 
 
 def test_missing_pose_file_is_rejected(clip, fake, tmp_path, capsys):
