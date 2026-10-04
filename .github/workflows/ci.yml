@@ -143,12 +143,52 @@ jobs:
       - name: Test
         run: uv run --no-sync python -m pytest -q --cov --cov-config=pyproject.toml
 
+      - name: Offline research preflight
+        run: uv run --no-sync python -m experiments.pose_classification.research_battery preflight
+
+  browser-test:
+    name: browser-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+          package-manager-cache: false
+
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: false
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install Python dependencies
+        run: uv sync --locked --python 3.12
+
+      - name: Install just for the environment doctor
+        run: |
+          uv tool install rust-just
+          echo "$(uv tool dir --bin)" >> "$GITHUB_PATH"
+
+      - name: Install pinned Playwright and Chromium
+        run: npm ci && npm exec -- playwright install --with-deps --only-shell chromium
+
+      - name: Diagnose browser environment
+        run: uv run --no-sync python -m scripts.check_dev_environment
+
+      - name: Run browser regressions
+        run: uv run --no-sync python -m scripts.run_browser_checks
+
   # One stable name for the branch ruleset to require. It fails if any job
   # above failed or was skipped, so the matrix can change without editing the ruleset.
   ci-ok:
     name: ci-ok
     if: always()
-    needs: [lint, coverage-floor, prek, ty, zizmor, test]
+    needs: [lint, coverage-floor, prek, ty, zizmor, test, browser-test]
     runs-on: ubuntu-latest
     steps:
       - name: Check upstream jobs

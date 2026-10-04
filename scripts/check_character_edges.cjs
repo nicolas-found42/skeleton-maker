@@ -1,14 +1,27 @@
 // SPDX-License-Identifier: MIT
-// Run against scripts.make_character_fixture HTML with an installed Playwright module.
+// Run through scripts.run_browser_checks so the project-owned Chromium is used.
 const assert = require("node:assert/strict");
-const { chromium } = require(process.env.PLAYWRIGHT_MODULE || "playwright");
+const { chromium } = require("playwright");
 (async () => {
   const b = await chromium.launch({ headless: true });
   try {
     const p = await b.newPage({ viewport: { width: 640, height: 360 } });
+    const origin = new URL(process.argv[2]).origin;
+    const externalRequests = [];
+    await p.route("**/*", (route) => {
+      const url = new URL(route.request().url());
+      if (url.origin === origin) return route.continue();
+      externalRequests.push(url.href);
+      return route.abort();
+    });
     const errors = [];
     p.on("pageerror", (e) => errors.push(e.message));
     await p.goto(process.argv[2]);
+    await p.evaluate(() => fetch("https://example.invalid/offline-probe").catch(() => null));
+    check(
+      externalRequests.splice(0)[0] === "https://example.invalid/offline-probe",
+      "off-origin requests are intercepted before leaving the browser",
+    );
     await p.waitForFunction(() => window.__stage);
     await p.evaluate(() => {
       window.__stage.current.playing = false;
@@ -120,6 +133,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || "playwright");
     const record = await p.locator("#rec").textContent();
     check(/unavailable/i.test(record), "missing recorder shows unavailable");
     check(errors.length === 0, "no runtime errors");
+    check(externalRequests.length === 0, "no external requests");
     console.log(
       JSON.stringify(
         {

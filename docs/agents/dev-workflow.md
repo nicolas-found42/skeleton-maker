@@ -88,6 +88,8 @@ The gates below are rolled out issue by issue. The Status column says what is li
 | Gate | Tool | Status |
 | --- | --- | --- |
 | Tests | `pytest` (offline) | live |
+| Browser regressions | pinned Playwright Chromium, synthetic WebM and loopback server | live: `just browser-check`, required `browser-test` CI job |
+| Research preflight | deterministic pose features and TypeSafe schema checks | live: `just research-check`, CI Python matrix |
 | Lint and format | `ruff` (line length 100, rules `E,F,W,I,B,UP,SIM,RUF,C4,PT,S`; formatter owns line length) | live: tree is clean (#2), enforced by the `lint` CI job (#3) |
 | Workflow security | `zizmor`, SHA-pinned actions, least-privilege permissions | live (#3) |
 | Dependency updates | Dependabot with `cooldown` (`github-actions` and `uv`; `ty` and `ruff` are excluded from grouping and bumped deliberately; semver-major bumps are ignored and upgraded by hand, as are minor bumps of `grpcio`, `grpcio-tools`, `protobuf` and `opencv-python-headless`) | live (#3, #5) |
@@ -99,22 +101,26 @@ The gates below are rolled out issue by issue. The Status column says what is li
 
 CI is the backstop: hooks can be skipped locally, CI cannot. Run the same commands CI runs before pushing.
 
-CI jobs (`.github/workflows/ci.yml`): `lint` (ruff check and format), `coverage-floor` (the floor may not decrease), `ty` (type check), `prek` (the local hook config over all files), `zizmor` (workflow audit), `test` (Ubuntu on Python 3.10, 3.11, 3.12 and macOS on 3.12), and `ci-ok`, an aggregate that fails if any other job failed or was skipped. The `main` ruleset requires only `ci-ok`, so the matrix can change without editing the ruleset. Every action is pinned to a full commit SHA with a version comment; Dependabot proposes updates weekly with a 7-day cooldown.
+CI jobs (`.github/workflows/ci.yml`): `lint` (ruff check and format), `coverage-floor` (the floor may not decrease), `ty` (type check), `prek` (the local hook config over all files), `zizmor` (workflow audit), `browser-test` (offline generated-fixture regressions), `test` (offline research preflight plus Ubuntu on Python 3.10, 3.11, 3.12 and macOS on 3.12), and `ci-ok`, an aggregate that fails if any other job failed or was skipped. The `main` ruleset requires only `ci-ok`, so the matrix can change without editing the ruleset. Every action is pinned to a full commit SHA with a version comment; Dependabot proposes updates weekly with a 7-day cooldown.
 
 ## Everyday commands
 
 Install [just](https://github.com/casey/just) (`uv tool install rust-just` or `brew install just`), then from a fresh clone:
 
 ```bash
-just setup   # uv sync --locked, and install the git hooks
-just check   # hooks + lint + types + workflow audit + tests with coverage: what CI runs, locally
+just setup   # Python environment, hooks, npm dependency, and matching Chromium
+just doctor  # diagnose required tools and the installed Playwright Chromium
+just check   # hooks + lint + types + workflow audit + tests + offline browser regressions
 ```
 
-Other recipes: `just lint`, `just fmt`, `just hooks`, `just type`, `just workflows`, `just test [pytest args]`, `just audit`.
+Other recipes: `just browser-install`, `just browser-check`, `just research-check`, `just lint`, `just fmt`, `just hooks`, `just type`, `just workflows`, `just test [pytest args]`, `just audit`.
+
+On a fresh workstation, `uv run --locked python -m scripts.setup_dev` bootstraps `just`, project dependencies, hooks, npm dependencies, and the matching Playwright Chromium. `just check` includes the offline browser regressions. For browser setup, diagnostics, and fixture details, see [`browser-testing.md`](browser-testing.md). Classification artifact verification and replay are documented in [`pose-classification-tooling.md`](../research/pose-classification-tooling.md); Jev evidence capture is documented in [`jev-evidence.md`](jev-evidence.md).
 
 Dependencies:
 
 - Dev tools live in `[dependency-groups] dev` in `pyproject.toml` (PEP 735); `uv sync` installs them by default. `ruff` and `ty` are pinned exactly; bump either deliberately, in its own PR. Keep the `ruff` pin in step with the `ruff-pre-commit` rev in `.pre-commit-config.yaml`.
+- Hypothesis exercises research schema and Jev envelope parsing with generated inputs. `tomli` supplies the TOML reader on Python 3.10; development scripts are included in the blocking type check.
 - `uv.lock` is committed. Any change to dependencies must include the updated lock (`uv lock`). CI runs `uv lock --check` and `uv sync --locked`, so a stale lock fails the build.
 - End users still install with `uv pip install -e ".[download]"`; there is no `dev` extra.
 - The weekly `audit` workflow runs `uv audit` (experimental, uv pinned to a version in the workflow) and is not part of `ci-ok`. A red run means someone should look; it never blocks a merge.
@@ -148,7 +154,6 @@ Tools evaluated and deliberately not adopted yet. Adopt one when its trigger fir
 | Tool | Adopt when |
 | --- | --- |
 | `git-cliff` | the first tagged release or package publish |
-| `hypothesis` as a dependency | new parsing or serialization code is added |
 | `inline-snapshot` | three or more tests assert on large literals or JSON |
 | `diff-cover` | the global coverage floor reaches 60% |
 | `mutmut` | core modules (`stage`, `verify`, `bbox`) have stable APIs and coverage is 70% or more |

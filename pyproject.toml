@@ -32,9 +32,11 @@ download = ["yt-dlp>=2024.1.1"]
 # .pre-commit-config.yaml (the ruff-pre-commit rev).
 [dependency-groups]
 dev = [
+    "hypothesis>=6.168.3",
     "pytest>=7",
     "pytest-cov>=5",
     "ruff==0.16.10",
+    "tomli>=2.4.1",
     "ty==0.0.84",
 ]
 
@@ -56,7 +58,7 @@ testpaths = ["tests"]
 python-version = "3.10"
 
 [tool.ty.src]
-include = ["skeleton_maker", "tests"]
+include = ["skeleton_maker", "tests", "scripts", "experiments"]
 # Generated gRPC stubs are rebuilt from proto/ on demand and gitignored.
 exclude = ["skeleton_maker/_gen"]
 

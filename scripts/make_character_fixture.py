@@ -12,7 +12,10 @@ from tests.test_stage import body
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("out", type=Path)
+    parser.add_argument("--video-name", default="video.mp4")
     args = parser.parse_args()
+    if Path(args.video_name).name != args.video_name:
+        parser.error("--video-name must be a filename in the fixture directory")
     frames = []
     for frame in [*range(30), *range(90, 120)]:
         detections = []
@@ -24,7 +27,7 @@ def main():
     page = build_html(
         build_stage(frames),
         builtin_specs(),
-        {"video": "video.mp4", "character": "robot", "title": "browser regression"},
+        {"video": args.video_name, "character": "robot", "title": "browser regression"},
         "browser regression",
     )
     args.out.parent.mkdir(parents=True, exist_ok=True)

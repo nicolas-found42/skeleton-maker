@@ -29,22 +29,25 @@ Some observations from this dataset:
 - The character-catalog fixture selected all eight co-authored targets, including two `none` cases. Examples and targets were authored together, so this is a smoke check, not an independent request benchmark or evidence of character-spec quality. The retained fixture does not accept free-text user input or search motion windows.
 - The host agent inspected fourteen timestamp strips with three crops each, covering all seven clips. Selected tracks included a seated camera operator and observers with occluded legs. Clip genre therefore cannot label a selected person's activity. This informal inspection is neither human nor blinded ground truth; three stills cannot establish repeated-motion counts.
 
-## Local artifacts and reproduction
+## Artifacts and reproduction
 
-The classification-only research harness remains local at `work/agent-run/experiments/research_battery.py`. Its commands accept a fixed experiment catalog; the retrieval command, query definitions and query-scoring function were removed. Source clips and responses are not committed. With the repository environment and `OPENROUTER_API_KEY` available for fresh live judgments, the bounded commands are:
+The classification-only research tools are tracked in `experiments/pose_classification/`. Their [run guide](pose-classification-tooling.md) describes the input schemas, offline preflight, frozen processing and retained-data checks. The [artifact manifest](../../experiments/pose_classification/manifest.toml) pins the processing version and SHA256 hashes of the retained datasets and response files. Real clips and raw responses remain in ignored local storage, with their location supplied explicitly.
+
+A fresh checkout can run the synthetic preflight without a key or real clips. With the retained artifacts at their original local location, these commands verify the study, summarize provider usage and export the exact validated request/response pairs offline:
 
 ```sh
-uv run --locked python work/agent-run/experiments/research_battery.py --help
-uv run --locked python work/agent-run/experiments/research_battery.py action-quality
-uv run --locked python work/agent-run/experiments/research_battery.py generic-quality
-uv run --locked python work/agent-run/experiments/research_battery.py corruption --pairs 12
-uv run --locked python work/agent-run/experiments/research_battery.py spec-assist
-uv run --locked python work/agent-run/experiments/research_battery.py summary action_quality
+uv run --locked python -m experiments.pose_classification.research_battery preflight
+uv run --locked python -m experiments.pose_classification.research_battery verify \
+  --artifacts work/agent-run/experiments
+uv run --locked python -m experiments.pose_classification.research_battery summary \
+  --artifacts work/agent-run/experiments
+uv run --locked python -m experiments.pose_classification.research_battery replay \
+  --artifacts work/agent-run/experiments --output work/classification-replay.jsonl
 ```
 
-Successful exact requests are cached in their JSONL result files; matching replay does not submit new requests. Do not print or save the API key. This local harness and its inputs are not a distributed benchmark or a production command.
+Replay reconstructs each original model/state/question bundle, verifies its hashes and typed response, and makes no provider calls. The separate `classify` command accepts a numeric pose-window schema and a fixed catalog; its new requests are distinct from the historical study. It accepts no motion-search query or ranking operation. Its cache reuses exact validated requests; fresh requests require the existing `OPENROUTER_API_KEY`. The key is never part of artifacts or model state.
 
-Frozen windows are in `windows.json`, local source joins in `source.json`, and source hashes in `provenance_v1.json`. The generating processing version was commit `939d1f0`; local `frozen_stage.py`, `frozen_nova77.py` and `frozen_processing.py` preserve that version. Later production fixes are not silently folded into the study. Do not rebuild windows with different processing and combine them with these response files. Archived invalid v0 pilots are excluded from v1 counts.
+Frozen windows are in `windows.json`, local source joins in `source.json`, and the original source hashes in `provenance_v1.json`. The generating processing version was commit `939d1f0`; tracked frozen stage and joint-mapping sources preserve that version, and `frozen-stage` can run it offline against local pose JSON Lines. Later production fixes are not silently folded into the study. Do not rebuild windows with different processing and combine them with these response files. Archived invalid v0 pilots are excluded from v1 counts. The original selected-window sampling/digest harness remains a local historical artifact; the tracked tools verify and replay the retained experiment rather than claiming to regenerate its entire sample.
 
 ## TypeSafe contract used
 

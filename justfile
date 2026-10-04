@@ -7,10 +7,26 @@ set shell := ["bash", "-euo", "pipefail", "-c"]
 default:
     @just --list
 
-# Create or update .venv from uv.lock and install the git hooks.
+# Bootstrap Python, hooks, just (if absent), npm, and matching Chromium.
 setup:
-    uv sync --locked
-    uvx prek install
+    uv run --locked python -m scripts.setup_dev
+
+# Install the Chromium build pinned by package-lock.json and its Linux libraries.
+browser-install:
+    npm ci
+    if [ "$(uname -s)" = Linux ]; then npm exec -- playwright install --with-deps --only-shell chromium; else npm exec -- playwright install chromium; fi
+
+# Check required tools and confirm the project-pinned Playwright Chromium launches.
+doctor:
+    uv run --locked python -m scripts.check_dev_environment
+
+# Run the offline generated-fixture browser regressions.
+browser-check:
+    uv run --locked python -m scripts.run_browser_checks
+
+# Validate pose feature invariants and TypeSafe schemas without local data or a key.
+research-check:
+    uv run --locked python -m experiments.pose_classification.research_battery preflight
 
 # Ruff check and format check (what the `lint` CI job runs).
 lint:
@@ -39,7 +55,7 @@ test *args:
     uv run --locked python -m pytest -q --cov --cov-config=pyproject.toml {{ args }}
 
 # Everything CI runs locally.
-check: hooks lint type workflows test
+check: hooks lint type workflows test research-check browser-check
 
 # Audit locked dependencies for known vulnerabilities (experimental in uv).
 audit:
