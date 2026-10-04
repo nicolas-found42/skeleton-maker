@@ -37,6 +37,28 @@ jobs:
       - name: Ruff format
         run: uv run --no-sync ruff format --check .
 
+  coverage-floor:
+    name: coverage-floor
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The floor in pyproject.toml may only go up: compare with the base commit
+      # (the PR's base, or the previous tip of main on a push).
+      - name: Coverage floor does not decrease
+        env:
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            echo "no base commit to compare with"
+            exit 0
+          fi
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          git show "$BASE_SHA:pyproject.toml" > "$RUNNER_TEMP/base-pyproject.toml"
+          python3 scripts/check_coverage_floor.py "$RUNNER_TEMP/base-pyproject.toml" pyproject.toml
+
   prek:
     name: prek
     runs-on: ubuntu-latest
@@ -126,7 +148,7 @@ jobs:
   ci-ok:
     name: ci-ok
     if: always()
-    needs: [lint, prek, ty, zizmor, test]
+    needs: [lint, coverage-floor, prek, ty, zizmor, test]
     runs-on: ubuntu-latest
     steps:
       - name: Check upstream jobs
