@@ -18,8 +18,9 @@ joint rotations, root pose, tracking ids). Method: GitHub + awesome-list search,
 1. **Exporters (BVH / glTF / C3D) + a Blender importer.** Table stakes; many downstream tools
    consume these. Our edge over single-person estimators (e.g. `squall01337/mixamo-llm-mocap`,
    GVHMR-based): multi-person with stable ids and per-joint rotations already in the file.
-2. **A features + Jev layer: natural-language motion search and event cutting.** The
-   experiments below say this is promising *if* built as many atomic questions composed in code.
+2. **Closed-catalog action classification and pose-quality analysis.** Retain labels,
+   measurements and provenance for inspection. Natural-language motion search was withdrawn
+   on 2026-10-04; its draft PR#44 was closed without merging.
 3. **Per-failure-mode quality gate** (jitter, id teleport, limb fly-away, L/R swap) before
    anything trusts the data.
 4. **Retargeting to humanoids / avatars** (GMR, VRM). Check each target's expected input
@@ -71,7 +72,10 @@ Present in context-awesome but **empty there** (0 items): `akirosingh/awesome-cl
 The humanoid-ball-sports list is a small, fresh cluster of 2026 work converting human motion
 into robot skills (tennis, badminton, soccer†). It is the most "new category" signal found.
 
-## Jev experiments (what was run, what it showed)
+## Jev experiments (historical observations)
+
+The free-text search experiment below is historical; its mechanism and draft PR were retired.
+The retained real-pose classification and quality study is in [jev-real-pose-study.md](research/jev-real-pose-study.md).
 
 | # | Question | Result |
 |---|---|---|
@@ -99,7 +103,7 @@ design the digest as carefully as the questions; never gate on one generic confi
 
 ## Next
 
-1. Run one real clip through the NIM and repeat experiments 5–7 on actual Nova-77 digests.
+1. Run one real clip through the NIM and repeat the classification and quality experiments (5 and 7) on actual Nova-77 digests.
    `skeleton_maker/nova77.py` now maps the canonical joints used by the character stage;
    its left/right assignment is inferred per track. Use that map and retain the assignment
    uncertainty when building features.
