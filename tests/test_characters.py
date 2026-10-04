@@ -15,7 +15,9 @@ def test_builtin_characters_are_valid_and_complete():
     assert {"robot", "clay", "mannequin", "neon", "blocky", "critter"} <= set(specs)
     for name, spec in specs.items():
         assert spec["name"] == name
-        assert len(spec["palettes"]) >= 2, "auto-cast needs more than one palette to tell people apart"
+        assert len(spec["palettes"]) >= 2, (
+            "auto-cast needs more than one palette to tell people apart"
+        )
 
 
 def _spec():
@@ -45,7 +47,15 @@ def test_limb_needs_a_size():
 
 def test_paired_limb_lists_must_match():
     s = _spec()
-    s["parts"].append({"type": "limb", "from": ["L_Hip", "R_Hip"], "to": ["L_Knee", "R_Knee", "Head"], "r": 0.05, "mat": "main"})
+    s["parts"].append(
+        {
+            "type": "limb",
+            "from": ["L_Hip", "R_Hip"],
+            "to": ["L_Knee", "R_Knee", "Head"],
+            "r": 0.05,
+            "mat": "main",
+        }
+    )
     with pytest.raises(SpecError, match="same length"):
         validate_spec(s)
 
@@ -62,9 +72,12 @@ def test_html_is_self_contained_and_escapes_titles():
     from tests.test_stage import clip
 
     stage = build_stage(clip(20))
-    page = character.build_html(stage, builtin_specs(), {"character": "auto", "title": "</script><b>x"}, "</script><b>x")
+    page = character.build_html(
+        stage, builtin_specs(), {"character": "auto", "title": "</script><b>x"}, "</script><b>x"
+    )
     assert "</script><b>x" not in page.split("<title>")[1].split("</title>")[0]
-    assert "src=\"http" not in page and "href=\"http" not in page, "the page must not need the network"
+    assert 'src="http' not in page, "the page must not need the network"
+    assert 'href="http' not in page, "the page must not need the network"
     assert page.count("<script") == page.count("</script>")
     # the options JSON must not be able to close its own script element
     opts = page.split('id="options">')[1].split("</script>")[0]

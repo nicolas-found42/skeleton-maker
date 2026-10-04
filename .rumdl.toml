@@ -6,3 +6,5 @@ disable = ["MD013"]
 # One-line import of AGENTS.md, and a PR template whose headings start at level 2 by design.
 "CLAUDE.md" = ["MD041"]
 ".github/pull_request_template.md" = ["MD041"]
+# A bold "read this first" callout is intentional, not a fake heading.
+"docs/brainstorm-downstream-uses.md" = ["MD036"]

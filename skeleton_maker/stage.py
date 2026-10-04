@@ -45,12 +45,12 @@ class Options:
     """Tunables for cleaning. Defaults suit 30 fps footage."""
 
     fps: float = 30.0
-    min_conf: float = 0.0       # joints with confidence <= this are dropped
-    max_gap: int = 5            # interpolate gaps up to this many frames
-    min_len: int = 6            # drop track segments shorter than this
-    smooth_sigma: float = 1.5   # gaussian sigma in frames
-    cut_jump_m: float = 1.2     # root jump (m) in one frame that implies a camera cut
-    cut_gap_frames: int = 60    # bodies absent this long always start a new shot
+    min_conf: float = 0.0  # joints with confidence <= this are dropped
+    max_gap: int = 5  # interpolate gaps up to this many frames
+    min_len: int = 6  # drop track segments shorter than this
+    smooth_sigma: float = 1.5  # gaussian sigma in frames
+    cut_jump_m: float = 1.2  # root jump (m) in one frame that implies a camera cut
+    cut_gap_frames: int = 60  # bodies absent this long always start a new shot
     max_people: int = 60
 
 
@@ -69,19 +69,22 @@ class Stage:
     def from_payload(text: str) -> Stage:
         raw = gzip.decompress(base64.b64decode(text))
         n = int.from_bytes(raw[:4], "little")
-        return Stage(json.loads(raw[4:4 + n]), raw[4 + n:])
+        return Stage(json.loads(raw[4 : 4 + n]), raw[4 + n :])
 
     def positions(self, shot: int, track: int) -> np.ndarray:
         """Packed positions of one track as ``(n, len(CANON), 3)`` metres, NaN where missing."""
         t = self.meta["shots"][shot]["tracks"][track]
         n, j = t["n"], len(CANON)
-        arr = np.frombuffer(self.blob, dtype="<i2", count=n * j * 3, offset=t["offset"]).reshape(n, j, 3)
+        arr = np.frombuffer(self.blob, dtype="<i2", count=n * j * 3, offset=t["offset"]).reshape(
+            n, j, 3
+        )
         out = arr.astype(np.float64) / 1000.0
         out[arr == MISSING] = np.nan
         return out + np.asarray(self.meta["shots"][shot]["center"])
 
 
 # --- loading ---------------------------------------------------------------
+
 
 def load_frames(path: str) -> list:
     """``[(frame_id, [detection, ...]), ...]`` sorted by frame id."""
@@ -116,7 +119,11 @@ def detect_shots(frames: list, opts: Options) -> list:
             pf, pd = prev
             ids_now = {d["tracking_id"]: d for d in dets}
             shared = [(ids_now[d["tracking_id"]], d) for d in pd if d["tracking_id"] in ids_now]
-            jump = shared and np.median([np.linalg.norm(_root(a) - _root(b)) for a, b in shared]) > opts.cut_jump_m
+            jump = (
+                shared
+                and np.median([np.linalg.norm(_root(a) - _root(b)) for a, b in shared])
+                > opts.cut_jump_m
+            )
             if fid - pf > opts.cut_gap_frames or not shared or jump:
                 shots.append((start, pf))
                 start = fid
@@ -127,6 +134,7 @@ def detect_shots(frames: list, opts: Options) -> list:
 
 
 # --- cleaning --------------------------------------------------------------
+
 
 def _gauss_kernel(sigma: float) -> np.ndarray:
     r = max(1, int(3 * sigma))
@@ -140,8 +148,11 @@ def _smooth_segment(x: np.ndarray, sigma: float) -> np.ndarray:
         return x
     k = _gauss_kernel(sigma)
     r = len(k) // 2
-    pad = np.concatenate([x[1:r + 1][::-1], x, x[-r - 1:-1][::-1]], axis=0) if len(x) > r + 1 else np.pad(
-        x, [(r, r)] + [(0, 0)] * (x.ndim - 1), mode="edge")
+    pad = (
+        np.concatenate([x[1 : r + 1][::-1], x, x[-r - 1 : -1][::-1]], axis=0)
+        if len(x) > r + 1
+        else np.pad(x, [(r, r)] + [(0, 0)] * (x.ndim - 1), mode="edge")
+    )
     flat = pad.reshape(len(pad), -1)
     out = np.stack([np.convolve(flat[:, i], k, mode="valid") for i in range(flat.shape[1])], axis=1)
     return out.reshape(x.shape)
@@ -197,6 +208,7 @@ def _clean_track(kp: np.ndarray, valid: np.ndarray, opts: Options) -> list:
 
 # --- geometry --------------------------------------------------------------
 
+
 def _align_up(up: np.ndarray) -> np.ndarray:
     """Rotation matrix taking unit vector ``up`` to +Y (Rodrigues)."""
     y = np.array([0.0, 1.0, 0.0])
@@ -206,7 +218,7 @@ def _align_up(up: np.ndarray) -> np.ndarray:
     if s < 1e-8:
         return np.eye(3) if c > 0 else np.diag([1.0, -1.0, -1.0])
     vx = np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
-    return np.eye(3) + vx + vx @ vx * ((1 - c) / s ** 2)
+    return np.eye(3) + vx + vx @ vx * ((1 - c) / s**2)
 
 
 def _ground_alignment(feet: np.ndarray, *, min_spread: float = 0.7, max_tilt_deg: float = 20.0):
@@ -247,13 +259,18 @@ def _resolve_sides(world: np.ndarray) -> tuple:
     The person's forward is where their toes point; with up = +Y their left is
     ``up x forward``. Returns ``(a_is_left, confident)``.
     """
-    fwd = np.nanmedian(np.concatenate([world[:, 71] - world[:, 69], world[:, 76] - world[:, 74]]), axis=0)
+    fwd = np.nanmedian(
+        np.concatenate([world[:, 71] - world[:, 69], world[:, 76] - world[:, 74]]), axis=0
+    )
     fwd[1] = 0.0
     lat = np.nanmedian(world[:, 12] - world[:, 40], axis=0)
     lat[1] = 0.0
     n = np.linalg.norm(fwd)
     if not np.isfinite(n) or n < 0.03 or not np.isfinite(lat).all():
-        return True, False  # fall back to NVIDIA's diagram: A is the viewer's right of a frontal figure
+        return (
+            True,
+            False,
+        )  # fall back to NVIDIA's diagram: A is the viewer's right of a frontal figure
     left = np.cross([0.0, 1.0, 0.0], fwd / n)
     return bool(np.dot(lat, left) > 0), True
 
@@ -277,11 +294,14 @@ def _body_unit(canon: np.ndarray) -> float:
 
 # --- build -----------------------------------------------------------------
 
+
 def build_stage(frames: list, opts: Options | None = None, *, video: dict | None = None) -> Stage:
     """Build a :class:`Stage` from :func:`load_frames` output."""
     opts = opts or Options()
     shots_meta, chunks, offset = [], [], 0
-    cam_flip = np.diag([1.0, -1.0, -1.0])  # OpenCV camera (y down, z forward) -> y up, camera looks -z
+    cam_flip = np.diag(
+        [1.0, -1.0, -1.0]
+    )  # OpenCV camera (y down, z forward) -> y up, camera looks -z
     for f0, f1 in detect_shots(frames, opts):
         n = f1 - f0 + 1
         by_id: dict = {}
@@ -291,7 +311,11 @@ def build_stage(frames: list, opts: Options | None = None, *, video: dict | None
             for d in dets:
                 kp = np.asarray(d["keypoints_3d"], np.float64).reshape(NUM_JOINTS, 3)
                 conf = np.asarray(d["keypoints_confidence"], np.float64)
-                kp = np.where((conf > opts.min_conf)[:, None] & np.isfinite(kp).all(axis=1, keepdims=True), kp, np.nan)
+                kp = np.where(
+                    (conf > opts.min_conf)[:, None] & np.isfinite(kp).all(axis=1, keepdims=True),
+                    kp,
+                    np.nan,
+                )
                 # depth must be in front of the camera
                 kp[kp[:, 2] <= 0.05] = np.nan
                 by_id.setdefault(d["tracking_id"], {})[fid - f0] = kp
@@ -307,18 +331,24 @@ def build_stage(frames: list, opts: Options | None = None, *, video: dict | None
             continue
         # people sorted by how long they stay, capped
         tracks.sort(key=lambda x: -len(x[2]))
-        tracks = tracks[:opts.max_people]
+        tracks = tracks[: opts.max_people]
 
         # y-up world, camera at the origin looking down -z
         world = [(tid, s, seg @ cam_flip.T) for tid, s, seg in tracks]
         spines = np.concatenate([w[:, 3] - w[:, 0] for _, _, w in world])
         spines = spines[np.isfinite(spines).all(axis=1)]
-        up = np.median(spines / np.linalg.norm(spines, axis=1, keepdims=True), axis=0) if len(spines) else np.array([0, 1.0, 0])
+        up = (
+            np.median(spines / np.linalg.norm(spines, axis=1, keepdims=True), axis=0)
+            if len(spines)
+            else np.array([0, 1.0, 0])
+        )
         up /= np.linalg.norm(up)
         R = _align_up(up)
         world = [(tid, s, w @ R.T) for tid, s, w in world]
         # Spines lean and crouch; feet standing on one floor are a better "up" when spread out.
-        R2 = _ground_alignment(np.concatenate([w[:, list(FOOT_JOINTS)].reshape(-1, 3) for _, _, w in world]))
+        R2 = _ground_alignment(
+            np.concatenate([w[:, list(FOOT_JOINTS)].reshape(-1, 3) for _, _, w in world])
+        )
         if R2 is not None:
             R = R2 @ R
             world = [(tid, s, w @ R2.T) for tid, s, w in world]
@@ -350,23 +380,45 @@ def build_stage(frames: list, opts: Options | None = None, *, video: dict | None
         for tid, s, w in world:
             a_is_left, confident = _resolve_sides(w)
             canon = _canon(w, a_is_left)
-            canon = canon - np.array([0, 1, 0]) * floor[s:s + len(w), None, None] - center
+            canon = canon - np.array([0, 1, 0]) * floor[s : s + len(w), None, None] - center
             q = np.round(canon * 1000.0)
             q = np.clip(q, -32767, 32767)
             q[~np.isfinite(canon)] = MISSING
             data = q.astype("<i2").tobytes()
             head = canon[:, CANON_INDEX["HeadTop"], 1]
             height = float(np.nanmedian(head)) if np.isfinite(head).any() else 1.7
-            track_meta.append({"id": int(tid), "start": int(s), "n": len(w), "offset": offset,
-                               "height": round(height, 3), "unit": _body_unit(canon),
-                               "a_is_left": a_is_left, "sides_confident": confident})
+            track_meta.append(
+                {
+                    "id": int(tid),
+                    "start": int(s),
+                    "n": len(w),
+                    "offset": offset,
+                    "height": round(height, 3),
+                    "unit": _body_unit(canon),
+                    "a_is_left": a_is_left,
+                    "sides_confident": confident,
+                }
+            )
             chunks.append(data)
             offset += len(data)
         mean_floor = float(np.mean(floor))
-        shots_meta.append({
-            "frame0": int(f0), "n": int(n), "center": [round(float(c), 3) for c in center],
-            "camera": {"position": [0.0, round(-mean_floor, 3), 0.0],
-                       "direction": [round(float(c), 4) for c in (R @ np.array([0.0, 0.0, -1.0]))]},
-            "tracks": track_meta})
-    meta = {"version": VERSION, "fps": opts.fps, "joints": list(CANON), "video": video or {}, "shots": shots_meta}
+        shots_meta.append(
+            {
+                "frame0": int(f0),
+                "n": int(n),
+                "center": [round(float(c), 3) for c in center],
+                "camera": {
+                    "position": [0.0, round(-mean_floor, 3), 0.0],
+                    "direction": [round(float(c), 4) for c in (R @ np.array([0.0, 0.0, -1.0]))],
+                },
+                "tracks": track_meta,
+            }
+        )
+    meta = {
+        "version": VERSION,
+        "fps": opts.fps,
+        "joints": list(CANON),
+        "video": video or {},
+        "shots": shots_meta,
+    }
     return Stage(meta, b"".join(chunks))

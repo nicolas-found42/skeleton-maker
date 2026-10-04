@@ -10,17 +10,35 @@ from skeleton_maker.stage import Options, Stage, build_stage, detect_shots
 # Joint positions of a 1.75 m person in a y-up world, facing +z, with side A (the
 # higher-index diagram side, joints 9, 11-38, 67-71) on the person's left (+x).
 _UP = {
-    0: (0, .95, 0), 1: (0, 1.05, 0), 2: (0, 1.18, 0), 3: (0, 1.35, 0), 4: (0, 1.5, 0), 5: (0, 1.56, 0),
-    6: (0, 1.62, 0), 7: (0, 1.75, 0), 10: (0, 1.66, .09), 9: (.043, 1.67, 0), 8: (-.043, 1.67, 0),
+    0: (0, 0.95, 0),
+    1: (0, 1.05, 0),
+    2: (0, 1.18, 0),
+    3: (0, 1.35, 0),
+    4: (0, 1.5, 0),
+    5: (0, 1.56, 0),
+    6: (0, 1.62, 0),
+    7: (0, 1.75, 0),
+    10: (0, 1.66, 0.09),
+    9: (0.043, 1.67, 0),
+    8: (-0.043, 1.67, 0),
 }
 
 
 def _side(sign, clav, sh, el, wr, bases, tip, hip, knee, ank, heel, toe):
-    d = {clav: (.05 * sign, 1.45, 0), sh: (.18 * sign, 1.45, 0), el: (.46 * sign, 1.45, 0), wr: (.72 * sign, 1.45, 0),
-         tip: (.9 * sign, 1.45, 0), hip: (.09 * sign, .9, 0), knee: (.09 * sign, .5, 0), ank: (.09 * sign, .08, 0),
-         heel: (.09 * sign, .02, -.05), toe: (.09 * sign, .02, .15)}
+    d = {
+        clav: (0.05 * sign, 1.45, 0),
+        sh: (0.18 * sign, 1.45, 0),
+        el: (0.46 * sign, 1.45, 0),
+        wr: (0.72 * sign, 1.45, 0),
+        tip: (0.9 * sign, 1.45, 0),
+        hip: (0.09 * sign, 0.9, 0),
+        knee: (0.09 * sign, 0.5, 0),
+        ank: (0.09 * sign, 0.08, 0),
+        heel: (0.09 * sign, 0.02, -0.05),
+        toe: (0.09 * sign, 0.02, 0.15),
+    }
     for i, b in enumerate(bases):
-        d[b] = (.78 * sign, 1.45, (i - 2) * .02)
+        d[b] = (0.78 * sign, 1.45, (i - 2) * 0.02)
     return d
 
 
@@ -28,7 +46,9 @@ _UP.update(_side(1, 11, 12, 13, 14, (15, 19, 24, 29, 34), 28, 67, 68, 69, 70, 71
 _UP.update(_side(-1, 39, 40, 41, 42, (43, 47, 52, 57, 62), 56, 72, 73, 74, 75, 76))
 
 
-def body(origin=(0.0, 0.0, -5.0), facing=1.0, tilt_deg=0.0, conf=0.9, jitter=0.0, rng=None, mirror=False):
+def body(
+    origin=(0.0, 0.0, -5.0), facing=1.0, tilt_deg=0.0, conf=0.9, jitter=0.0, rng=None, mirror=False
+):
     """One detection dict. ``facing=-1`` turns the body to face away along z.
 
     ``mirror`` flips the lateral axis only, which puts side A on the person's right.
@@ -47,9 +67,16 @@ def body(origin=(0.0, 0.0, -5.0), facing=1.0, tilt_deg=0.0, conf=0.9, jitter=0.0
     tilt = np.array([[1, 0, 0], [0, np.cos(t), -np.sin(t)], [0, np.sin(t), np.cos(t)]])
     cam = (pts @ tilt.T) * np.array([1, -1, -1])  # y-up world -> OpenCV camera (y down, z forward)
     root = cam[0]
-    return {"tracking_id": 1, "bbox": [0, 0, 1, 1], "keypoints_2d": np.zeros((77, 2)).tolist(),
-            "keypoints_confidence": [conf] * 77, "keypoints_3d": cam.tolist(), "rest_pose": np.zeros((77, 3)).tolist(),
-            "joint_rotations": [[0, 0, 0, 1]] * 77, "root_pose": {"translation": root.tolist(), "rotation": [0, 0, 0, 1]}}
+    return {
+        "tracking_id": 1,
+        "bbox": [0, 0, 1, 1],
+        "keypoints_2d": np.zeros((77, 2)).tolist(),
+        "keypoints_confidence": [conf] * 77,
+        "keypoints_3d": cam.tolist(),
+        "rest_pose": np.zeros((77, 3)).tolist(),
+        "joint_rotations": [[0, 0, 0, 1]] * 77,
+        "root_pose": {"translation": root.tolist(), "rotation": [0, 0, 0, 1]},
+    }
 
 
 def clip(n, **kw):
@@ -70,7 +97,8 @@ def test_canonical_joint_sources_cover_all_names():
 def test_left_right_swap_when_sides_are_swapped():
     a, b = canon_sources(True), canon_sources(False)
     left = CANON_INDEX["L_Shoulder"]
-    assert a[left] == 12 and b[left] == 40
+    assert a[left] == 12
+    assert b[left] == 40
 
 
 def test_single_shot_single_track():
@@ -84,22 +112,27 @@ def test_single_shot_single_track():
 def test_person_facing_camera_has_side_a_as_left():
     st = build_stage(clip(40, facing=1.0))
     t = st.meta["shots"][0]["tracks"][0]
-    assert t["sides_confident"] and t["a_is_left"]
+    assert t["sides_confident"]
+    assert t["a_is_left"]
 
 
 def test_turning_the_body_around_does_not_change_which_side_is_left():
     st = build_stage(clip(40, facing=-1.0))
     t = st.meta["shots"][0]["tracks"][0]
-    assert t["sides_confident"] and t["a_is_left"]
+    assert t["sides_confident"]
+    assert t["a_is_left"]
 
 
 def test_a_body_whose_side_a_is_on_its_right_is_detected():
     st = build_stage(clip(40, mirror=True))
     t = st.meta["shots"][0]["tracks"][0]
-    assert t["sides_confident"] and not t["a_is_left"]
+    assert t["sides_confident"]
+    assert not t["a_is_left"]
     p = _first(st)
     # after canonicalising, the person's L_Shoulder must really be on their left (+x when facing +z)
-    assert np.nanmedian(p[:, CANON_INDEX["L_Shoulder"], 0] - p[:, CANON_INDEX["R_Shoulder"], 0]) > 0.2
+    assert (
+        np.nanmedian(p[:, CANON_INDEX["L_Shoulder"], 0] - p[:, CANON_INDEX["R_Shoulder"], 0]) > 0.2
+    )
 
 
 def test_tilted_camera_is_levelled_and_the_floor_is_zero():
@@ -128,7 +161,9 @@ def test_camera_cut_starts_a_new_shot():
 
 
 def test_kept_id_but_teleported_body_is_a_cut():
-    frames = clip(10, origin=(0, 0, -5.0)) + [(f, [body(origin=(6.0, 0, -9.0))]) for f in range(10, 20)]
+    frames = clip(10, origin=(0, 0, -5.0)) + [
+        (f, [body(origin=(6.0, 0, -9.0))]) for f in range(10, 20)
+    ]
     assert len(detect_shots(frames, Options())) == 2
 
 
@@ -155,7 +190,9 @@ def test_low_confidence_joints_are_dropped_not_drawn():
         frames.append((f, [d]))
     st = build_stage(frames, Options(min_conf=0.05))
     p = _first(st)
-    assert np.isnan(p[:, CANON_INDEX["L_Ankle"]]).all() or np.isnan(p[:, CANON_INDEX["R_Ankle"]]).all()
+    assert (
+        np.isnan(p[:, CANON_INDEX["L_Ankle"]]).all() or np.isnan(p[:, CANON_INDEX["R_Ankle"]]).all()
+    )
 
 
 def test_frames_without_a_head_are_not_a_body():
