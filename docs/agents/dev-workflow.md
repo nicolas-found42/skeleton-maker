@@ -88,7 +88,7 @@ The gates below are rolled out issue by issue. The Status column says what is li
 | Tests | `pytest` (offline) | live |
 | Lint and format | `ruff` (line length 100, rules `E,F,W,I,B,UP,SIM,RUF,C4,PT,S`; formatter owns line length) | live: tree is clean (#2), enforced by the `lint` CI job (#3) |
 | Workflow security | `zizmor`, SHA-pinned actions, least-privilege permissions | live (#3) |
-| Dependency updates | Dependabot with `cooldown` (`github-actions` and `uv`; `ty` and `ruff` are excluded from grouping and bumped deliberately) | live (#3, #5) |
+| Dependency updates | Dependabot with `cooldown` (`github-actions` and `uv`; `ty` and `ruff` are excluded from grouping and bumped deliberately; semver-major bumps and `grpcio`, `grpcio-tools`, `protobuf` are ignored and upgraded by hand) | live (#3, #5) |
 | Local hooks | `prek` (commit stage: `ruff`, `typos`, `rumdl`, file hygiene), also run in CI | live (#4) |
 | Reproducible installs | `uv.lock`, `uv sync --locked`, `just` recipes | live (#5) |
 | Vulnerability audit | `uv audit` (weekly workflow `audit.yml`, non-blocking, experimental) | live (#5) |
