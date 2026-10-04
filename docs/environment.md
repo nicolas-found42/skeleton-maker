@@ -12,6 +12,7 @@ skeleton-maker environment demo.skeleton/clip.mp4 --out demo.skeleton/environmen
 | --- | --- |
 | `video` | The conformed clip. If poses are reused later, this must be the clip whose frame ids they describe. A variable-frame-rate file is refused: conform it with `skeleton-maker clip` first. |
 | `--out` | Manifest to write (default `<video>.environment.json`). Assets go in `<out stem>.assets/` beside it. |
+| `--poses` | Existing pose output (JSON Lines) for this exact clip; reused with no NIM call or credential. See [Reusing poses](#reusing-poses). |
 | `--backend` | Installed backend name (default `grounded-sam2-da3`). |
 | `--geometry` | `off`: semantics only, geometry status `not_requested`. `auto`: geometry when the backend can produce it, otherwise status `unavailable` and the scan still completes. `required`: exit nonzero unless a valid shared registration (`registered_relative` or `registered_metric`) is produced. |
 | `--sample-fps` | Frames per second to scan, 0.05 to 30 and no more than the clip's rate (default 2). The step is rounded to whole source frames. |
@@ -30,8 +31,9 @@ Schema `skeleton-maker.environment/1`. Loaders must reject any other version.
 | `processed_frames` | scanned source frames: `frame_id`, `time` as an exact `[numerator, denominator]` of seconds, `time_s` (display float) |
 | `frame_range` | `[first, last]` scanned frame id |
 | `shots` | `id`, `first_frame`, `last_frame`; entity ids are scoped by shot |
-| `entities` | `id`, `shot`, `family` (`surface`, `object`, `vehicle`, `person`), `motion` (`static`, `dynamic`, `unknown`), `labels.native` and `labels.normalized` |
+| `entities` | `id`, `shot`, `family` (`surface`, `object`, `vehicle`, `person`), `motion` (`static`, `dynamic`, `unknown`), `labels.native` and `labels.normalized`, and for `person` entities `skeleton_id` |
 | `observations` | `id`, `entity`, `frame_id` (a processed frame), `bbox` `[x0, y0, x1, y1]` in full decoded source pixels, `mask` (`null` or `{"asset": "<relative path>"}`), `score`, `score_meaning`, `visibility` (`visible`, `occluded`, `absent`, `uncertain`) |
+| `poses` | `null` without `--poses`; otherwise `path`, `association`, `frame_count`, `skeletons` (`id`, `first_frame`, `last_frame`, `frames`) and `person_free_ranges` as `[first, last]` frame ids |
 | `geometry` | `status` (`not_requested`, `unavailable`, `relative`, `registered_relative`, `registered_metric`), `mode`, `reason` |
 | `backend` | `name`, `version`, `checkpoints`, `device` |
 | `config` | `requested_labels`, `geometry_mode`, `sample_fps`, `device` |
@@ -41,11 +43,23 @@ Loading (`skeleton_maker.envmanifest.load_manifest`) checks the schema version, 
 
 A `registered_relative` geometry result has no solved metric scale and must not be overlaid on the NIM's meter-valued skeletons.
 
+## Reusing poses
+
+```bash
+skeleton-maker environment demo.skeleton/clip.mp4 --poses demo.skeleton/pose.json --out demo.skeleton/environment.json
+```
+
+The poses must describe the same clip. The NIM emits one record per decoded frame, so the file must have exactly one record per clip frame with ids `0..N-1`, no duplicates, and every `bbox` (`[x, y, width, height]` in pose files, unlike the manifest's `[x0, y0, x1, y1]`) within the frame plus a 25% margin. Anything else exits 2 naming the mismatch and writes nothing.
+
+Pose files carry no fingerprint, so a matching length is not proof of identity: the manifest records `association: "user-supplied"`. If every record carries a `source_sha256` it is compared with the clip's hash: a match records `hash-verified`, a mismatch is rejected.
+
+People are not duplicated into the environment inventory. A backend reports a person as an entity with `family: "person"` and `skeleton_id` naming a `tracking_id` in the pose file (at most one entity per shot and skeleton); an unknown, missing or duplicated id fails the run. Frame ranges where the poses hold nobody are recorded in `poses.person_free_ranges` and are scanned like any other frame. Without `--poses` the command still runs, and `person` entities must not carry a `skeleton_id`.
+
 ## Backend contract
 
 Contract id `skeleton-maker.environment-backend/1`. A backend is an object with `name`, `available_devices()`, `supports_geometry()` and `run(request, assets_dir)`, registered in `skeleton_maker.environment.BACKENDS`. Heavyweight workers are expected to be invoked from such an adapter as a subprocess.
 
-Request:
+Request (`poses` is `null`, or the manifest's `poses` block):
 
 ```json
 {
@@ -54,6 +68,7 @@ Request:
   "device": "cpu",
   "geometry": "auto",
   "requested_labels": [],
+  "poses": null,
   "source": {"width": 64, "height": 48, "frame_rate": [30, 1], "frame_count": 30},
   "frames": [{"frame_id": 0, "time": [0, 1]}, {"frame_id": 15, "time": [1, 2]}]
 }

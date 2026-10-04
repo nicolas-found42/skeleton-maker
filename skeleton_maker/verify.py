@@ -16,6 +16,7 @@ import numpy as np
 
 from .bbox import read_annotation
 from .constants import MAX_BODIES, NUM_JOINTS
+from .poses import read_records
 from .utils import require_tool
 
 
@@ -83,11 +84,7 @@ def run(
         f"max {max_per_frame}",
     )
 
-    records = []
-    with open(poses) as fh:
-        for line in fh:
-            if line.strip():
-                records.append(json.loads(line))
+    records = read_records(poses)
     frame_ids = [r["frame_id"] for r in records]
     dets = [d for r in records for d in r["detections"]]
     dets_per_frame = collections.Counter(r["frame_id"] for r in records for _ in r["detections"])

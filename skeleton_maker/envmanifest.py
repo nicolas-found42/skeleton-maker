@@ -101,6 +101,7 @@ def validate_content(doc: dict, *, width: int, height: int, frame_ids) -> None:
             raise ManifestError(f"{where}: first_frame {first} is after last_frame {last}")
 
     entity_ids = set()
+    person_keys: set = set()
     for i, ent in enumerate(_need(doc, "entities", list, "manifest")):
         where = f"entities[{i}]"
         eid = _need(ent, "id", str, where)
@@ -111,6 +112,18 @@ def validate_content(doc: dict, *, width: int, height: int, frame_ids) -> None:
             raise ManifestError(f"{where}: shot {ent['shot']!r} is not declared in shots")
         _one_of(_need(ent, "family", str, where), FAMILIES, f"{where}.family")
         _one_of(_need(ent, "motion", str, where), MOTIONS, f"{where}.motion")
+        skeleton = ent.get("skeleton_id")
+        if skeleton is not None and (isinstance(skeleton, bool) or not isinstance(skeleton, int)):
+            raise ManifestError(f"{where}.skeleton_id: expected an integer or null")
+        if ent["family"] != "person" and skeleton is not None:
+            raise ManifestError(f"{where}.skeleton_id: only person entities link to skeletons")
+        if skeleton is not None:
+            key = (ent["shot"], skeleton)
+            if key in person_keys:
+                raise ManifestError(
+                    f"{where}: duplicate person entity for skeleton_id {skeleton} in {ent['shot']}"
+                )
+            person_keys.add(key)
         labels = _need(ent, "labels", dict, where)
         _need(labels, "native", str, f"{where}.labels")
         _need(labels, "normalized", str, f"{where}.labels")
@@ -188,6 +201,52 @@ def validate_manifest(doc: dict) -> None:
     _need(config, "requested_labels", list, "config")
     _need(doc, "assets", list, "manifest")
     validate_content(doc, width=width, height=height, frame_ids=ids)
+    _validate_poses(doc)
+
+
+POSE_ASSOCIATIONS = ("user-supplied", "hash-verified")
+
+
+def _validate_poses(doc: dict) -> None:
+    """The pose join block, and that person entities name skeletons that exist in it."""
+    block = doc.get("poses")
+    people = [e for e in doc["entities"] if e["family"] == "person"]
+    if block is None:
+        for i, ent in enumerate(doc["entities"]):
+            if ent.get("skeleton_id") is not None:
+                raise ManifestError(
+                    f"entities[{i}].skeleton_id: names a skeleton, but no pose file was supplied"
+                )
+        return
+    if not isinstance(block, dict):
+        raise ManifestError("poses: expected an object or null")
+    _need(block, "path", str, "poses")
+    _one_of(_need(block, "association", str, "poses"), POSE_ASSOCIATIONS, "poses.association")
+    _need(block, "frame_count", int, "poses")
+    ids = set()
+    for i, skeleton in enumerate(_need(block, "skeletons", list, "poses")):
+        where = f"poses.skeletons[{i}]"
+        ids.add(_need(skeleton, "id", int, where))
+        for key in ("first_frame", "last_frame", "frames"):
+            _need(skeleton, key, int, where)
+    for i, span in enumerate(_need(block, "person_free_ranges", list, "poses")):
+        if not (
+            isinstance(span, list)
+            and len(span) == 2
+            and all(isinstance(v, int) for v in span)
+            and span[0] <= span[1]
+        ):
+            raise ManifestError(f"poses.person_free_ranges[{i}]: expected [first, last]")
+    for ent in people:
+        skeleton = ent.get("skeleton_id")
+        if skeleton is None:
+            raise ManifestError(
+                f"person entity {ent['id']!r} must name an existing skeleton_id from the pose file"
+            )
+        if skeleton not in ids:
+            raise ManifestError(
+                f"person entity {ent['id']!r}: skeleton_id {skeleton} is not in the pose file"
+            )
 
 
 def resolve_asset(bundle: Path, rel: str, where: str = "asset") -> Path:
