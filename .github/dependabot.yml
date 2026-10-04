@@ -26,6 +26,15 @@ updates:
         patterns: ["*"]
         # ty (beta, 0.0.x) and ruff are bumped deliberately, each in its own PR.
         exclude-patterns: ["ty", "ruff"]
+    ignore:
+      # Major bumps change behaviour (numpy 2, opencv 5, ...) and the tests here are offline, so
+      # a green CI says nothing about the real YOLO and NIM pipeline. Upgrade majors by hand.
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+      # The gRPC stubs are generated for the NIM and these pins move together.
+      - dependency-name: "grpcio"
+      - dependency-name: "grpcio-tools"
+      - dependency-name: "protobuf"
     commit-message:
       prefix: "chore"
     labels: []
