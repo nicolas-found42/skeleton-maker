@@ -3,8 +3,13 @@
 
 One JSON file per clip, schema ``skeleton-maker.environment-annotations/1``, plus the mask
 PNG images it references (any non-zero pixel is inside; the size must equal the clip's frame).
-Annotations are written by people. A model prediction is never ground truth, so nothing in
-this module reads a manifest.
+Annotations come from people or from a published, human-checked dataset named in
+``provenance``. A model prediction is never ground truth, so nothing in this module reads a
+manifest.
+
+A clip's ``scope`` is ``semantic`` (masks, classes, identities; the default) or ``geometry``
+(camera and scene measurements only). A geometry-scope clip carries no semantic labels, so
+the per-clip semantic rules never apply to it and it is never padded with empty ones.
 """
 
 import json
@@ -19,6 +24,8 @@ from .envmanifest import ManifestError, _need, _one_of, resolve_asset
 ANNOTATION_SCHEMA = "skeleton-maker.environment-annotations/1"
 
 SPLITS = ("development", "heldout")
+SCOPES = ("semantic", "geometry")
+PROVENANCE_KINDS = ("human", "published_dataset")
 STRUCTURAL = ("wall", "floor", "ceiling")
 COUNTABLE_FAMILIES = ("object", "vehicle")
 #: ``occluded`` instances are real but unscored: neither a detection nor a miss.
@@ -103,6 +110,14 @@ def _validate(doc) -> None:
         isinstance(k, str) and isinstance(v, str) for k, v in aliases.items()
     ):
         raise AnnotationError("aliases: expected an object mapping alias -> canonical class")
+    scope = doc.get("scope", "semantic")
+    _one_of(scope, SCOPES, "scope")
+    provenance = doc.get("provenance")
+    if provenance is not None:
+        _one_of(_need(provenance, "kind", str, "provenance"), PROVENANCE_KINDS, "provenance.kind")
+        for key in ("source", "citation", "license", "quality_control"):
+            if not _need(provenance, key, str, "provenance").strip():
+                raise AnnotationError(f"provenance.{key}: must not be empty")
     review = doc.get("review")
     if review is not None:
         _need(review, "second_reviewer", str, "review")
@@ -170,6 +185,18 @@ def _validate(doc) -> None:
                 "outside every shot; identities are never scored across a cut"
             )
     geometry = doc.get("geometry")
+    if scope == "geometry":
+        if geometry is None:
+            raise AnnotationError("a geometry-scope clip needs a geometry block")
+        for i, frame in enumerate(doc["frames"]):
+            if any(
+                frame.get(key) for key in ("surfaces", "negative_classes", "instances", "ignore")
+            ):
+                raise AnnotationError(
+                    f"frames[{i}]: a geometry-scope clip carries no semantic labels"
+                )
+        if doc.get("tracking_intervals"):
+            raise AnnotationError("a geometry-scope clip carries no tracking intervals")
     if geometry is not None:
         if not isinstance(geometry, dict):
             raise AnnotationError("geometry: expected an object")

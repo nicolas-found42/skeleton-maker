@@ -8,7 +8,7 @@ skeleton-maker environment-score --predictions runs/ --annotations labels/ --out
 
 `--split` picks the clips the gates score (`heldout` by default, or `development` or `all`). Corpus coverage always looks at every annotation. Exit codes: `0` all gates passed, `1` a gate failed, `2` invalid input (malformed annotation or manifest, missing directory, empty corpus). The report is written atomically.
 
-Ground truth is human labelling only. Model predictions and Jev judgments are never ground truth. The targets below were fixed before any held-out evaluation; changing one needs an explicit spec change with its rationale. Scorer version: `1` (in the report as `scorer_version`).
+Ground truth is human labelling only. Model predictions and Jev judgments are never ground truth. The targets below were fixed before any held-out evaluation; changing one needs an explicit spec change with its rationale. Scorer version: `2` (in the report as `scorer_version`). Version 2 adds annotation `scope` and `provenance`; the targets are unchanged. Rationale: the maintainer approved non-human annotation on 2026-10-04, and the independent camera and depth measurements that registration needs come from motion-capture datasets that carry no masks. Declaring a clip's scope keeps those clips out of the mask rules instead of padding them with empty labels.
 
 ## Inputs
 
@@ -32,6 +32,14 @@ One JSON file per clip, schema `skeleton-maker.environment-annotations/1`, with 
   "tags": ["indoor", "tripod", "person_free"],
   "aliases": {"couch": "sofa"},
   "review": {"second_reviewer": "name", "disagreements_resolved": true},
+  "scope": "semantic",
+  "provenance": {
+    "kind": "published_dataset",
+    "source": "VIPSeg",
+    "citation": "Miao et al., CVPR 2022",
+    "license": "non-commercial research",
+    "quality_control": "what the dataset's authors did to check the labels"
+  },
   "shots": [{"first_frame": 0, "last_frame": 299}],
   "frames": [
     {
@@ -54,6 +62,8 @@ One JSON file per clip, schema `skeleton-maker.environment-annotations/1`, with 
 }
 ```
 
+- `scope` is `semantic` (default: masks, classes, identities) or `geometry` (camera and scene measurements only). A geometry-scope clip needs a `geometry` block and carries no surfaces, instances, ignore regions, negative classes or tracking intervals. The per-clip semantic rules below, and the clip totals, count semantic clips only; geometry-scope clips feed the registration, metric-scale, underconstrained and geometry-coverage checks.
+- `provenance` names where labels came from: `human` or `published_dataset`, with `source`, `citation`, `license` and `quality_control`. For a held-out semantic clip, the second-review check accepts a `review` block or `provenance.kind` `published_dataset`; the report says which clips rely on the published dataset's own quality control. Whether that is as strong as a named second reviewer is the maintainer's call, so the check states it rather than hiding it.
 - `split` is `development` or `heldout`; clips from one capture session must not appear on both sides.
 - `surfaces` hold `wall`, `floor` and `ceiling` (the union of their pixels in the frame). `negative_classes` lists structural classes known to be absent from the frame; a class cannot be both.
 - `instances` are `object` or `vehicle` with a stable `id` across the frame sequence and `visibility` `visible`, `occluded` or `absent` (absent needs no mask). `aliases` map model labels onto the annotation's class names.
@@ -74,7 +84,7 @@ Registration and scale are scored from an optional `geometry.evaluation` block i
 | `registration` | Coverage of eligible frames at least 0.80, median reprojection error at most 0.5% and 95th percentile at most 2.0% of the image diagonal. Percentiles use the nearest-rank method. Abstained frames count against coverage. |
 | `metric_scale` | Every withheld dimension within 10% relative error, and the manifest's geometry status is `registered_metric`. The annotation's `uncertainty_m` is reported with it. |
 | `underconstrained` | Every clip tagged `underconstrained` reports `not_requested`, `unavailable`, `relative` or `relative-camera-frame` geometry, never a registration. |
-| `corpus_coverage` | At least 12 clips (6 development, 6 held-out); 10 annotated frames and a 2-second tracking interval per held-out clip; second review on every held-out clip; complete prediction runs; at least 2 held-out clips with positive annotations for each of objects, vehicles, walls, floors and ceilings, and at least one class-negative frame for each structural class; at least 6 object and 3 vehicle subtypes; every required scene tag; 2 held-out translating-camera clips with eligible frames and control points; one withheld metric dimension. |
+| `corpus_coverage` | At least 12 semantic clips (6 development, 6 held-out), plus any geometry-scope clips; 10 annotated frames and a 2-second tracking interval per held-out semantic clip; second review (or a published dataset's quality control) on every held-out semantic clip; complete prediction runs; at least 2 held-out clips with positive annotations for each of objects, vehicles, walls, floors and ceilings, and at least one class-negative frame for each structural class; at least 6 object and 3 vehicle subtypes; every required scene tag; 2 held-out translating-camera clips with eligible frames and control points; one withheld metric dimension. |
 
 ## Empty sets, ignored regions and aggregation
 

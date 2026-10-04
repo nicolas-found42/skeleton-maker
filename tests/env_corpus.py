@@ -40,6 +40,8 @@ class Clip:
         self.aliases = {}
         self.geometry = None
         self.review = {"second_reviewer": "reviewer-b", "disagreements_resolved": True}
+        self.scope = None
+        self.provenance = None
         self.entities = {}
         self.vocab = {}
         self.observations = []
@@ -277,6 +279,10 @@ class Clip:
         }
         if self.review:
             doc["review"] = self.review
+        if self.scope:
+            doc["scope"] = self.scope
+        if self.provenance:
+            doc["provenance"] = self.provenance
         if self.geometry:
             doc["geometry"] = self.geometry
         (self.corpus.annotations / f"{self.name}.json").write_text(json.dumps(doc))

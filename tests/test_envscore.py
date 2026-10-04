@@ -765,6 +765,112 @@ def test_a_full_corpus_passes_coverage(corpus, tmp_path, geometry_only_abstentio
     assert coverage["pass"] is True
 
 
+def _semantic_clip(corpus, name, split, required):
+    a = corpus.clip(name, split=split, frames=range(30), fps=10, tags=required)
+    for cls in ("floor", "wall", "ceiling"):
+        a.gt_surface(0, cls, FULL)
+        a.gt_negative(1, cls)
+    for k in range(6):
+        a.gt_instance(2, f"o{k}", "object", f"object-{k}", _px(k))
+    for k in range(3):
+        a.gt_instance(2, f"v{k}", "vehicle", f"vehicle-{k}", _px(k, row=1))
+    a.interval(0, 29)
+    return a
+
+
+def _geometry_clip(corpus, name, split="heldout", tags=("translating",)):
+    a = corpus.clip(name, split=split, frames=range(30), fps=10, tags=tags)
+    a.scope = "geometry"
+    a.review = None
+    a.gt_geometry(
+        range(30),
+        control_points=[{"frame_id": 0, "id": "corner", "xy": [5.0, 5.0]}],
+        dimensions=[{"id": "desk", "meters": 1.0, "uncertainty_m": 0.03, "withheld": True}],
+    )
+    return a
+
+
+def test_geometry_clips_stand_beside_twelve_semantic_clips(corpus, tmp_path):
+    required = [t for t in envscore.TARGETS["required_tags"] if t != "translating"]
+    for i in range(12):
+        a = _semantic_clip(corpus, f"s{i:02d}", "development" if i < 6 else "heldout", required)
+        if i < 6:
+            a.gt_geometry(range(30))
+    _geometry_clip(corpus, "g0")
+    _geometry_clip(corpus, "g1")
+    corpus.write()
+
+    _, doc = _score(corpus, tmp_path)
+
+    coverage = doc["gates"]["corpus_coverage"]
+    assert [c["name"] for c in coverage["checks"] if not c["pass"]] == []
+    assert doc["inputs"]["clips"]["g0"]["scope"] == "geometry"
+    assert doc["gates"]["objects"]["counts"]["fn"] == 36  # six semantic held-out clips only
+
+
+def test_geometry_clips_do_not_count_toward_the_semantic_clip_totals(corpus, tmp_path):
+    required = list(envscore.TARGETS["required_tags"])
+    for i in range(6):
+        _semantic_clip(corpus, f"s{i:02d}", "development", required)
+    for i in range(6):
+        _geometry_clip(corpus, f"g{i}")
+    corpus.write()
+
+    _, doc = _score(corpus, tmp_path)
+
+    clips = next(c for c in doc["gates"]["corpus_coverage"]["checks"] if c["name"] == "clips")
+    assert clips["pass"] is False
+    assert "6 semantic" in clips["detail"]
+
+
+def test_a_published_dataset_provenance_replaces_a_named_second_reviewer(corpus, tmp_path):
+    required = list(envscore.TARGETS["required_tags"])
+    for i in range(12):
+        a = _semantic_clip(corpus, f"s{i:02d}", "development" if i < 6 else "heldout", required)
+        a.gt_geometry(range(30), control_points=[{"frame_id": 0, "id": "p", "xy": [1.0, 1.0]}])
+        a.review = None
+        a.provenance = {
+            "kind": "published_dataset",
+            "source": "VIPSeg",
+            "citation": "Miao et al., CVPR 2022",
+            "license": "non-commercial research",
+            "quality_control": "four expert annotators double-check machine output",
+        }
+    corpus.write()
+
+    _, doc = _score(corpus, tmp_path)
+
+    review = next(
+        c for c in doc["gates"]["corpus_coverage"]["checks"] if c["name"] == "second review"
+    )
+    assert review["pass"] is True
+    assert "published dataset" in review["detail"]
+
+
+def test_a_semantic_held_out_clip_without_review_or_provenance_fails_second_review(
+    corpus, tmp_path
+):
+    a = corpus.clip("a", split="heldout")
+    a.review = None
+    corpus.write()
+
+    _, doc = _score(corpus, tmp_path)
+
+    review = next(
+        c for c in doc["gates"]["corpus_coverage"]["checks"] if c["name"] == "second review"
+    )
+    assert review["pass"] is False
+
+
+def test_geometry_scope_annotations_reject_semantic_labels(corpus):
+    a = _geometry_clip(corpus, "g")
+    a.gt_instance(0, "c", "object", "chair", (0, 4, 0, 4))
+    corpus.write()
+
+    with pytest.raises(envscore.AnnotationError, match="geometry"):
+        envscore.load_annotation(corpus.annotations / "g.json")
+
+
 def test_the_split_option_selects_which_clips_are_scored(corpus, tmp_path):
     dev = corpus.clip("dev", split="development")
     dev.gt_instance(0, "c", "object", "chair", (0, 4, 0, 4))

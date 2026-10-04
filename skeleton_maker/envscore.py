@@ -31,7 +31,7 @@ from .envmanifest import ManifestError
 from .path_safety import is_same_or_ancestor, same_path
 from .utils import die
 
-SCORER_VERSION = "1"
+SCORER_VERSION = "2"
 SCORE_SCHEMA = "skeleton-maker.environment-score/1"
 
 TARGETS: dict[str, Any] = {
@@ -628,22 +628,39 @@ def _underconstrained_gate(clips: dict, manifests: dict) -> dict:
     return {"pass": not reasons, "reasons": reasons, "clips": verdicts}
 
 
+def _is_semantic(ann: dict) -> bool:
+    return ann.get("scope", "semantic") == "semantic"
+
+
+def _second_review(ann: dict) -> str | None:
+    """How a clip's labels were reviewed, or ``None`` when they were not."""
+    if ann.get("review"):
+        return "named second reviewer"
+    if (ann.get("provenance") or {}).get("kind") == "published_dataset":
+        return "published dataset quality control"
+    return None
+
+
 def _coverage_gate(all_clips: dict, manifests: dict) -> dict:
     t = TARGETS["corpus"]
-    held = {n: a for n, a in all_clips.items() if a["split"] == "heldout"}
+    semantic = {n: a for n, a in all_clips.items() if _is_semantic(a)}
+    held = {n: a for n, a in semantic.items() if a["split"] == "heldout"}
+    held_all = {n: a for n, a in all_clips.items() if a["split"] == "heldout"}
     checks = []
 
     def check(name, ok, detail):
         checks.append({"name": name, "pass": bool(ok), "detail": detail})
 
-    n_dev = sum(1 for a in all_clips.values() if a["split"] == "development")
+    n_dev = sum(1 for a in semantic.values() if a["split"] == "development")
     check(
         "clips",
-        len(all_clips) >= t["clips"]
+        len(semantic) >= t["clips"]
         and n_dev >= t["development_clips"]
         and len(held) >= t["heldout_clips"],
-        f"{len(all_clips)} clips ({n_dev} development, {len(held)} held-out); "
-        f"need {t['clips']} with {t['development_clips']} and {t['heldout_clips']}",
+        f"{len(semantic)} semantic clips ({n_dev} development, {len(held)} held-out) of "
+        f"{len(all_clips)} in the corpus; need {t['clips']} semantic clips with "
+        f"{t['development_clips']} and {t['heldout_clips']}; geometry-scope clips are counted "
+        "by the geometry checks only",
     )
     short = [n for n, a in held.items() if len(a["frames"]) < t["heldout_frames_per_clip"]]
     check(
@@ -664,10 +681,14 @@ def _coverage_gate(all_clips: dict, manifests: dict) -> dict:
         bool(held) and not lacking,
         f"held-out clips without a {t['tracking_interval_seconds']} s tracking interval: {lacking or 'none'}",
     )
+    how = {n: _second_review(a) for n, a in held.items()}
+    published = sorted(n for n, kind in how.items() if kind == "published dataset quality control")
     check(
         "second review",
-        bool(held) and all(a.get("review") for a in held.values()),
-        "every held-out clip needs a second reviewer with disagreements resolved",
+        bool(held) and all(how.values()),
+        "every held-out semantic clip needs a second reviewer with disagreements resolved, or a "
+        f"published dataset's documented quality control; {len(published)} clips rely on the "
+        f"published dataset: {published or 'none'}",
     )
     incomplete = []
     for name in all_clips:
@@ -722,7 +743,7 @@ def _coverage_gate(all_clips: dict, manifests: dict) -> dict:
     check("required scene tags", not missing, f"missing: {missing or 'none'}")
     translating = [
         n
-        for n, a in held.items()
+        for n, a in held_all.items()
         if "translating" in a.get("tags", [])
         and (a.get("geometry") or {}).get("eligible_frames")
         and (a.get("geometry") or {}).get("control_points")
@@ -734,7 +755,7 @@ def _coverage_gate(all_clips: dict, manifests: dict) -> dict:
     )
     withheld = [
         n
-        for n, a in held.items()
+        for n, a in held_all.items()
         if any(d["withheld"] for d in (a.get("geometry") or {}).get("dimensions", []))
     ]
     check(
@@ -761,7 +782,11 @@ def score(predictions: str, annotations: str, split: str = "heldout") -> dict:
     for name, ann in selected.items():
         manifest_path = manifests.get(name)
         manifest = manifest_path[0] if manifest_path else None
-        info = {"split": ann["split"], "prediction": "present" if manifest else "missing"}
+        info = {
+            "split": ann["split"],
+            "scope": ann.get("scope", "semantic"),
+            "prediction": "present" if manifest else "missing",
+        }
         clip: dict = {"scanned": set(), "entities": {}, "observations": {}}
         bundle = Path()
         if manifest:
@@ -771,6 +796,9 @@ def score(predictions: str, annotations: str, split: str = "heldout") -> dict:
             clip["entities"] = {e["id"]: e for e in manifest["entities"]}
             for obs in manifest["observations"]:
                 clip["observations"].setdefault(obs["frame_id"], []).append(obs)
+        if not _is_semantic(ann):
+            inputs[name] = info
+            continue
         frames = [_Frame(clip, ann, manifest, bundle, f) for f in ann["frames"]]
         info["frames_unscanned"] = sorted(f.id for f in frames if not f.scanned)
         inputs[name] = info
