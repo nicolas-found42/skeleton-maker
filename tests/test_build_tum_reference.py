@@ -7,6 +7,7 @@ the converter's own formulas.
 """
 
 import importlib.util
+import json
 import math
 from pathlib import Path
 
@@ -189,6 +190,82 @@ def test_a_fast_turning_camera_is_tagged_motion_blur_from_its_measured_turn_rate
     assert motion["peak_turn_rate_deg_s"] == pytest.approx(150.0, rel=0.05)
     assert motion["fast_turn_fraction"] > 0.9
     assert "motion_blur" in tum.motion_tags(motion)
+
+
+def _full_size_sequence(root: Path) -> Path:
+    """A real-size 640x480 synthetic sequence: a slow sideways slide in front of a textured plane."""
+    (root / "rgb").mkdir(parents=True)
+    (root / "depth").mkdir()
+    rng = np.random.default_rng(11)
+    texture = np.kron(rng.integers(0, 2, size=(60, 110)) * 200 + 20, np.ones((8, 8))).astype(
+        np.uint8
+    )
+    rgb, depth, truth = [], [], []
+    for i in range(240):
+        t = 1000.0 + i / 30.0
+        frame = texture[:480, i : i + 640]
+        cv2.imwrite(str(root / "rgb" / f"{t:.6f}.png"), cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR))
+        rgb.append(f"{t:.6f} rgb/{t:.6f}.png")
+        td = t + 0.005
+        cv2.imwrite(str(root / "depth" / f"{td:.6f}.png"), np.full((480, 640), 10000, np.uint16))
+        depth.append(f"{td:.6f} depth/{td:.6f}.png")
+        truth.append(f"{t:.6f} {0.01 * i:.6f} 0 0 0 0 0 1")
+    for name, rows in (("rgb", rgb), ("depth", depth), ("groundtruth", truth)):
+        (root / f"{name}.txt").write_text("# header\n" + "\n".join(rows) + "\n")
+    return root
+
+
+def test_the_cli_default_camera_is_freiburg1_so_existing_calls_are_unchanged(tmp_path):
+    """Without --camera the CLI behaves as before and says so in its report."""
+    root, out = _full_size_sequence(tmp_path / "seq"), tmp_path / "out"
+
+    exit_normal = tum.main(
+        [str(root), str(out), "--name", "default-cam", "--split", "heldout", "--sample-step", "10"]
+    )
+
+    report = json.loads((out / "default-cam.build-report.json").read_text())
+    reference = json.loads((out / "default-cam.geometry-reference.json").read_text())
+    annotation = json.loads((out / "default-cam.annotation.json").read_text())
+
+    assert exit_normal == 0
+    assert report["parameters"]["camera"] == "freiburg1"
+    assert reference["camera"]["intrinsics"][0][0] == 517.3
+    assert annotation["frames"] == []
+
+
+def test_the_cli_selects_the_freiburg2_camera(tmp_path):
+    """A real-size fr2 sequence: 640x480 frames, Freiburg 2 intrinsics, a slow slide."""
+    root, out = _full_size_sequence(tmp_path / "seq"), tmp_path / "out"
+
+    exit_normal = tum.main(
+        [str(root), str(out), "--name", "pan", "--split", "development", "--camera", "freiburg2"]
+    )
+    report = json.loads((out / "pan.build-report.json").read_text())
+    reference = json.loads((out / "pan.geometry-reference.json").read_text())
+    annotation = json.loads((out / "pan.annotation.json").read_text())
+
+    assert exit_normal == 0
+    assert report["parameters"]["camera"] == "freiburg2"
+    assert reference["camera"]["intrinsics"][0][0] == 520.9
+    assert annotation["frames"] == []
+
+
+def test_the_cli_refuses_an_unknown_camera(tmp_path):
+    with pytest.raises(SystemExit) as excinfo:
+        tum.main(
+            [
+                "/nonexistent",
+                str(tmp_path / "out"),
+                "--name",
+                "x",
+                "--split",
+                "development",
+                "--camera",
+                "kinect-xyz",
+            ]
+        )
+
+    assert excinfo.value.code != 0
 
 
 def test_frames_without_a_close_depth_image_are_never_anchors(tmp_path):

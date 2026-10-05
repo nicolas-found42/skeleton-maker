@@ -43,6 +43,15 @@ FREIBURG1 = {
     "intrinsics": [517.3, 516.5, 318.6, 255.3],
     "distortion": [0.2624, -0.9531, -0.0054, 0.0026, 1.1633],
 }
+#: freiburg2 colour camera, from the TUM file-format page (fx, fy, cx, cy, then d0..d4); the
+#: same Kinect depth scale, so ``DEPTH_SCALE`` above applies unchanged.
+FREIBURG2 = {
+    "size": [640, 480],
+    "intrinsics": [520.9, 521.0, 325.1, 249.7],
+    "distortion": [0.2312, -0.7849, -0.0033, -0.0001, 0.9172],
+}
+#: The cameras this converter knows, by name; ``build`` records the one it used.
+CAMERAS = {"freiburg1": FREIBURG1, "freiburg2": FREIBURG2}
 MAX_ASSOCIATION_S = 0.02
 DEPTH_RANGE_M = (0.5, 3.5)
 #: Per-point bound, above the median 2 cm depth-versus-pose disagreement measured on freiburg1.
@@ -395,6 +404,7 @@ def build(
     frame_rate: int = 30,
     sample_step: int = 30,
     camera: dict = FREIBURG1,
+    camera_name: str | None = None,
     encode: bool = True,
     clip_sha256: str | None = None,
     extra_tags: tuple[str, ...] = ("indoor",),
@@ -492,6 +502,7 @@ def build(
             "sample_step": sample_step,
             "max_samples": max_samples,
             "frame_rate": frame_rate,
+            "camera": camera_name,
             "max_association_s": MAX_ASSOCIATION_S,
             "depth_range_m": DEPTH_RANGE_M,
             "anchor_uncertainty_m": ANCHOR_UNCERTAINTY_M,
@@ -515,6 +526,12 @@ def main(argv=None) -> int:
     parser.add_argument("out_dir", type=Path)
     parser.add_argument("--name", required=True)
     parser.add_argument("--split", choices=("development", "heldout"), required=True)
+    parser.add_argument(
+        "--camera",
+        choices=(*CAMERAS,),
+        default="freiburg1",
+        help="which TUM colour-camera calibration the sequence was recorded with",
+    )
     parser.add_argument("--sample-step", type=int, default=30)
     parser.add_argument(
         "--max-samples",
@@ -530,6 +547,8 @@ def main(argv=None) -> int:
             name=args.name,
             split=args.split,
             sample_step=args.sample_step,
+            camera=CAMERAS[args.camera],
+            camera_name=args.camera,
             max_samples=args.max_samples,
         )
     except ReferenceError_ as exc:
