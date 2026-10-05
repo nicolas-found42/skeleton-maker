@@ -39,6 +39,7 @@ work/
 !skeleton_maker/characters/*.json
 !docs/research/environment-source-candidates.json
 !docs/research/environment-corpus-manifest.json
+!docs/research/environment-corpus-v2-results.json
 
 # macOS
 .DS_Store

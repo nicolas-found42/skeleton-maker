@@ -1,6 +1,6 @@
 # Environment evaluation status
 
-Issue #51 remains subject to real-video recognition, tracking and independent geometry gates. Offline fixtures establish integration behavior. The observations below are development evidence, not held-out accuracy results.
+Issue #51 remains subject to real-video recognition, tracking and independent geometry gates. Offline fixtures establish integration behavior. The earlier observations below are development evidence. The final corpus-v2 section reports the frozen development and held-out pilot, including failed gates and a missing attempt.
 
 ## Source acquisition
 
@@ -104,3 +104,70 @@ Official releases offer possible complementary scene references: [ScanNet](https
 ## Local evidence
 
 The integration checkout's ignored `work/jev-run/` directory contains source-search metadata, download logs, full Jev envelopes and evidence, the street manifest and mask bundle, runtime logs and inspected frames. Version 2 tracking artifacts are under `work/jev-run/issue-61-real/run-3/`; the DA3 smokes, derived clip and original manifests are retained under `work/jev-run/issue-59-real/`, with a hash-checked relocation ledger. Media and model weights remain outside Git. The committed inventory and this report retain readable provenance and the decisive execution/failure observations; they do not substitute for the complete evaluation artifacts required by #66.
+
+## Frozen corpus-v2 evaluation
+
+The once-only pilot failed the frozen accuracy gates. Seven development clips and eight held-out clips were attempted. 14 prediction manifests were published; their individual perception, overall and geometry statuses are retained in the JSON report. Held-out `vip-h3-indoor-objects` stopped after 12 of 16 samples without a published manifest; its termination cause, exit status, wall time and peak RSS were not captured. Its expected command is reconstructed from the freeze, with provenance explicitly marked because the original runtime argv was not captured. The interrupted attempt was retained and was not retried. Missing predictions count as misses, so these are failed full-pilot results, not a completed-cohort accuracy estimate.
+
+The [machine-readable results](environment-corpus-v2-results.json) include every scorer gate, per-class and per-clip results, exact frozen commands/settings/aliases/targets, worker identities, hashes, hardware and per-clip execution records. Evaluated source commit: `cb8f2749cab3d3e3dbf2c09821bee78a149fe817`. The original configuration was frozen before held-out inference at `2026-10-05T11:39:30.375233+00:00`; its SHA-256 is `2e80a8ae6ae008b172ee3c5c64d7b55e36ede248264ac11b07adb66ac4073bca`. The 2,506 corpus inputs retain tree SHA-256 `558ae101cea0c23ddb7e1dfa36151c487f6eb95e5b13729377d6b921f8813d2a`. The original full hash inventory, media, annotations, masks, depth and logs remain outside Git under `/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2`.
+
+CPU was selected from development resource/execution evidence before accuracy scoring. The MPS attempt was operator-stopped after 1,257.8 seconds amid swap and slow progress; no deadlock was proven. The completed CPU d1 probe was copied with identical hashes into the final prediction directory, preserving original command/log paths in its record. The baseline aliases, targets and inference settings were not tuned after development error analysis or held-out exposure. Hardware: Apple M5, 16 GiB, arm64, macOS 26.4.1.
+
+The public scorer rejects the raw runner directory with exit 2 because run-record JSON is parsed as a prediction. The frozen workaround uses a manifest-only symlink view: every manifest and asset is validated, runner/operator-stop metadata exclusions are recorded in a separate ledger, and score files are written outside both input directories. The scorer and targets were unchanged.
+
+### Separate gate results
+
+Both final public scorer invocations exited 1. Accuracy is split-specific; corpus coverage examines all 15 annotations. There is no combined score. Full reasons, subtype counts and per-clip failures are in the JSON report.
+
+| Gate | Development | Held-out |
+| --- | --- | --- |
+| objects | FAIL; P/R 0.293185/0.435294; TP/FP/FN 185/446/240 | FAIL; P/R 0.592697/0.241972; TP/FP/FN 211/145/661 |
+| vehicles | FAIL; P/R 0.625731/0.295580; TP/FP/FN 107/64/255 | FAIL; P/R 0.739623/0.532609; TP/FP/FN 196/69/172 |
+| walls | FAIL; IoU 0.212924; negative FP 37/47 (0.787234) | FAIL; IoU 0.300508; negative FP 17/48 (0.354167) |
+| floors | FAIL; IoU 0.759878; negative FP 43/47 (0.914894) | FAIL; IoU 0.334738; negative FP 47/48 (0.979167) |
+| ceilings | FAIL; IoU 0.444931; negative FP 60/63 (0.952381) | FAIL; IoU 0.853950; negative FP 37/48 (0.770833) |
+| structural_surfaces | FAIL; AND of wall, floor and ceiling gates | FAIL; AND of wall, floor and ceiling gates |
+| identity_objects | FAIL; IDF1 0.317959; switches 39, fragmentation 13, misses 235 | FAIL; IDF1 0.270358; switches 47, fragmentation 12, misses 661 |
+| identity_vehicles | FAIL; IDF1 0.307692; switches 26, fragmentation 8, misses 255 | FAIL; IDF1 0.565561; switches 19, fragmentation 8, misses 172 |
+| registration | FAIL; 0/4 registered; reprojection error unmeasurable | FAIL; 0/8 registered; reprojection error unmeasurable |
+| metric_scale | FAIL; no predicted check dimensions | FAIL; no predicted check dimensions |
+| underconstrained | PASS | FAIL; missing h3 manifest cannot establish honest abstention |
+| corpus_coverage | FAIL; failed: complete prediction runs | FAIL; failed: complete prediction runs |
+
+### Execution records
+
+| Clip | Split | Exit | Wall seconds | Peak process RSS bytes | Result |
+| --- | --- | --- | --- | --- | --- |
+| tum-fr1-rpy | heldout | 0 | 1444.8 | 7188561920 | perception complete; overall partial |
+| tum-fr1-xyz | heldout | 0 | 1792.6 | 6872023040 | perception complete; overall partial |
+| tum-fr2-rpy | development | 0 | 2422.6 | 6618284032 | perception complete; overall partial |
+| vip-d1-indoor-structure | development | 0 | 4669.3 | 3900293120 | perception complete; overall partial |
+| vip-d2-indoor-structure | development | 0 | 2592.3 | 6516867072 | perception complete; overall partial |
+| vip-d3-indoor-objects | development | 0 | 1149.9 | 4939235328 | perception complete; overall partial |
+| vip-d4-vehicles | development | 0 | 1574.5 | 6176505856 | perception complete; overall partial |
+| vip-d5-vehicles | development | 0 | 1886.6 | 6051905536 | perception complete; overall partial |
+| vip-d6-vehicles | development | 0 | 1241.1 | 4656742400 | perception complete; overall partial |
+| vip-h1-indoor-structure | heldout | 0 | 4897.5 | 6850297856 | perception complete; overall partial |
+| vip-h2-indoor-structure | heldout | 0 | 3251.5 | 3493494784 | perception complete; overall partial |
+| vip-h3-indoor-objects | heldout | unknown | unknown | unknown | interrupted; no manifest |
+| vip-h4-vehicles | heldout | 0 | 3971.0 | 3164635136 | perception complete; overall partial |
+| vip-h5-vehicles | heldout | 0 | 2693.1 | 3181150208 | perception complete; overall partial |
+| vip-h6-vehicles-fixed | heldout | 0 | 2766.4 | 6170705920 | perception complete; overall partial |
+
+Process RSS excludes accelerator allocation and is not total physical footprint. The machine was shared with other active workloads, so these runtimes are not a throughput benchmark. CLI exit zero certifies neither recognition accuracy nor metric registration. The optional SAM2 `_C` extension warning remains in the logs.
+
+### Development diagnostics and limits
+
+The read-only development mask audit reproduces object and vehicle counts. Of 446 unmatched object predictions, 96 have best same-class IoU below 0.5, 44 overlap an eligible same-class reference but remain unmatched by one-to-one assignment, and 306 have no same-class reference in that frame. The 64 unmatched vehicle predictions divide into 23, 1 and 40 respectively. Existing chair/stool and table/desk aliases cover those terms. Duplicate masks, ambiguous `shelf cabinet` labels and distinct bed/sofa or truck/car classes were retained. High overlap with a differently labeled published instance does not establish an alias. The preselected d1 frame-zero ceiling diagnostic has IoU 0.247543: predicted outlines miss broad published ceiling regions.
+
+The held-out underconstrained gate also fails for the absent h3 manifest: its geometry status is missing and therefore not in the honest-geometry set used by the scorer. The raw generic reason says that the clip claims registration without adequate evidence; no actual registration claim by this missing clip was observed. The reason string is preserved in JSON.
+
+Structural negative rates measure agreement with the frozen VIPSeg mapping. Ground/road/building/sky classes remain background in that mapping, so negative failures do not establish that every predicted physical surface is semantically wrong. The missing held-out clip contributes positive misses but its unscanned class-negative frames do not enter the negative-rate denominator, as specified by the scorer.
+
+Development TUM registration abstained: ten of 20 supplied anchors lack positive finite DA3 depth and ten have camera-intrinsics mismatch; none passes. Frame-zero returned focal lengths are 611.926/610.084 versus corrected calibration 544.841/543.589. Held-out TUM fr1-rpy abstains for nonpositive/nonfinite anchor depth; fr1-xyz abstains for intrinsics mismatch. Guards and controls were preserved. This records rejection conditions without asserting a fix. Check dimensions are withheld from scale fitting but their expected lengths appear in the calibration payload for post-fit validation, so the payload is not fully blinded.
+
+VIPSeg published quality control replaces a newly named second reviewer under the accepted deviation. Training contamination is unknown. Pan occurs only in development; the blur proxy was checked on one frame pair. TUM room/360 references were rejected for depth/pose disagreement. Freiburg3 sitting rotation qualified by a fragile 0.0001 m margin and was rejected during selection. Results apply only to this finite pilot and fixed taxonomy.
+
+A fresh `just check` at the evaluated source commit passed: 532 tests, one skip, 82.76% coverage, plus hooks, format/lint/types, workflow security, research preflight and all offline browser regressions. Report-only changes are checked separately by the repository hooks. Fixture success establishes software behavior, not recognition accuracy. All twelve Jev capabilities were used with `typesafe/jev-1.13` through OpenRouter; local envelopes retain contradictions and low-confidence/escalated judgments. Actual numerical checks and artifact validation supply proof. Issue #51 and the corpus/evaluation tickets remain open, and PR #67 remains draft. No merge or issue closure is claimed.
+
+The final Jev report gate verified all five completion claims, with no contradicted or unsupported claims, but escalated its patch review: safe-to-apply 0.40, correctness confidence 0.46 and blast-radius confidence 0.41. Hash/report equivalence was verified with review confidence 0.76. This is not automatic approval. The stronger agent review resolves report-only safety from the exact four-file diff and the executed corpus/source hash, raw-score equality, manifest/record and hook checks; no numerical gate or parent-feature readiness is overridden. The final probabilities are retained in the JSON report, and the initial oversized-request API 400 remains in local evidence.

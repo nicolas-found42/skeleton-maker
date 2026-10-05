@@ -1,0 +1,4874 @@
+{
+  "schema": "skeleton-maker.environment-pilot-results/1",
+  "recorded_at_utc": "2026-10-05T23:47:17.357283+00:00",
+  "evaluation_status": "failed; one held-out attempt interrupted without a published manifest",
+  "original_freeze_path": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/reports/frozen-evaluation.json",
+  "original_freeze_sha256": "2e80a8ae6ae008b172ee3c5c64d7b55e36ede248264ac11b07adb66ac4073bca",
+  "frozen_configuration": {
+    "frozen_at_utc": "2026-10-05T11:39:30.375233+00:00",
+    "git_commit": "cb8f2749cab3d3e3dbf2c09821bee78a149fe817",
+    "git_status": "",
+    "device": "cpu",
+    "prediction_directory": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu",
+    "hardware": {
+      "platform": "macOS-26.4.1-arm64-arm-64bit",
+      "machine": "arm64",
+      "cpu": "Apple M5",
+      "memory_bytes": 17179869184
+    },
+    "corpus": {
+      "file_count": 2506,
+      "tree_sha256": "558ae101cea0c23ddb7e1dfa36151c487f6eb95e5b13729377d6b921f8813d2a",
+      "inventory_note": "The 2506 per-file hashes are retained in the original frozen file outside Git; its complete SHA-256 is recorded below."
+    },
+    "scorer_version": "2",
+    "targets": {
+      "mask_iou": 0.5,
+      "object_precision": 0.8,
+      "object_recall": 0.7,
+      "subtype_min_instances": 10,
+      "subtype_recall": 0.5,
+      "structural_iou": 0.65,
+      "structural_clip_iou": 0.5,
+      "negative_area_fraction": 0.01,
+      "negative_false_positive_rate": 0.05,
+      "idf1": 0.75,
+      "registration_coverage": 0.8,
+      "reprojection_median_pct": 0.5,
+      "reprojection_p95_pct": 2.0,
+      "metric_relative_error": 0.1,
+      "ignore_overlap": 0.5,
+      "corpus": {
+        "clips": 12,
+        "development_clips": 6,
+        "heldout_clips": 6,
+        "heldout_frames_per_clip": 10,
+        "tracking_interval_seconds": 2.0,
+        "family_positive_heldout_clips": 2,
+        "object_subtypes": 6,
+        "vehicle_subtypes": 3,
+        "translating_registration_clips": 2
+      },
+      "required_tags": [
+        "indoor",
+        "outdoor",
+        "vehicle_stationary",
+        "vehicle_moving",
+        "handled_object",
+        "tripod",
+        "translating",
+        "pan",
+        "occlusion",
+        "motion_blur",
+        "person_free",
+        "edited_cut",
+        "underconstrained"
+      ]
+    },
+    "requested_label_vocabulary": [
+      {
+        "label": "wall",
+        "family": "surface",
+        "source": "preset"
+      },
+      {
+        "label": "floor",
+        "family": "surface",
+        "source": "preset"
+      },
+      {
+        "label": "ceiling",
+        "family": "surface",
+        "source": "preset"
+      },
+      {
+        "label": "ground",
+        "family": "surface",
+        "source": "preset"
+      },
+      {
+        "label": "road",
+        "family": "surface",
+        "source": "preset"
+      },
+      {
+        "label": "stairs",
+        "family": "surface",
+        "source": "preset"
+      },
+      {
+        "label": "door",
+        "family": "surface",
+        "source": "preset"
+      },
+      {
+        "label": "window",
+        "family": "surface",
+        "source": "preset"
+      },
+      {
+        "label": "chair",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "table",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "sofa",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "bed",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "desk",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "shelf",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "cabinet",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "bench",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "stool",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "bottle",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "cup",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "bowl",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "plate",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "knife",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "bag",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "backpack",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "box",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "bucket",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "ladder",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "hammer",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "drill",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "laptop",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "phone",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "monitor",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "lamp",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "book",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "pot",
+        "family": "object",
+        "source": "preset"
+      },
+      {
+        "label": "car",
+        "family": "vehicle",
+        "source": "preset"
+      },
+      {
+        "label": "truck",
+        "family": "vehicle",
+        "source": "preset"
+      },
+      {
+        "label": "bus",
+        "family": "vehicle",
+        "source": "preset"
+      },
+      {
+        "label": "bicycle",
+        "family": "vehicle",
+        "source": "preset"
+      },
+      {
+        "label": "motorcycle",
+        "family": "vehicle",
+        "source": "preset"
+      }
+    ],
+    "code_sha256": {
+      "skeleton_maker/__init__.py": "eb3b09cd08d87021caaf142652b78eb8c17249bafe2de2edbcf7243c626a8f25",
+      "skeleton_maker/_gen/nvidia/ai4m/body_pose/v1/body_pose_pb2.py": "ad28156e97529ba71a807658d59a18afb9e4a34ea76581865965dd6ac8acd704",
+      "skeleton_maker/_gen/nvidia/ai4m/body_pose/v1/body_pose_pb2_grpc.py": "e2cbc1aef2239fe82c60dbeeef39e75454afc1093ff94dd082ee6010a4ea86b2",
+      "skeleton_maker/_gen/nvidia/ai4m/common/v1/service_info_pb2.py": "5221bc99a20529d92c49cfde26e7f1048354d8fa26557de023ae5cfb9d48d608",
+      "skeleton_maker/_gen/nvidia/ai4m/common/v1/service_info_pb2_grpc.py": "9e76c584bbc609323d2bbeed1d527edf81572c760d4a0b94a505e8194db8ad7f",
+      "skeleton_maker/artifacts.py": "7d8b3e56e41175ea1b5dc6b72c18a9b787e7d89f7f13f1971a7df4370b31cfc9",
+      "skeleton_maker/bbox.py": "36532ea5657e11b6ebd68bcf46a63496e37995538dd6b46226fe03a66c84c4af",
+      "skeleton_maker/character.py": "31406ffb99ed432186e16b88f55c4a720e888240a7995c521a108016aa5a05d4",
+      "skeleton_maker/cli.py": "fe94a8fd4ad0e2213349cd6c124f02ce66663e14e44ef0fd3bcb96be9bedd28b",
+      "skeleton_maker/constants.py": "762a7b5a8660069702dd60c136c709d85ce8d64cdf0097d45773d9baf615a1a9",
+      "skeleton_maker/detection.py": "6f5444b48615327aa9c0c39a2672550a3b4c53b3d12eb110e5f477fb2582c906",
+      "skeleton_maker/envannotations.py": "6c408f05215cbfba5999c19f172080b2254e9a0e4513b7191f1d5dbe6ac63d53",
+      "skeleton_maker/envcamera.py": "50c950e1e0fa728d24cd15c36d8400e9beb9aa62b9728c8f4c52992a6ee9dd79",
+      "skeleton_maker/envgeometry.py": "21c6bbbcce435da02c7ee78f5588ed3066e8d98cffe6ab665836e73a2a75528d",
+      "skeleton_maker/environment.py": "68044c78a26741c7372431058dbe00221250a718d4aba911a79ef569452e56b0",
+      "skeleton_maker/environment_overlay.py": "04b2667da1b399304f4073dc995f8eb3c93697a4df5e6038f7c77ff55dea4f35",
+      "skeleton_maker/environment_viewer.py": "ec8224001a7c9e9249d83d5a004f1d5d33cb52352c8dfaa1bdfa6ad04be968b4",
+      "skeleton_maker/envmanifest.py": "07adb9b86e9ab5855caa8c801e780f37dedee484d7aca8838cf912aca88d86d7",
+      "skeleton_maker/envregistration.py": "8b5ef5c997a2ba26099d9ce579c1554e783fa3989144f3925925e3a5acc55f48",
+      "skeleton_maker/envscore.py": "079e3d11ee3910a32cd4867357654320b57cde10ee2c07f6fa1eaaa505ff35d6",
+      "skeleton_maker/envworkers.py": "274c30eb69d20d49aa9310e52ba65601c5985ef9040b3194ed9956233fade094",
+      "skeleton_maker/grpc_stubs.py": "499a9ffaab3bce461aac484efe6a08a4c6f738c41557616459a6795f6602fb81",
+      "skeleton_maker/labels.py": "a88495ade475073649a28dd4a8f54ab059abcb9af5ac1ee2ffd76cc26e0e409d",
+      "skeleton_maker/nim.py": "4cd180c8b687ebc976d95a60e4c7b356aa3ea9a5a7207137afdef4a90bc94d34",
+      "skeleton_maker/nova77.py": "fc470957712280d1301c3662f6653780ad76a22d0a010c6ec6233c1e85e8af84",
+      "skeleton_maker/path_safety.py": "3ad27590b4f18cc72fb59f92fdc5ea8a663956cae44f95122e16b70cbd9f2a27",
+      "skeleton_maker/poses.py": "86c8b00fbad78c1972bb41684d875a4d519008060938195979620690117aed16",
+      "skeleton_maker/render.py": "d3864d1ea7c74f79b99fb3de1768558646ddc168b90b627d440c9600c2a02c76",
+      "skeleton_maker/shots.py": "53c9254effd5aa84c435977ee3b932fc84a88371a36c048f730b982560d7eff7",
+      "skeleton_maker/stage.py": "d8a6d4644889bfdf47b4a65b30b48da5d958032847db74e6b42aac17505e52b3",
+      "skeleton_maker/stage_environment.py": "d0fd3aaff95b6d77c5b7ee48c22e386444dc3461fb7d799938b85f8f75dc0191",
+      "skeleton_maker/utils.py": "7b8d116e14122e4ad16f4c674dc1de3d3fc3eb4d867967af2d920001253b52cf",
+      "skeleton_maker/verify.py": "135d7f7832f77b216b934d276e2d486e7fe3c8f3bde39c46aa54aaa5c55d0667",
+      "skeleton_maker/workers/da3_geometry.py": "3ce75d66bc5da597ab7efec4a356e17d1e4b5450ec31cf989749c3ace24f19d6",
+      "skeleton_maker/workers/grounded_sam2_da3.py": "36cfe81c42e93a6a532891f67d578af2934cf13878d2be8ee3c1e72a2d485eaa",
+      "scripts/build_tum_reference.py": "aba11f27bff0d321ffe9fb18697df62f1b939753f2cbd9b8fc4f29b8e6f1cf81",
+      "scripts/build_vipseg_corpus.py": "cdd3e33022121425d975751aacf596eb1be464dbbe296d9092b4fa26d75158fd",
+      "scripts/check_coverage_floor.py": "5823fe9c953e1e41779643727fd6253f68a7e77c7ad6b1b4319c13c68e531c0f",
+      "scripts/check_dev_environment.py": "baf1a21e0387d60102c13f13eda4bc751de3a19c1530bef744c55caae36509b7",
+      "scripts/hash_corpus.py": "aa68b58171cb4521f5a6689f4bd9df292259559c74940cb72efcb565d9c085f7",
+      "scripts/jev_report.py": "781e9533194063bebce3a60f1ee7b8d2e7fc72eed9f58b425cc0ddaf5cd04b9d",
+      "scripts/make_character_environment_fixture.py": "af512cdda1c46093d9ec6e54e5fa909af59c203d4a9dec2b1b9acfae93db8756",
+      "scripts/make_character_fixture.py": "fff46a4189cf4930528e03a6e24ecbe879e3c3c2d47c079eee9eb07b8fcf0c1b",
+      "scripts/make_environment_viewer_fixture.py": "8543944427b27e8d3b1463c593c89c000f489e3b60d98653d764c2a0325ea718",
+      "scripts/run_browser_checks.py": "365826d8fdf200857c3977465d4fe36e34f11a8d8d7a68e936dc82fc7f2be1d5",
+      "scripts/run_checked.py": "e668ecf3dc7e63fe890cabed7cbe625e33f457c3367ad3eb86b569684e469ba0",
+      "scripts/run_environment_corpus.py": "82d18c055240892f8dc46114d31f7f0339e8292dedf62a70b322126c21545cf6",
+      "scripts/setup_da3_geometry_worker.py": "88a0a6c5a061a1b453c0327c057bf07ee88938d8e1148176992af60ad8780917",
+      "scripts/setup_dev.py": "1943245db5d3cdc1580a688212b82cfc5eee36d099b5150c28163c7a13df96f5",
+      "scripts/setup_environment_worker.py": "60b3fc38cc9e46a10c30e16d4cee74dd249e4d47062889fb02fe2e36ef2f57c3"
+    },
+    "workers": {
+      "grounded-sam2-da3": {
+        "worker_version": "2",
+        "libraries": {
+          "torch": "2.14.1",
+          "torchvision": "0.29.1",
+          "transformers": "5.18.0",
+          "sam2": "1.1.0"
+        },
+        "models": {
+          "grounding-dino": {
+            "source": "https://huggingface.co/IDEA-Research/grounding-dino-tiny",
+            "revision": "a2bb814dd30d776dcf7e30523b00659f4f141c71",
+            "sha256": "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3",
+            "license": "Apache-2.0"
+          },
+          "sam2": {
+            "source": "https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_small.pt",
+            "sha256": "6d1aa6f30de5c92224f8172114de081d104bbd23dd9dc5c58996f0cad5dc4d38",
+            "license": "Apache-2.0"
+          }
+        },
+        "settings": {
+          "box_threshold": 0.25,
+          "text_threshold": 0.2,
+          "nms_iou": 0.7,
+          "max_boxes_per_object_label": 6,
+          "max_boxes_per_surface_label": 8,
+          "max_unknown_per_frame": 4,
+          "object_prompt_group_size": 4,
+          "preprocessing": "grounding-dino HF processor defaults on RGB frames at source resolution",
+          "labels": "request-vocabulary",
+          "prompted_alone": [
+            "wall",
+            "floor",
+            "ceiling"
+          ],
+          "tracking": {
+            "predictor": "SAM2VideoPredictor per shot, one internal video frame per sampled source frame",
+            "association": "sam2_video_mask_coverage",
+            "minimum_mask_coverage": 0.35,
+            "ambiguity_margin": 0.12,
+            "motion_method": "median_background_flow_residual",
+            "motion_threshold_frame_diagonals": 0.02,
+            "camera_flow_dispersion_threshold_frame_diagonals": 0.02,
+            "motion_calibrated": false
+          }
+        }
+      },
+      "da3-geometry": {
+        "worker_version": "2",
+        "code": {
+          "repository": "https://github.com/ByteDance-Seed/Depth-Anything-3",
+          "revision": "3d835ec1a5802d64a8b8b15f817a1ab54809bfe4",
+          "license": "Apache-2.0"
+        },
+        "checkpoint": {
+          "repository": "depth-anything/DA3-SMALL",
+          "revision": "e08cab65ca0ec38e7826075418411ab90cab4da3",
+          "file": "model.safetensors",
+          "sha256": "364492e38a3a06d221ac75da7f6621ada3f2361cd24fde11ba79091e9f40efcf",
+          "license": "Apache-2.0"
+        },
+        "libraries": {
+          "torch": "2.14.1",
+          "torchvision": "0.29.1",
+          "numpy": "1.26.4",
+          "huggingface_hub": "1.33.0",
+          "opencv-python-headless": "4.11.0.86",
+          "pillow": "12.3.0",
+          "safetensors": "0.8.0",
+          "einops": "0.8.1",
+          "omegaconf": "2.3.1",
+          "imageio": "2.37.0",
+          "trimesh": "4.6.4",
+          "moviepy": "1.0.3",
+          "addict": "2.4.0",
+          "depth-anything-3": "0.0.0"
+        },
+        "settings": {
+          "model": "depth-anything/DA3-SMALL",
+          "revision": "e08cab65ca0ec38e7826075418411ab90cab4da3",
+          "preprocessing": {
+            "input_color": "RGB",
+            "process_res": 504,
+            "process_res_method": "upper_bound_resize",
+            "crop": null,
+            "lens_transform": "identity or OpenCV undistort from supplied calibration"
+          },
+          "depth_units": "relative_depth",
+          "extrinsics": "world-to-camera, DA3/OpenCV convention, per-shot reference frame",
+          "input_extrinsics_alignment": "disabled; this worker supplies no input extrinsics",
+          "export": "disabled; this worker consumes prediction arrays directly"
+        },
+        "checkpoint_file_sha256": "364492e38a3a06d221ac75da7f6621ada3f2361cd24fde11ba79091e9f40efcf"
+      }
+    },
+    "actual_semantic_checkpoint_sha256": {
+      "grounding-dino": "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3",
+      "sam2": "6d1aa6f30de5c92224f8172114de081d104bbd23dd9dc5c58996f0cad5dc4d38"
+    },
+    "local_evaluation_scripts_sha256": {
+      "work/issue-64-preparation/freeze_evaluation.py": "6cf1d6d4acea0d734c9adcf870d64eb9d1a2ce79df064d0e3b6dfc857bc1902c",
+      "work/issue-64-preparation/run_cpu_corpus.py": "4c5afa42edd2dea6b609e2538c7dacf2f44d038ff693809a9845cb8036fd71c7",
+      "work/issue-64-preparation/build_prediction_view.py": "a5e9ee94ef7fad2f610969ea6c7fe03ca2d96a88ea101f75e80a734f2729ee31"
+    },
+    "worker_requirements_sha256": {
+      "skeleton_maker/workers/da3_geometry.requirements.txt": "6285066678eca0caf84df444d0146e10d9228ea456f5ed930bc7ef5e084ebfcb",
+      "skeleton_maker/workers/grounded_sam2_da3.requirements.txt": "e4d5b8a64926edc23b9076d661076c6bab5ed491abc644c373177584632f398c"
+    },
+    "scoring_procedure": {
+      "manifest_view_directory": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu-manifests",
+      "view_builder": "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/work/issue-64-preparation/build_prediction_view.py",
+      "view_rule": "Validate predictions; exclude only .run-record.json and .operator-stop.json metadata; preserve originals and record view hashes outside the view.",
+      "accuracy_split": "heldout",
+      "coverage_scope": "all 15 corpus clips",
+      "score_output_directory": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/reports"
+    },
+    "commands": {
+      "tum-fr1-rpy": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/tum-fr1-rpy.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/tum-fr1-rpy.json",
+        "--sample-fps",
+        "0.5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache",
+        "--calibration",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/references/tum-fr1-rpy.geometry-reference.json"
+      ],
+      "tum-fr1-xyz": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/tum-fr1-xyz.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/tum-fr1-xyz.json",
+        "--sample-fps",
+        "0.5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache",
+        "--calibration",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/references/tum-fr1-xyz.geometry-reference.json"
+      ],
+      "tum-fr2-rpy": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/tum-fr2-rpy.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/tum-fr2-rpy.json",
+        "--sample-fps",
+        "0.5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache",
+        "--calibration",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/references/tum-fr2-rpy.geometry-reference.json"
+      ],
+      "vip-d1-indoor-structure": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-d1-indoor-structure.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/development-cpu-probe/vip-d1-indoor-structure.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ],
+      "vip-d2-indoor-structure": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-d2-indoor-structure.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d2-indoor-structure.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ],
+      "vip-d3-indoor-objects": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-d3-indoor-objects.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d3-indoor-objects.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ],
+      "vip-d4-vehicles": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-d4-vehicles.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d4-vehicles.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ],
+      "vip-d5-vehicles": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-d5-vehicles.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d5-vehicles.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ],
+      "vip-d6-vehicles": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-d6-vehicles.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d6-vehicles.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ],
+      "vip-h1-indoor-structure": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-h1-indoor-structure.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-h1-indoor-structure.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ],
+      "vip-h2-indoor-structure": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-h2-indoor-structure.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-h2-indoor-structure.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ],
+      "vip-h3-indoor-objects": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-h3-indoor-objects.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-h3-indoor-objects.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ],
+      "vip-h4-vehicles": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-h4-vehicles.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-h4-vehicles.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ],
+      "vip-h5-vehicles": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-h5-vehicles.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-h5-vehicles.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ],
+      "vip-h6-vehicles-fixed": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-h6-vehicles-fixed.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-h6-vehicles-fixed.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ]
+    },
+    "aliases": {
+      "tum-fr1-rpy": {},
+      "tum-fr1-xyz": {},
+      "tum-fr2-rpy": {},
+      "vip-d1-indoor-structure": {
+        "chair": "chair_or_seat",
+        "stool": "chair_or_seat",
+        "table": "table_or_desk",
+        "desk": "table_or_desk",
+        "bottle": "bottle_or_cup",
+        "cup": "bottle_or_cup",
+        "bowl": "tub_or_bowl_or_pot",
+        "pot": "tub_or_bowl_or_pot",
+        "bucket": "tub_or_bowl_or_pot",
+        "bag": "bag_or_package",
+        "backpack": "bag_or_package",
+        "laptop": "computer",
+        "phone": "mobile_phone",
+        "monitor": "screen_or_television"
+      },
+      "vip-d2-indoor-structure": {
+        "chair": "chair_or_seat",
+        "stool": "chair_or_seat",
+        "table": "table_or_desk",
+        "desk": "table_or_desk",
+        "bottle": "bottle_or_cup",
+        "cup": "bottle_or_cup",
+        "bowl": "tub_or_bowl_or_pot",
+        "pot": "tub_or_bowl_or_pot",
+        "bucket": "tub_or_bowl_or_pot",
+        "bag": "bag_or_package",
+        "backpack": "bag_or_package",
+        "laptop": "computer",
+        "phone": "mobile_phone",
+        "monitor": "screen_or_television"
+      },
+      "vip-d3-indoor-objects": {
+        "chair": "chair_or_seat",
+        "stool": "chair_or_seat",
+        "table": "table_or_desk",
+        "desk": "table_or_desk",
+        "bottle": "bottle_or_cup",
+        "cup": "bottle_or_cup",
+        "bowl": "tub_or_bowl_or_pot",
+        "pot": "tub_or_bowl_or_pot",
+        "bucket": "tub_or_bowl_or_pot",
+        "bag": "bag_or_package",
+        "backpack": "bag_or_package",
+        "laptop": "computer",
+        "phone": "mobile_phone",
+        "monitor": "screen_or_television"
+      },
+      "vip-d4-vehicles": {
+        "chair": "chair_or_seat",
+        "stool": "chair_or_seat",
+        "table": "table_or_desk",
+        "desk": "table_or_desk",
+        "bottle": "bottle_or_cup",
+        "cup": "bottle_or_cup",
+        "bowl": "tub_or_bowl_or_pot",
+        "pot": "tub_or_bowl_or_pot",
+        "bucket": "tub_or_bowl_or_pot",
+        "bag": "bag_or_package",
+        "backpack": "bag_or_package",
+        "laptop": "computer",
+        "phone": "mobile_phone",
+        "monitor": "screen_or_television"
+      },
+      "vip-d5-vehicles": {
+        "chair": "chair_or_seat",
+        "stool": "chair_or_seat",
+        "table": "table_or_desk",
+        "desk": "table_or_desk",
+        "bottle": "bottle_or_cup",
+        "cup": "bottle_or_cup",
+        "bowl": "tub_or_bowl_or_pot",
+        "pot": "tub_or_bowl_or_pot",
+        "bucket": "tub_or_bowl_or_pot",
+        "bag": "bag_or_package",
+        "backpack": "bag_or_package",
+        "laptop": "computer",
+        "phone": "mobile_phone",
+        "monitor": "screen_or_television"
+      },
+      "vip-d6-vehicles": {
+        "chair": "chair_or_seat",
+        "stool": "chair_or_seat",
+        "table": "table_or_desk",
+        "desk": "table_or_desk",
+        "bottle": "bottle_or_cup",
+        "cup": "bottle_or_cup",
+        "bowl": "tub_or_bowl_or_pot",
+        "pot": "tub_or_bowl_or_pot",
+        "bucket": "tub_or_bowl_or_pot",
+        "bag": "bag_or_package",
+        "backpack": "bag_or_package",
+        "laptop": "computer",
+        "phone": "mobile_phone",
+        "monitor": "screen_or_television"
+      },
+      "vip-h1-indoor-structure": {
+        "chair": "chair_or_seat",
+        "stool": "chair_or_seat",
+        "table": "table_or_desk",
+        "desk": "table_or_desk",
+        "bottle": "bottle_or_cup",
+        "cup": "bottle_or_cup",
+        "bowl": "tub_or_bowl_or_pot",
+        "pot": "tub_or_bowl_or_pot",
+        "bucket": "tub_or_bowl_or_pot",
+        "bag": "bag_or_package",
+        "backpack": "bag_or_package",
+        "laptop": "computer",
+        "phone": "mobile_phone",
+        "monitor": "screen_or_television"
+      },
+      "vip-h2-indoor-structure": {
+        "chair": "chair_or_seat",
+        "stool": "chair_or_seat",
+        "table": "table_or_desk",
+        "desk": "table_or_desk",
+        "bottle": "bottle_or_cup",
+        "cup": "bottle_or_cup",
+        "bowl": "tub_or_bowl_or_pot",
+        "pot": "tub_or_bowl_or_pot",
+        "bucket": "tub_or_bowl_or_pot",
+        "bag": "bag_or_package",
+        "backpack": "bag_or_package",
+        "laptop": "computer",
+        "phone": "mobile_phone",
+        "monitor": "screen_or_television"
+      },
+      "vip-h3-indoor-objects": {
+        "chair": "chair_or_seat",
+        "stool": "chair_or_seat",
+        "table": "table_or_desk",
+        "desk": "table_or_desk",
+        "bottle": "bottle_or_cup",
+        "cup": "bottle_or_cup",
+        "bowl": "tub_or_bowl_or_pot",
+        "pot": "tub_or_bowl_or_pot",
+        "bucket": "tub_or_bowl_or_pot",
+        "bag": "bag_or_package",
+        "backpack": "bag_or_package",
+        "laptop": "computer",
+        "phone": "mobile_phone",
+        "monitor": "screen_or_television"
+      },
+      "vip-h4-vehicles": {
+        "chair": "chair_or_seat",
+        "stool": "chair_or_seat",
+        "table": "table_or_desk",
+        "desk": "table_or_desk",
+        "bottle": "bottle_or_cup",
+        "cup": "bottle_or_cup",
+        "bowl": "tub_or_bowl_or_pot",
+        "pot": "tub_or_bowl_or_pot",
+        "bucket": "tub_or_bowl_or_pot",
+        "bag": "bag_or_package",
+        "backpack": "bag_or_package",
+        "laptop": "computer",
+        "phone": "mobile_phone",
+        "monitor": "screen_or_television"
+      },
+      "vip-h5-vehicles": {
+        "chair": "chair_or_seat",
+        "stool": "chair_or_seat",
+        "table": "table_or_desk",
+        "desk": "table_or_desk",
+        "bottle": "bottle_or_cup",
+        "cup": "bottle_or_cup",
+        "bowl": "tub_or_bowl_or_pot",
+        "pot": "tub_or_bowl_or_pot",
+        "bucket": "tub_or_bowl_or_pot",
+        "bag": "bag_or_package",
+        "backpack": "bag_or_package",
+        "laptop": "computer",
+        "phone": "mobile_phone",
+        "monitor": "screen_or_television"
+      },
+      "vip-h6-vehicles-fixed": {
+        "chair": "chair_or_seat",
+        "stool": "chair_or_seat",
+        "table": "table_or_desk",
+        "desk": "table_or_desk",
+        "bottle": "bottle_or_cup",
+        "cup": "bottle_or_cup",
+        "bowl": "tub_or_bowl_or_pot",
+        "pot": "tub_or_bowl_or_pot",
+        "bucket": "tub_or_bowl_or_pot",
+        "bag": "bag_or_package",
+        "backpack": "bag_or_package",
+        "laptop": "computer",
+        "phone": "mobile_phone",
+        "monitor": "screen_or_television"
+      }
+    },
+    "development_records": {
+      "tum-fr2-rpy": {
+        "clip": "tum-fr2-rpy",
+        "split": "development",
+        "command": [
+          "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+          "environment",
+          "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/tum-fr2-rpy.mp4",
+          "--out",
+          "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/tum-fr2-rpy.json",
+          "--sample-fps",
+          "0.5",
+          "--device",
+          "cpu",
+          "--geometry",
+          "auto",
+          "--no-cache",
+          "--calibration",
+          "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/references/tum-fr2-rpy.geometry-reference.json"
+        ],
+        "exit_code": 0,
+        "wall_seconds": 2422.6,
+        "peak_rss_bytes": 6618284032,
+        "manifest_sha256": "27d7642981b93c101abf7d605f92aac28f68afc5be16bfab1714ebd9d32733a7",
+        "log": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/tum-fr2-rpy.log"
+      },
+      "vip-d1-indoor-structure": {
+        "clip": "vip-d1-indoor-structure",
+        "split": "development",
+        "command": [
+          "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+          "environment",
+          "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-d1-indoor-structure.mp4",
+          "--out",
+          "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/development-cpu-probe/vip-d1-indoor-structure.json",
+          "--sample-fps",
+          "5",
+          "--device",
+          "cpu",
+          "--geometry",
+          "auto",
+          "--no-cache"
+        ],
+        "exit_code": 0,
+        "wall_seconds": 4669.3,
+        "peak_rss_bytes": 3900293120,
+        "manifest_sha256": "fff787b95328e1f52cb929e90fe250c0678263b088828caa899255f92712b244",
+        "log": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/development-cpu-probe/vip-d1-indoor-structure.log"
+      },
+      "vip-d2-indoor-structure": {
+        "clip": "vip-d2-indoor-structure",
+        "split": "development",
+        "command": [
+          "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+          "environment",
+          "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-d2-indoor-structure.mp4",
+          "--out",
+          "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d2-indoor-structure.json",
+          "--sample-fps",
+          "5",
+          "--device",
+          "cpu",
+          "--geometry",
+          "auto",
+          "--no-cache"
+        ],
+        "exit_code": 0,
+        "wall_seconds": 2592.3,
+        "peak_rss_bytes": 6516867072,
+        "manifest_sha256": "f38c0e27a97cf154da360b522cddcf7aa1f7e5701e89d25ed71633e1a81ff484",
+        "log": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d2-indoor-structure.log"
+      },
+      "vip-d3-indoor-objects": {
+        "clip": "vip-d3-indoor-objects",
+        "split": "development",
+        "command": [
+          "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+          "environment",
+          "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-d3-indoor-objects.mp4",
+          "--out",
+          "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d3-indoor-objects.json",
+          "--sample-fps",
+          "5",
+          "--device",
+          "cpu",
+          "--geometry",
+          "auto",
+          "--no-cache"
+        ],
+        "exit_code": 0,
+        "wall_seconds": 1149.9,
+        "peak_rss_bytes": 4939235328,
+        "manifest_sha256": "c0a01ac9823114a7e98b8f4f193128dd89eecdb0268b1551ecf438cd1dec1424",
+        "log": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d3-indoor-objects.log"
+      },
+      "vip-d4-vehicles": {
+        "clip": "vip-d4-vehicles",
+        "split": "development",
+        "command": [
+          "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+          "environment",
+          "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-d4-vehicles.mp4",
+          "--out",
+          "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d4-vehicles.json",
+          "--sample-fps",
+          "5",
+          "--device",
+          "cpu",
+          "--geometry",
+          "auto",
+          "--no-cache"
+        ],
+        "exit_code": 0,
+        "wall_seconds": 1574.5,
+        "peak_rss_bytes": 6176505856,
+        "manifest_sha256": "f4152692c8cec018a0fab2ca3679331ee8659c1ccedd3e46ab72c4bca33d5622",
+        "log": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d4-vehicles.log"
+      },
+      "vip-d5-vehicles": {
+        "clip": "vip-d5-vehicles",
+        "split": "development",
+        "command": [
+          "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+          "environment",
+          "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-d5-vehicles.mp4",
+          "--out",
+          "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d5-vehicles.json",
+          "--sample-fps",
+          "5",
+          "--device",
+          "cpu",
+          "--geometry",
+          "auto",
+          "--no-cache"
+        ],
+        "exit_code": 0,
+        "wall_seconds": 1886.6,
+        "peak_rss_bytes": 6051905536,
+        "manifest_sha256": "fca85992853f6f6f098db1cbbb32e25a7b066b0c1f63cdc4ff61127e25be6528",
+        "log": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d5-vehicles.log"
+      },
+      "vip-d6-vehicles": {
+        "clip": "vip-d6-vehicles",
+        "split": "development",
+        "command": [
+          "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+          "environment",
+          "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-d6-vehicles.mp4",
+          "--out",
+          "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d6-vehicles.json",
+          "--sample-fps",
+          "5",
+          "--device",
+          "cpu",
+          "--geometry",
+          "auto",
+          "--no-cache"
+        ],
+        "exit_code": 0,
+        "wall_seconds": 1241.1,
+        "peak_rss_bytes": 4656742400,
+        "manifest_sha256": "b9954342887db89526caa4beab8cb42b092430dcf1b21709565ca47a36f71266",
+        "log": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d6-vehicles.log"
+      }
+    },
+    "caveats": [
+      "VIPSeg training contamination unknown",
+      "Second review is published VIPSeg quality control",
+      "pan covered only in development",
+      "motion_blur proxy checked on one frame pair",
+      "Results apply only to this pilot corpus"
+    ]
+  },
+  "execution_records": [
+    {
+      "clip": "tum-fr1-rpy",
+      "split": "heldout",
+      "command": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/tum-fr1-rpy.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/tum-fr1-rpy.json",
+        "--sample-fps",
+        "0.5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache",
+        "--calibration",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/references/tum-fr1-rpy.geometry-reference.json"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 1444.8,
+      "peak_rss_bytes": 7188561920,
+      "manifest_sha256": "6aed192deb2ee05a700bc1e4bd1da7dbdfef639a69371309c2b18c0c98d4bcda",
+      "log": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/tum-fr1-rpy.log",
+      "manifest_status": {
+        "status": "partial",
+        "perception_status": "complete",
+        "reason": "geometry registration unavailable: DA3 depth and poses are camera-frame estimates without a solved metric scale; metric registration abstained: calibration point has no positive finite DA3 depth",
+        "created_at": "2026-10-05T12:09:56+00:00",
+        "tool": {
+          "name": "skeleton-maker",
+          "version": "0.1.0"
+        }
+      },
+      "processed_frames": [
+        {
+          "frame_id": 0,
+          "time": [
+            0,
+            1
+          ],
+          "time_s": 0.0
+        },
+        {
+          "frame_id": 60,
+          "time": [
+            2,
+            1
+          ],
+          "time_s": 2.0
+        },
+        {
+          "frame_id": 120,
+          "time": [
+            4,
+            1
+          ],
+          "time_s": 4.0
+        },
+        {
+          "frame_id": 180,
+          "time": [
+            6,
+            1
+          ],
+          "time_s": 6.0
+        },
+        {
+          "frame_id": 240,
+          "time": [
+            8,
+            1
+          ],
+          "time_s": 8.0
+        },
+        {
+          "frame_id": 300,
+          "time": [
+            10,
+            1
+          ],
+          "time_s": 10.0
+        },
+        {
+          "frame_id": 360,
+          "time": [
+            12,
+            1
+          ],
+          "time_s": 12.0
+        },
+        {
+          "frame_id": 420,
+          "time": [
+            14,
+            1
+          ],
+          "time_s": 14.0
+        },
+        {
+          "frame_id": 480,
+          "time": [
+            16,
+            1
+          ],
+          "time_s": 16.0
+        },
+        {
+          "frame_id": 540,
+          "time": [
+            18,
+            1
+          ],
+          "time_s": 18.0
+        },
+        {
+          "frame_id": 600,
+          "time": [
+            20,
+            1
+          ],
+          "time_s": 20.0
+        },
+        {
+          "frame_id": 660,
+          "time": [
+            22,
+            1
+          ],
+          "time_s": 22.0
+        },
+        {
+          "frame_id": 720,
+          "time": [
+            24,
+            1
+          ],
+          "time_s": 24.0
+        }
+      ],
+      "geometry_status": "relative-camera-frame",
+      "geometry_reason": "DA3 depth and poses are camera-frame estimates without a solved metric scale; metric registration abstained: calibration point has no positive finite DA3 depth",
+      "record_sha256": "7d8f082b2d1ca6692ab9f590e1ed518d9e50085fdec764c1a0c1687f2c23b1db",
+      "log_sha256": "afdc4892759a8e82d65b70eb1543c69c9e0104586c0acf94212f0babaae40360"
+    },
+    {
+      "clip": "tum-fr1-xyz",
+      "split": "heldout",
+      "command": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/tum-fr1-xyz.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/tum-fr1-xyz.json",
+        "--sample-fps",
+        "0.5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache",
+        "--calibration",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/references/tum-fr1-xyz.geometry-reference.json"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 1792.6,
+      "peak_rss_bytes": 6872023040,
+      "manifest_sha256": "73a8a0eb61ba11f7857f7a7628df088eee96a675164e1bff154e745d152031a7",
+      "log": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/tum-fr1-xyz.log",
+      "manifest_status": {
+        "status": "partial",
+        "perception_status": "complete",
+        "reason": "geometry registration unavailable: DA3 depth and poses are camera-frame estimates without a solved metric scale; metric registration abstained: DA3 source-space intrinsics do not match the calibration/lens-corrected camera",
+        "created_at": "2026-10-05T12:39:48+00:00",
+        "tool": {
+          "name": "skeleton-maker",
+          "version": "0.1.0"
+        }
+      },
+      "processed_frames": [
+        {
+          "frame_id": 0,
+          "time": [
+            0,
+            1
+          ],
+          "time_s": 0.0
+        },
+        {
+          "frame_id": 60,
+          "time": [
+            2,
+            1
+          ],
+          "time_s": 2.0
+        },
+        {
+          "frame_id": 120,
+          "time": [
+            4,
+            1
+          ],
+          "time_s": 4.0
+        },
+        {
+          "frame_id": 180,
+          "time": [
+            6,
+            1
+          ],
+          "time_s": 6.0
+        },
+        {
+          "frame_id": 240,
+          "time": [
+            8,
+            1
+          ],
+          "time_s": 8.0
+        },
+        {
+          "frame_id": 300,
+          "time": [
+            10,
+            1
+          ],
+          "time_s": 10.0
+        },
+        {
+          "frame_id": 360,
+          "time": [
+            12,
+            1
+          ],
+          "time_s": 12.0
+        },
+        {
+          "frame_id": 420,
+          "time": [
+            14,
+            1
+          ],
+          "time_s": 14.0
+        },
+        {
+          "frame_id": 480,
+          "time": [
+            16,
+            1
+          ],
+          "time_s": 16.0
+        },
+        {
+          "frame_id": 540,
+          "time": [
+            18,
+            1
+          ],
+          "time_s": 18.0
+        },
+        {
+          "frame_id": 600,
+          "time": [
+            20,
+            1
+          ],
+          "time_s": 20.0
+        },
+        {
+          "frame_id": 660,
+          "time": [
+            22,
+            1
+          ],
+          "time_s": 22.0
+        },
+        {
+          "frame_id": 720,
+          "time": [
+            24,
+            1
+          ],
+          "time_s": 24.0
+        },
+        {
+          "frame_id": 780,
+          "time": [
+            26,
+            1
+          ],
+          "time_s": 26.0
+        }
+      ],
+      "geometry_status": "relative-camera-frame",
+      "geometry_reason": "DA3 depth and poses are camera-frame estimates without a solved metric scale; metric registration abstained: DA3 source-space intrinsics do not match the calibration/lens-corrected camera",
+      "record_sha256": "d55b02070f95a9451a4107a938dfe56e7be5ea933fcb60cb973ff0c0e2bc8166",
+      "log_sha256": "a107e9e018af191146a2f278dc81b986a47da637c2f1a331ed68adf92bb6756d"
+    },
+    {
+      "clip": "tum-fr2-rpy",
+      "split": "development",
+      "command": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/tum-fr2-rpy.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/tum-fr2-rpy.json",
+        "--sample-fps",
+        "0.5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache",
+        "--calibration",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/references/tum-fr2-rpy.geometry-reference.json"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 2422.6,
+      "peak_rss_bytes": 6618284032,
+      "manifest_sha256": "27d7642981b93c101abf7d605f92aac28f68afc5be16bfab1714ebd9d32733a7",
+      "log": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/tum-fr2-rpy.log",
+      "manifest_status": {
+        "status": "partial",
+        "perception_status": "complete",
+        "reason": "geometry registration unavailable: DA3 depth and poses are camera-frame estimates without a solved metric scale; metric registration abstained: calibration point has no positive finite DA3 depth",
+        "created_at": "2026-10-05T09:06:28+00:00",
+        "tool": {
+          "name": "skeleton-maker",
+          "version": "0.1.0"
+        }
+      },
+      "processed_frames": [
+        {
+          "frame_id": 0,
+          "time": [
+            0,
+            1
+          ],
+          "time_s": 0.0
+        },
+        {
+          "frame_id": 60,
+          "time": [
+            2,
+            1
+          ],
+          "time_s": 2.0
+        },
+        {
+          "frame_id": 120,
+          "time": [
+            4,
+            1
+          ],
+          "time_s": 4.0
+        },
+        {
+          "frame_id": 180,
+          "time": [
+            6,
+            1
+          ],
+          "time_s": 6.0
+        },
+        {
+          "frame_id": 240,
+          "time": [
+            8,
+            1
+          ],
+          "time_s": 8.0
+        },
+        {
+          "frame_id": 300,
+          "time": [
+            10,
+            1
+          ],
+          "time_s": 10.0
+        },
+        {
+          "frame_id": 360,
+          "time": [
+            12,
+            1
+          ],
+          "time_s": 12.0
+        },
+        {
+          "frame_id": 420,
+          "time": [
+            14,
+            1
+          ],
+          "time_s": 14.0
+        },
+        {
+          "frame_id": 480,
+          "time": [
+            16,
+            1
+          ],
+          "time_s": 16.0
+        },
+        {
+          "frame_id": 540,
+          "time": [
+            18,
+            1
+          ],
+          "time_s": 18.0
+        },
+        {
+          "frame_id": 600,
+          "time": [
+            20,
+            1
+          ],
+          "time_s": 20.0
+        },
+        {
+          "frame_id": 660,
+          "time": [
+            22,
+            1
+          ],
+          "time_s": 22.0
+        },
+        {
+          "frame_id": 720,
+          "time": [
+            24,
+            1
+          ],
+          "time_s": 24.0
+        },
+        {
+          "frame_id": 780,
+          "time": [
+            26,
+            1
+          ],
+          "time_s": 26.0
+        },
+        {
+          "frame_id": 840,
+          "time": [
+            28,
+            1
+          ],
+          "time_s": 28.0
+        },
+        {
+          "frame_id": 900,
+          "time": [
+            30,
+            1
+          ],
+          "time_s": 30.0
+        }
+      ],
+      "geometry_status": "relative-camera-frame",
+      "geometry_reason": "DA3 depth and poses are camera-frame estimates without a solved metric scale; metric registration abstained: calibration point has no positive finite DA3 depth",
+      "record_sha256": "010424480fde7b9eaa3492942a268205dc62490437706d81ba291390a1cd6eee",
+      "log_sha256": "20c770904e61332596c4cf9b9bbe46b1233a8ad4a5ff806be859a6ab8345c783"
+    },
+    {
+      "clip": "vip-d1-indoor-structure",
+      "split": "development",
+      "command": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-d1-indoor-structure.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/development-cpu-probe/vip-d1-indoor-structure.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 4669.3,
+      "peak_rss_bytes": 3900293120,
+      "manifest_sha256": "fff787b95328e1f52cb929e90fe250c0678263b088828caa899255f92712b244",
+      "log": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/development-cpu-probe/vip-d1-indoor-structure.log",
+      "manifest_status": {
+        "status": "partial",
+        "perception_status": "complete",
+        "reason": "geometry registration unavailable: DA3 depth and poses are camera-frame estimates without a solved metric scale",
+        "created_at": "2026-10-05T08:23:44+00:00",
+        "tool": {
+          "name": "skeleton-maker",
+          "version": "0.1.0"
+        }
+      },
+      "processed_frames": [
+        {
+          "frame_id": 0,
+          "time": [
+            0,
+            1
+          ],
+          "time_s": 0.0
+        },
+        {
+          "frame_id": 1,
+          "time": [
+            1,
+            5
+          ],
+          "time_s": 0.2
+        },
+        {
+          "frame_id": 2,
+          "time": [
+            2,
+            5
+          ],
+          "time_s": 0.4
+        },
+        {
+          "frame_id": 3,
+          "time": [
+            3,
+            5
+          ],
+          "time_s": 0.6
+        },
+        {
+          "frame_id": 4,
+          "time": [
+            4,
+            5
+          ],
+          "time_s": 0.8
+        },
+        {
+          "frame_id": 5,
+          "time": [
+            1,
+            1
+          ],
+          "time_s": 1.0
+        },
+        {
+          "frame_id": 6,
+          "time": [
+            6,
+            5
+          ],
+          "time_s": 1.2
+        },
+        {
+          "frame_id": 7,
+          "time": [
+            7,
+            5
+          ],
+          "time_s": 1.4
+        },
+        {
+          "frame_id": 8,
+          "time": [
+            8,
+            5
+          ],
+          "time_s": 1.6
+        },
+        {
+          "frame_id": 9,
+          "time": [
+            9,
+            5
+          ],
+          "time_s": 1.8
+        },
+        {
+          "frame_id": 10,
+          "time": [
+            2,
+            1
+          ],
+          "time_s": 2.0
+        },
+        {
+          "frame_id": 11,
+          "time": [
+            11,
+            5
+          ],
+          "time_s": 2.2
+        },
+        {
+          "frame_id": 12,
+          "time": [
+            12,
+            5
+          ],
+          "time_s": 2.4
+        },
+        {
+          "frame_id": 13,
+          "time": [
+            13,
+            5
+          ],
+          "time_s": 2.6
+        },
+        {
+          "frame_id": 14,
+          "time": [
+            14,
+            5
+          ],
+          "time_s": 2.8
+        }
+      ],
+      "geometry_status": "relative-camera-frame",
+      "geometry_reason": "DA3 depth and poses are camera-frame estimates without a solved metric scale",
+      "record_sha256": "17a57a703a137cc3613f5a8a0ed8f67e4814d2ba600a0319b1d7b281eed305df",
+      "log_sha256": "6ac949f3a45fd2a0a74f9e802a6b2f11ef085c21f00e8eccafcebca5cdbbb89d"
+    },
+    {
+      "clip": "vip-d2-indoor-structure",
+      "split": "development",
+      "command": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-d2-indoor-structure.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d2-indoor-structure.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 2592.3,
+      "peak_rss_bytes": 6516867072,
+      "manifest_sha256": "f38c0e27a97cf154da360b522cddcf7aa1f7e5701e89d25ed71633e1a81ff484",
+      "log": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d2-indoor-structure.log",
+      "manifest_status": {
+        "status": "partial",
+        "perception_status": "complete",
+        "reason": "geometry registration unavailable: DA3 depth and poses are camera-frame estimates without a solved metric scale",
+        "created_at": "2026-10-05T09:49:40+00:00",
+        "tool": {
+          "name": "skeleton-maker",
+          "version": "0.1.0"
+        }
+      },
+      "processed_frames": [
+        {
+          "frame_id": 0,
+          "time": [
+            0,
+            1
+          ],
+          "time_s": 0.0
+        },
+        {
+          "frame_id": 1,
+          "time": [
+            1,
+            5
+          ],
+          "time_s": 0.2
+        },
+        {
+          "frame_id": 2,
+          "time": [
+            2,
+            5
+          ],
+          "time_s": 0.4
+        },
+        {
+          "frame_id": 3,
+          "time": [
+            3,
+            5
+          ],
+          "time_s": 0.6
+        },
+        {
+          "frame_id": 4,
+          "time": [
+            4,
+            5
+          ],
+          "time_s": 0.8
+        },
+        {
+          "frame_id": 5,
+          "time": [
+            1,
+            1
+          ],
+          "time_s": 1.0
+        },
+        {
+          "frame_id": 6,
+          "time": [
+            6,
+            5
+          ],
+          "time_s": 1.2
+        },
+        {
+          "frame_id": 7,
+          "time": [
+            7,
+            5
+          ],
+          "time_s": 1.4
+        },
+        {
+          "frame_id": 8,
+          "time": [
+            8,
+            5
+          ],
+          "time_s": 1.6
+        },
+        {
+          "frame_id": 9,
+          "time": [
+            9,
+            5
+          ],
+          "time_s": 1.8
+        },
+        {
+          "frame_id": 10,
+          "time": [
+            2,
+            1
+          ],
+          "time_s": 2.0
+        },
+        {
+          "frame_id": 11,
+          "time": [
+            11,
+            5
+          ],
+          "time_s": 2.2
+        },
+        {
+          "frame_id": 12,
+          "time": [
+            12,
+            5
+          ],
+          "time_s": 2.4
+        },
+        {
+          "frame_id": 13,
+          "time": [
+            13,
+            5
+          ],
+          "time_s": 2.6
+        },
+        {
+          "frame_id": 14,
+          "time": [
+            14,
+            5
+          ],
+          "time_s": 2.8
+        }
+      ],
+      "geometry_status": "relative-camera-frame",
+      "geometry_reason": "DA3 depth and poses are camera-frame estimates without a solved metric scale",
+      "record_sha256": "b284d2868b5c095210c99f8353a0982854584bfd5fe985070041ab09542c786d",
+      "log_sha256": "0491c6a81914e8a098f5c3d5a506cc4bb8dc1f1a32162f39837498e1d4087fb9"
+    },
+    {
+      "clip": "vip-d3-indoor-objects",
+      "split": "development",
+      "command": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-d3-indoor-objects.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d3-indoor-objects.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 1149.9,
+      "peak_rss_bytes": 4939235328,
+      "manifest_sha256": "c0a01ac9823114a7e98b8f4f193128dd89eecdb0268b1551ecf438cd1dec1424",
+      "log": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d3-indoor-objects.log",
+      "manifest_status": {
+        "status": "partial",
+        "perception_status": "complete",
+        "reason": "geometry registration unavailable: DA3 depth and poses are camera-frame estimates without a solved metric scale",
+        "created_at": "2026-10-05T10:08:50+00:00",
+        "tool": {
+          "name": "skeleton-maker",
+          "version": "0.1.0"
+        }
+      },
+      "processed_frames": [
+        {
+          "frame_id": 0,
+          "time": [
+            0,
+            1
+          ],
+          "time_s": 0.0
+        },
+        {
+          "frame_id": 1,
+          "time": [
+            1,
+            5
+          ],
+          "time_s": 0.2
+        },
+        {
+          "frame_id": 2,
+          "time": [
+            2,
+            5
+          ],
+          "time_s": 0.4
+        },
+        {
+          "frame_id": 3,
+          "time": [
+            3,
+            5
+          ],
+          "time_s": 0.6
+        },
+        {
+          "frame_id": 4,
+          "time": [
+            4,
+            5
+          ],
+          "time_s": 0.8
+        },
+        {
+          "frame_id": 5,
+          "time": [
+            1,
+            1
+          ],
+          "time_s": 1.0
+        },
+        {
+          "frame_id": 6,
+          "time": [
+            6,
+            5
+          ],
+          "time_s": 1.2
+        },
+        {
+          "frame_id": 7,
+          "time": [
+            7,
+            5
+          ],
+          "time_s": 1.4
+        },
+        {
+          "frame_id": 8,
+          "time": [
+            8,
+            5
+          ],
+          "time_s": 1.6
+        },
+        {
+          "frame_id": 9,
+          "time": [
+            9,
+            5
+          ],
+          "time_s": 1.8
+        },
+        {
+          "frame_id": 10,
+          "time": [
+            2,
+            1
+          ],
+          "time_s": 2.0
+        },
+        {
+          "frame_id": 11,
+          "time": [
+            11,
+            5
+          ],
+          "time_s": 2.2
+        },
+        {
+          "frame_id": 12,
+          "time": [
+            12,
+            5
+          ],
+          "time_s": 2.4
+        },
+        {
+          "frame_id": 13,
+          "time": [
+            13,
+            5
+          ],
+          "time_s": 2.6
+        },
+        {
+          "frame_id": 14,
+          "time": [
+            14,
+            5
+          ],
+          "time_s": 2.8
+        },
+        {
+          "frame_id": 15,
+          "time": [
+            3,
+            1
+          ],
+          "time_s": 3.0
+        }
+      ],
+      "geometry_status": "relative-camera-frame",
+      "geometry_reason": "DA3 depth and poses are camera-frame estimates without a solved metric scale",
+      "record_sha256": "0e9eaa6a335735729d7ef8ebb470b8dd3d0522a21f0ae2fd4aa9bddfe9cd5d7e",
+      "log_sha256": "6a5f76cda31604754ed0335aebb52b448a30730bbd85f700bc6dc20bfb0846b2"
+    },
+    {
+      "clip": "vip-d4-vehicles",
+      "split": "development",
+      "command": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-d4-vehicles.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d4-vehicles.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 1574.5,
+      "peak_rss_bytes": 6176505856,
+      "manifest_sha256": "f4152692c8cec018a0fab2ca3679331ee8659c1ccedd3e46ab72c4bca33d5622",
+      "log": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d4-vehicles.log",
+      "manifest_status": {
+        "status": "partial",
+        "perception_status": "complete",
+        "reason": "geometry registration unavailable: DA3 depth and poses are camera-frame estimates without a solved metric scale",
+        "created_at": "2026-10-05T10:35:04+00:00",
+        "tool": {
+          "name": "skeleton-maker",
+          "version": "0.1.0"
+        }
+      },
+      "processed_frames": [
+        {
+          "frame_id": 0,
+          "time": [
+            0,
+            1
+          ],
+          "time_s": 0.0
+        },
+        {
+          "frame_id": 1,
+          "time": [
+            1,
+            5
+          ],
+          "time_s": 0.2
+        },
+        {
+          "frame_id": 2,
+          "time": [
+            2,
+            5
+          ],
+          "time_s": 0.4
+        },
+        {
+          "frame_id": 3,
+          "time": [
+            3,
+            5
+          ],
+          "time_s": 0.6
+        },
+        {
+          "frame_id": 4,
+          "time": [
+            4,
+            5
+          ],
+          "time_s": 0.8
+        },
+        {
+          "frame_id": 5,
+          "time": [
+            1,
+            1
+          ],
+          "time_s": 1.0
+        },
+        {
+          "frame_id": 6,
+          "time": [
+            6,
+            5
+          ],
+          "time_s": 1.2
+        },
+        {
+          "frame_id": 7,
+          "time": [
+            7,
+            5
+          ],
+          "time_s": 1.4
+        },
+        {
+          "frame_id": 8,
+          "time": [
+            8,
+            5
+          ],
+          "time_s": 1.6
+        },
+        {
+          "frame_id": 9,
+          "time": [
+            9,
+            5
+          ],
+          "time_s": 1.8
+        },
+        {
+          "frame_id": 10,
+          "time": [
+            2,
+            1
+          ],
+          "time_s": 2.0
+        },
+        {
+          "frame_id": 11,
+          "time": [
+            11,
+            5
+          ],
+          "time_s": 2.2
+        },
+        {
+          "frame_id": 12,
+          "time": [
+            12,
+            5
+          ],
+          "time_s": 2.4
+        },
+        {
+          "frame_id": 13,
+          "time": [
+            13,
+            5
+          ],
+          "time_s": 2.6
+        },
+        {
+          "frame_id": 14,
+          "time": [
+            14,
+            5
+          ],
+          "time_s": 2.8
+        },
+        {
+          "frame_id": 15,
+          "time": [
+            3,
+            1
+          ],
+          "time_s": 3.0
+        }
+      ],
+      "geometry_status": "relative-camera-frame",
+      "geometry_reason": "DA3 depth and poses are camera-frame estimates without a solved metric scale",
+      "record_sha256": "481f850a209bf7b988dccdb3e550968f19f52fff824cb0cca51ad7a77d286a68",
+      "log_sha256": "a52ece6813ca7d611259e92c742ca7a26294c896d6ced7903fee44af25cb1956"
+    },
+    {
+      "clip": "vip-d5-vehicles",
+      "split": "development",
+      "command": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-d5-vehicles.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d5-vehicles.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 1886.6,
+      "peak_rss_bytes": 6051905536,
+      "manifest_sha256": "fca85992853f6f6f098db1cbbb32e25a7b066b0c1f63cdc4ff61127e25be6528",
+      "log": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d5-vehicles.log",
+      "manifest_status": {
+        "status": "partial",
+        "perception_status": "complete",
+        "reason": "geometry registration unavailable: DA3 depth and poses are camera-frame estimates without a solved metric scale",
+        "created_at": "2026-10-05T11:06:31+00:00",
+        "tool": {
+          "name": "skeleton-maker",
+          "version": "0.1.0"
+        }
+      },
+      "processed_frames": [
+        {
+          "frame_id": 0,
+          "time": [
+            0,
+            1
+          ],
+          "time_s": 0.0
+        },
+        {
+          "frame_id": 1,
+          "time": [
+            1,
+            5
+          ],
+          "time_s": 0.2
+        },
+        {
+          "frame_id": 2,
+          "time": [
+            2,
+            5
+          ],
+          "time_s": 0.4
+        },
+        {
+          "frame_id": 3,
+          "time": [
+            3,
+            5
+          ],
+          "time_s": 0.6
+        },
+        {
+          "frame_id": 4,
+          "time": [
+            4,
+            5
+          ],
+          "time_s": 0.8
+        },
+        {
+          "frame_id": 5,
+          "time": [
+            1,
+            1
+          ],
+          "time_s": 1.0
+        },
+        {
+          "frame_id": 6,
+          "time": [
+            6,
+            5
+          ],
+          "time_s": 1.2
+        },
+        {
+          "frame_id": 7,
+          "time": [
+            7,
+            5
+          ],
+          "time_s": 1.4
+        },
+        {
+          "frame_id": 8,
+          "time": [
+            8,
+            5
+          ],
+          "time_s": 1.6
+        },
+        {
+          "frame_id": 9,
+          "time": [
+            9,
+            5
+          ],
+          "time_s": 1.8
+        },
+        {
+          "frame_id": 10,
+          "time": [
+            2,
+            1
+          ],
+          "time_s": 2.0
+        },
+        {
+          "frame_id": 11,
+          "time": [
+            11,
+            5
+          ],
+          "time_s": 2.2
+        },
+        {
+          "frame_id": 12,
+          "time": [
+            12,
+            5
+          ],
+          "time_s": 2.4
+        },
+        {
+          "frame_id": 13,
+          "time": [
+            13,
+            5
+          ],
+          "time_s": 2.6
+        },
+        {
+          "frame_id": 14,
+          "time": [
+            14,
+            5
+          ],
+          "time_s": 2.8
+        },
+        {
+          "frame_id": 15,
+          "time": [
+            3,
+            1
+          ],
+          "time_s": 3.0
+        }
+      ],
+      "geometry_status": "relative-camera-frame",
+      "geometry_reason": "DA3 depth and poses are camera-frame estimates without a solved metric scale",
+      "record_sha256": "eb47fc3da0d7a0577f70ee4d3012e2577d007808f5c81e3dd678bb84ad00ddb9",
+      "log_sha256": "e71b2596e9ab6a6edc0f6045ea7be0f03b16247e36af5041ea84c4c5e97c7cc1"
+    },
+    {
+      "clip": "vip-d6-vehicles",
+      "split": "development",
+      "command": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-d6-vehicles.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d6-vehicles.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 1241.1,
+      "peak_rss_bytes": 4656742400,
+      "manifest_sha256": "b9954342887db89526caa4beab8cb42b092430dcf1b21709565ca47a36f71266",
+      "log": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-d6-vehicles.log",
+      "manifest_status": {
+        "status": "partial",
+        "perception_status": "complete",
+        "reason": "geometry registration unavailable: DA3 depth and poses are camera-frame estimates without a solved metric scale",
+        "created_at": "2026-10-05T11:27:12+00:00",
+        "tool": {
+          "name": "skeleton-maker",
+          "version": "0.1.0"
+        }
+      },
+      "processed_frames": [
+        {
+          "frame_id": 0,
+          "time": [
+            0,
+            1
+          ],
+          "time_s": 0.0
+        },
+        {
+          "frame_id": 1,
+          "time": [
+            1,
+            5
+          ],
+          "time_s": 0.2
+        },
+        {
+          "frame_id": 2,
+          "time": [
+            2,
+            5
+          ],
+          "time_s": 0.4
+        },
+        {
+          "frame_id": 3,
+          "time": [
+            3,
+            5
+          ],
+          "time_s": 0.6
+        },
+        {
+          "frame_id": 4,
+          "time": [
+            4,
+            5
+          ],
+          "time_s": 0.8
+        },
+        {
+          "frame_id": 5,
+          "time": [
+            1,
+            1
+          ],
+          "time_s": 1.0
+        },
+        {
+          "frame_id": 6,
+          "time": [
+            6,
+            5
+          ],
+          "time_s": 1.2
+        },
+        {
+          "frame_id": 7,
+          "time": [
+            7,
+            5
+          ],
+          "time_s": 1.4
+        },
+        {
+          "frame_id": 8,
+          "time": [
+            8,
+            5
+          ],
+          "time_s": 1.6
+        },
+        {
+          "frame_id": 9,
+          "time": [
+            9,
+            5
+          ],
+          "time_s": 1.8
+        },
+        {
+          "frame_id": 10,
+          "time": [
+            2,
+            1
+          ],
+          "time_s": 2.0
+        },
+        {
+          "frame_id": 11,
+          "time": [
+            11,
+            5
+          ],
+          "time_s": 2.2
+        },
+        {
+          "frame_id": 12,
+          "time": [
+            12,
+            5
+          ],
+          "time_s": 2.4
+        },
+        {
+          "frame_id": 13,
+          "time": [
+            13,
+            5
+          ],
+          "time_s": 2.6
+        },
+        {
+          "frame_id": 14,
+          "time": [
+            14,
+            5
+          ],
+          "time_s": 2.8
+        }
+      ],
+      "geometry_status": "relative-camera-frame",
+      "geometry_reason": "DA3 depth and poses are camera-frame estimates without a solved metric scale",
+      "record_sha256": "4a900d58dd191c412a09eac8756673f809ec9e1b621c03e8844f6480c99dd1c7",
+      "log_sha256": "22f0709070c9844fff471893e3e251427585125e8cb966f74f6161a373db86a5"
+    },
+    {
+      "clip": "vip-h1-indoor-structure",
+      "split": "heldout",
+      "command": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-h1-indoor-structure.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-h1-indoor-structure.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 4897.5,
+      "peak_rss_bytes": 6850297856,
+      "manifest_sha256": "6a638fa726fabdb58d59a5d3fa9c203f16ec6c575d1e1f639502064d345a7c57",
+      "log": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-h1-indoor-structure.log",
+      "manifest_status": {
+        "status": "partial",
+        "perception_status": "complete",
+        "reason": "geometry registration unavailable: DA3 depth and poses are camera-frame estimates without a solved metric scale",
+        "created_at": "2026-10-05T14:01:26+00:00",
+        "tool": {
+          "name": "skeleton-maker",
+          "version": "0.1.0"
+        }
+      },
+      "processed_frames": [
+        {
+          "frame_id": 0,
+          "time": [
+            0,
+            1
+          ],
+          "time_s": 0.0
+        },
+        {
+          "frame_id": 1,
+          "time": [
+            1,
+            5
+          ],
+          "time_s": 0.2
+        },
+        {
+          "frame_id": 2,
+          "time": [
+            2,
+            5
+          ],
+          "time_s": 0.4
+        },
+        {
+          "frame_id": 3,
+          "time": [
+            3,
+            5
+          ],
+          "time_s": 0.6
+        },
+        {
+          "frame_id": 4,
+          "time": [
+            4,
+            5
+          ],
+          "time_s": 0.8
+        },
+        {
+          "frame_id": 5,
+          "time": [
+            1,
+            1
+          ],
+          "time_s": 1.0
+        },
+        {
+          "frame_id": 6,
+          "time": [
+            6,
+            5
+          ],
+          "time_s": 1.2
+        },
+        {
+          "frame_id": 7,
+          "time": [
+            7,
+            5
+          ],
+          "time_s": 1.4
+        },
+        {
+          "frame_id": 8,
+          "time": [
+            8,
+            5
+          ],
+          "time_s": 1.6
+        },
+        {
+          "frame_id": 9,
+          "time": [
+            9,
+            5
+          ],
+          "time_s": 1.8
+        },
+        {
+          "frame_id": 10,
+          "time": [
+            2,
+            1
+          ],
+          "time_s": 2.0
+        },
+        {
+          "frame_id": 11,
+          "time": [
+            11,
+            5
+          ],
+          "time_s": 2.2
+        },
+        {
+          "frame_id": 12,
+          "time": [
+            12,
+            5
+          ],
+          "time_s": 2.4
+        },
+        {
+          "frame_id": 13,
+          "time": [
+            13,
+            5
+          ],
+          "time_s": 2.6
+        },
+        {
+          "frame_id": 14,
+          "time": [
+            14,
+            5
+          ],
+          "time_s": 2.8
+        }
+      ],
+      "geometry_status": "relative-camera-frame",
+      "geometry_reason": "DA3 depth and poses are camera-frame estimates without a solved metric scale",
+      "record_sha256": "d31283f3631f75eb49b55fa28689f485a6f47364e4cd9277e9dee39364f3b302",
+      "log_sha256": "2210c5ac79fe2ac6e1b2a06fa1626e0995ccbc0cbec9ca71b7ca56dc0d459464"
+    },
+    {
+      "clip": "vip-h2-indoor-structure",
+      "split": "heldout",
+      "command": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-h2-indoor-structure.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-h2-indoor-structure.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 3251.5,
+      "peak_rss_bytes": 3493494784,
+      "manifest_sha256": "3649f89f1eabaf23977dc8ad12808269aacfa5129a44530749f8ccd7a6c19d2c",
+      "log": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-h2-indoor-structure.log",
+      "manifest_status": {
+        "status": "partial",
+        "perception_status": "complete",
+        "reason": "geometry registration unavailable: DA3 depth and poses are camera-frame estimates without a solved metric scale",
+        "created_at": "2026-10-05T14:55:37+00:00",
+        "tool": {
+          "name": "skeleton-maker",
+          "version": "0.1.0"
+        }
+      },
+      "processed_frames": [
+        {
+          "frame_id": 0,
+          "time": [
+            0,
+            1
+          ],
+          "time_s": 0.0
+        },
+        {
+          "frame_id": 1,
+          "time": [
+            1,
+            5
+          ],
+          "time_s": 0.2
+        },
+        {
+          "frame_id": 2,
+          "time": [
+            2,
+            5
+          ],
+          "time_s": 0.4
+        },
+        {
+          "frame_id": 3,
+          "time": [
+            3,
+            5
+          ],
+          "time_s": 0.6
+        },
+        {
+          "frame_id": 4,
+          "time": [
+            4,
+            5
+          ],
+          "time_s": 0.8
+        },
+        {
+          "frame_id": 5,
+          "time": [
+            1,
+            1
+          ],
+          "time_s": 1.0
+        },
+        {
+          "frame_id": 6,
+          "time": [
+            6,
+            5
+          ],
+          "time_s": 1.2
+        },
+        {
+          "frame_id": 7,
+          "time": [
+            7,
+            5
+          ],
+          "time_s": 1.4
+        },
+        {
+          "frame_id": 8,
+          "time": [
+            8,
+            5
+          ],
+          "time_s": 1.6
+        },
+        {
+          "frame_id": 9,
+          "time": [
+            9,
+            5
+          ],
+          "time_s": 1.8
+        },
+        {
+          "frame_id": 10,
+          "time": [
+            2,
+            1
+          ],
+          "time_s": 2.0
+        },
+        {
+          "frame_id": 11,
+          "time": [
+            11,
+            5
+          ],
+          "time_s": 2.2
+        },
+        {
+          "frame_id": 12,
+          "time": [
+            12,
+            5
+          ],
+          "time_s": 2.4
+        },
+        {
+          "frame_id": 13,
+          "time": [
+            13,
+            5
+          ],
+          "time_s": 2.6
+        },
+        {
+          "frame_id": 14,
+          "time": [
+            14,
+            5
+          ],
+          "time_s": 2.8
+        }
+      ],
+      "geometry_status": "relative-camera-frame",
+      "geometry_reason": "DA3 depth and poses are camera-frame estimates without a solved metric scale",
+      "record_sha256": "142153420a7467f971cdd329bd3e89bf83e784d920805efb8d2919e8c5167fbf",
+      "log_sha256": "51ab97f9b611bd567560a270dd5c75a2682fb1b9ba9edca59b3d0ea90f2986d4"
+    },
+    {
+      "clip": "vip-h3-indoor-objects",
+      "split": "heldout",
+      "command": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-h3-indoor-objects.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-h3-indoor-objects.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ],
+      "exit_code": null,
+      "wall_seconds": null,
+      "peak_rss_bytes": null,
+      "manifest_sha256": null,
+      "log": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-h3-indoor-objects.log",
+      "status": "interrupted",
+      "observed_utc": "2026-10-05T21:08:45.241393+00:00",
+      "last_completed_sample": 12,
+      "planned_samples": 16,
+      "reason": "Log ends after sample 12; no environment runner or worker remains in process inventory. Termination cause, exit status, total wall time, and peak RSS were not captured. Attempt retained without retry.",
+      "log_sha256": "327e549d8d470af59b20132f18c281cb8d42db71ff88234e1702fc22629c2086",
+      "command_provenance": "Reconstructed from the pre-held-out frozen configuration and unchanged CPU runner; the original runtime argv was not captured before the process disappeared.",
+      "manifest_status": null,
+      "record_sha256": "87a33f13850995a645e4160a579a06610d1e2fb8b4ac2dada3aabdcece1e2b94"
+    },
+    {
+      "clip": "vip-h4-vehicles",
+      "split": "heldout",
+      "command": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-h4-vehicles.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-h4-vehicles.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 3971.0,
+      "peak_rss_bytes": 3164635136,
+      "manifest_sha256": "95a67898555d499c473e4c327776419c909cc59f519514b9ff3330a58f900dac",
+      "log": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-h4-vehicles.log",
+      "manifest_status": {
+        "status": "partial",
+        "perception_status": "complete",
+        "reason": "geometry registration unavailable: DA3 depth and poses are camera-frame estimates without a solved metric scale",
+        "created_at": "2026-10-05T22:14:56+00:00",
+        "tool": {
+          "name": "skeleton-maker",
+          "version": "0.1.0"
+        }
+      },
+      "processed_frames": [
+        {
+          "frame_id": 0,
+          "time": [
+            0,
+            1
+          ],
+          "time_s": 0.0
+        },
+        {
+          "frame_id": 1,
+          "time": [
+            1,
+            5
+          ],
+          "time_s": 0.2
+        },
+        {
+          "frame_id": 2,
+          "time": [
+            2,
+            5
+          ],
+          "time_s": 0.4
+        },
+        {
+          "frame_id": 3,
+          "time": [
+            3,
+            5
+          ],
+          "time_s": 0.6
+        },
+        {
+          "frame_id": 4,
+          "time": [
+            4,
+            5
+          ],
+          "time_s": 0.8
+        },
+        {
+          "frame_id": 5,
+          "time": [
+            1,
+            1
+          ],
+          "time_s": 1.0
+        },
+        {
+          "frame_id": 6,
+          "time": [
+            6,
+            5
+          ],
+          "time_s": 1.2
+        },
+        {
+          "frame_id": 7,
+          "time": [
+            7,
+            5
+          ],
+          "time_s": 1.4
+        },
+        {
+          "frame_id": 8,
+          "time": [
+            8,
+            5
+          ],
+          "time_s": 1.6
+        },
+        {
+          "frame_id": 9,
+          "time": [
+            9,
+            5
+          ],
+          "time_s": 1.8
+        },
+        {
+          "frame_id": 10,
+          "time": [
+            2,
+            1
+          ],
+          "time_s": 2.0
+        },
+        {
+          "frame_id": 11,
+          "time": [
+            11,
+            5
+          ],
+          "time_s": 2.2
+        },
+        {
+          "frame_id": 12,
+          "time": [
+            12,
+            5
+          ],
+          "time_s": 2.4
+        },
+        {
+          "frame_id": 13,
+          "time": [
+            13,
+            5
+          ],
+          "time_s": 2.6
+        },
+        {
+          "frame_id": 14,
+          "time": [
+            14,
+            5
+          ],
+          "time_s": 2.8
+        },
+        {
+          "frame_id": 15,
+          "time": [
+            3,
+            1
+          ],
+          "time_s": 3.0
+        }
+      ],
+      "geometry_status": "relative-camera-frame",
+      "geometry_reason": "DA3 depth and poses are camera-frame estimates without a solved metric scale",
+      "record_sha256": "6fd8a124438d150d020d3cd535ef15fb73f4be541e64ff8bf99ffdc5950ebba0",
+      "log_sha256": "2698dcd20ac6b6d7e06722fa9efd83c2ba14d3661ceaa96204f647217f600b01"
+    },
+    {
+      "clip": "vip-h5-vehicles",
+      "split": "heldout",
+      "command": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-h5-vehicles.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-h5-vehicles.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 2693.1,
+      "peak_rss_bytes": 3181150208,
+      "manifest_sha256": "dbae7e8b641276c2310a5afade97b7a5a6581bf621204bce5d2a1711e2d0a6df",
+      "log": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-h5-vehicles.log",
+      "manifest_status": {
+        "status": "partial",
+        "perception_status": "complete",
+        "reason": "geometry registration unavailable: DA3 depth and poses are camera-frame estimates without a solved metric scale",
+        "created_at": "2026-10-05T22:59:49+00:00",
+        "tool": {
+          "name": "skeleton-maker",
+          "version": "0.1.0"
+        }
+      },
+      "processed_frames": [
+        {
+          "frame_id": 0,
+          "time": [
+            0,
+            1
+          ],
+          "time_s": 0.0
+        },
+        {
+          "frame_id": 1,
+          "time": [
+            1,
+            5
+          ],
+          "time_s": 0.2
+        },
+        {
+          "frame_id": 2,
+          "time": [
+            2,
+            5
+          ],
+          "time_s": 0.4
+        },
+        {
+          "frame_id": 3,
+          "time": [
+            3,
+            5
+          ],
+          "time_s": 0.6
+        },
+        {
+          "frame_id": 4,
+          "time": [
+            4,
+            5
+          ],
+          "time_s": 0.8
+        },
+        {
+          "frame_id": 5,
+          "time": [
+            1,
+            1
+          ],
+          "time_s": 1.0
+        },
+        {
+          "frame_id": 6,
+          "time": [
+            6,
+            5
+          ],
+          "time_s": 1.2
+        },
+        {
+          "frame_id": 7,
+          "time": [
+            7,
+            5
+          ],
+          "time_s": 1.4
+        },
+        {
+          "frame_id": 8,
+          "time": [
+            8,
+            5
+          ],
+          "time_s": 1.6
+        },
+        {
+          "frame_id": 9,
+          "time": [
+            9,
+            5
+          ],
+          "time_s": 1.8
+        },
+        {
+          "frame_id": 10,
+          "time": [
+            2,
+            1
+          ],
+          "time_s": 2.0
+        },
+        {
+          "frame_id": 11,
+          "time": [
+            11,
+            5
+          ],
+          "time_s": 2.2
+        },
+        {
+          "frame_id": 12,
+          "time": [
+            12,
+            5
+          ],
+          "time_s": 2.4
+        },
+        {
+          "frame_id": 13,
+          "time": [
+            13,
+            5
+          ],
+          "time_s": 2.6
+        },
+        {
+          "frame_id": 14,
+          "time": [
+            14,
+            5
+          ],
+          "time_s": 2.8
+        },
+        {
+          "frame_id": 15,
+          "time": [
+            3,
+            1
+          ],
+          "time_s": 3.0
+        }
+      ],
+      "geometry_status": "relative-camera-frame",
+      "geometry_reason": "DA3 depth and poses are camera-frame estimates without a solved metric scale",
+      "record_sha256": "2cf611e62a7d2c407614086d561984ee7dd06201c307a4296920af268864e98d",
+      "log_sha256": "f1fc6b03dc9700369542696cac2ac5a8f8208ce970500dc96ba428e0234dc348"
+    },
+    {
+      "clip": "vip-h6-vehicles-fixed",
+      "split": "heldout",
+      "command": [
+        "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+        "environment",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/clips/vip-h6-vehicles-fixed.mp4",
+        "--out",
+        "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-h6-vehicles-fixed.json",
+        "--sample-fps",
+        "5",
+        "--device",
+        "cpu",
+        "--geometry",
+        "auto",
+        "--no-cache"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 2766.4,
+      "peak_rss_bytes": 6170705920,
+      "manifest_sha256": "d9f3b44013ee37ca0ee67a7fc2e408aae2187b65bd6eaddcf351cfea7c83ac0e",
+      "log": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu/vip-h6-vehicles-fixed.log",
+      "manifest_status": {
+        "status": "partial",
+        "perception_status": "complete",
+        "reason": "geometry registration unavailable: DA3 depth and poses are camera-frame estimates without a solved metric scale",
+        "created_at": "2026-10-05T23:45:56+00:00",
+        "tool": {
+          "name": "skeleton-maker",
+          "version": "0.1.0"
+        }
+      },
+      "processed_frames": [
+        {
+          "frame_id": 0,
+          "time": [
+            0,
+            1
+          ],
+          "time_s": 0.0
+        },
+        {
+          "frame_id": 1,
+          "time": [
+            1,
+            5
+          ],
+          "time_s": 0.2
+        },
+        {
+          "frame_id": 2,
+          "time": [
+            2,
+            5
+          ],
+          "time_s": 0.4
+        },
+        {
+          "frame_id": 3,
+          "time": [
+            3,
+            5
+          ],
+          "time_s": 0.6
+        },
+        {
+          "frame_id": 4,
+          "time": [
+            4,
+            5
+          ],
+          "time_s": 0.8
+        },
+        {
+          "frame_id": 5,
+          "time": [
+            1,
+            1
+          ],
+          "time_s": 1.0
+        },
+        {
+          "frame_id": 6,
+          "time": [
+            6,
+            5
+          ],
+          "time_s": 1.2
+        },
+        {
+          "frame_id": 7,
+          "time": [
+            7,
+            5
+          ],
+          "time_s": 1.4
+        },
+        {
+          "frame_id": 8,
+          "time": [
+            8,
+            5
+          ],
+          "time_s": 1.6
+        },
+        {
+          "frame_id": 9,
+          "time": [
+            9,
+            5
+          ],
+          "time_s": 1.8
+        },
+        {
+          "frame_id": 10,
+          "time": [
+            2,
+            1
+          ],
+          "time_s": 2.0
+        },
+        {
+          "frame_id": 11,
+          "time": [
+            11,
+            5
+          ],
+          "time_s": 2.2
+        },
+        {
+          "frame_id": 12,
+          "time": [
+            12,
+            5
+          ],
+          "time_s": 2.4
+        },
+        {
+          "frame_id": 13,
+          "time": [
+            13,
+            5
+          ],
+          "time_s": 2.6
+        },
+        {
+          "frame_id": 14,
+          "time": [
+            14,
+            5
+          ],
+          "time_s": 2.8
+        },
+        {
+          "frame_id": 15,
+          "time": [
+            3,
+            1
+          ],
+          "time_s": 3.0
+        }
+      ],
+      "geometry_status": "relative-camera-frame",
+      "geometry_reason": "DA3 depth and poses are camera-frame estimates without a solved metric scale",
+      "record_sha256": "2708e6997db473eafc094f04c1ed6993eed15d3858b761121f0ccb07edeca730",
+      "log_sha256": "755e3c7a3c9f34acb6dffe75a30ad77f3f465ad9cf5559efe48de56b8d98c755"
+    }
+  ],
+  "scores": {
+    "development": {
+      "path": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/reports/development-final-score.json",
+      "sha256": "9086de809976358e3f2bb9da1dafb6eb5ca626fef5f7720324558525a60de5cd",
+      "execution": {
+        "command": [
+          "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+          "environment-score",
+          "--predictions",
+          "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu-manifests",
+          "--annotations",
+          "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/annotations",
+          "--split",
+          "development",
+          "--out",
+          "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/reports/development-final-score.json"
+        ],
+        "exit_code": 1,
+        "stdout": "FAIL  objects\n        precision 0.293 is below 0.8\n        recall 0.435 is below 0.7\n        subtype 'chair_or_seat' recall 0.453 is below 0.5\n        subtype 'table_or_desk' recall 0.310 is below 0.5\n        subtype 'tub_or_bowl_or_pot' recall 0.342 is below 0.5\nFAIL  vehicles\n        precision 0.626 is below 0.8\n        recall 0.296 is below 0.7\n        subtype 'bicycle' recall 0.077 is below 0.5\n        subtype 'car' recall 0.428 is below 0.5\n        subtype 'truck' recall 0.000 is below 0.5\nFAIL  walls\n        IoU 0.213 is below 0.65\n        clip 'vip-d2-indoor-structure' IoU 0.052 is below 0.5\n        clip 'vip-d3-indoor-objects' IoU 0.069 is below 0.5\n        37 of 47 wall-negative frames hold a predicted region over 1% of the image\nFAIL  floors\n        43 of 47 floor-negative frames hold a predicted region over 1% of the image\nFAIL  ceilings\n        IoU 0.445 is below 0.65\n        clip 'vip-d1-indoor-structure' IoU 0.298 is below 0.5\n        60 of 63 ceiling-negative frames hold a predicted region over 1% of the image\nFAIL  structural_surfaces\nFAIL  identity_objects\n        IDF1 0.318 is below 0.75\nFAIL  identity_vehicles\n        IDF1 0.308 is below 0.75\nFAIL  registration\n        coverage 0.000 is below 0.8; abstained frames count against it\n        no control-point reprojections to measure\nFAIL  metric_scale\n        tum-fr2-rpy/check-dimension: no predicted value\npass  underconstrained\nFAIL  corpus_coverage\n        failed: complete prediction runs\nscorer 2, split development: report written to /Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/reports/development-final-score.json\n",
+        "stderr": "error: not every gate passed\n"
+      },
+      "report": {
+        "schema": "skeleton-maker.environment-score/1",
+        "scorer_version": "2",
+        "split": "development",
+        "targets": {
+          "mask_iou": 0.5,
+          "object_precision": 0.8,
+          "object_recall": 0.7,
+          "subtype_min_instances": 10,
+          "subtype_recall": 0.5,
+          "structural_iou": 0.65,
+          "structural_clip_iou": 0.5,
+          "negative_area_fraction": 0.01,
+          "negative_false_positive_rate": 0.05,
+          "idf1": 0.75,
+          "registration_coverage": 0.8,
+          "reprojection_median_pct": 0.5,
+          "reprojection_p95_pct": 2.0,
+          "metric_relative_error": 0.1,
+          "ignore_overlap": 0.5,
+          "corpus": {
+            "clips": 12,
+            "development_clips": 6,
+            "heldout_clips": 6,
+            "heldout_frames_per_clip": 10,
+            "tracking_interval_seconds": 2.0,
+            "family_positive_heldout_clips": 2,
+            "object_subtypes": 6,
+            "vehicle_subtypes": 3,
+            "translating_registration_clips": 2
+          },
+          "required_tags": [
+            "indoor",
+            "outdoor",
+            "vehicle_stationary",
+            "vehicle_moving",
+            "handled_object",
+            "tripod",
+            "translating",
+            "pan",
+            "occlusion",
+            "motion_blur",
+            "person_free",
+            "edited_cut",
+            "underconstrained"
+          ]
+        },
+        "inputs": {
+          "annotations": 15,
+          "predictions": 14,
+          "unmatched_predictions": [],
+          "clips": {
+            "tum-fr2-rpy": {
+              "split": "development",
+              "scope": "geometry",
+              "prediction": "present",
+              "run_status": "partial"
+            },
+            "vip-d1-indoor-structure": {
+              "split": "development",
+              "scope": "semantic",
+              "prediction": "present",
+              "run_status": "partial",
+              "frames_unscanned": []
+            },
+            "vip-d2-indoor-structure": {
+              "split": "development",
+              "scope": "semantic",
+              "prediction": "present",
+              "run_status": "partial",
+              "frames_unscanned": []
+            },
+            "vip-d3-indoor-objects": {
+              "split": "development",
+              "scope": "semantic",
+              "prediction": "present",
+              "run_status": "partial",
+              "frames_unscanned": []
+            },
+            "vip-d4-vehicles": {
+              "split": "development",
+              "scope": "semantic",
+              "prediction": "present",
+              "run_status": "partial",
+              "frames_unscanned": []
+            },
+            "vip-d5-vehicles": {
+              "split": "development",
+              "scope": "semantic",
+              "prediction": "present",
+              "run_status": "partial",
+              "frames_unscanned": []
+            },
+            "vip-d6-vehicles": {
+              "split": "development",
+              "scope": "semantic",
+              "prediction": "present",
+              "run_status": "partial",
+              "frames_unscanned": []
+            }
+          }
+        },
+        "gates": {
+          "objects": {
+            "pass": false,
+            "reasons": [
+              "precision 0.293 is below 0.8",
+              "recall 0.435 is below 0.7",
+              "subtype 'chair_or_seat' recall 0.453 is below 0.5",
+              "subtype 'table_or_desk' recall 0.310 is below 0.5",
+              "subtype 'tub_or_bowl_or_pot' recall 0.342 is below 0.5"
+            ],
+            "counts": {
+              "tp": 185,
+              "fp": 446,
+              "fn": 240
+            },
+            "precision": 0.2931854199683043,
+            "recall": 0.43529411764705883,
+            "per_class": {
+              "bag_or_package": {
+                "tp": 0,
+                "fp": 2,
+                "fn": 0,
+                "instances": 0,
+                "recall": null
+              },
+              "bed": {
+                "tp": 15,
+                "fp": 23,
+                "fn": 0,
+                "instances": 15,
+                "recall": 1.0
+              },
+              "bench": {
+                "tp": 0,
+                "fp": 20,
+                "fn": 0,
+                "instances": 0,
+                "recall": null
+              },
+              "book": {
+                "tp": 0,
+                "fp": 19,
+                "fn": 0,
+                "instances": 0,
+                "recall": null
+              },
+              "bottle_or_cup": {
+                "tp": 0,
+                "fp": 33,
+                "fn": 4,
+                "instances": 4,
+                "recall": 0.0
+              },
+              "box": {
+                "tp": 0,
+                "fp": 13,
+                "fn": 0,
+                "instances": 0,
+                "recall": null
+              },
+              "chair_or_seat": {
+                "tp": 68,
+                "fp": 37,
+                "fn": 82,
+                "instances": 150,
+                "recall": 0.4533333333333333
+              },
+              "ladder": {
+                "tp": 0,
+                "fp": 5,
+                "fn": 0,
+                "instances": 0,
+                "recall": null
+              },
+              "lamp": {
+                "tp": 0,
+                "fp": 30,
+                "fn": 0,
+                "instances": 0,
+                "recall": null
+              },
+              "mobile_phone": {
+                "tp": 0,
+                "fp": 1,
+                "fn": 0,
+                "instances": 0,
+                "recall": null
+              },
+              "plate": {
+                "tp": 0,
+                "fp": 4,
+                "fn": 0,
+                "instances": 0,
+                "recall": null
+              },
+              "screen_or_television": {
+                "tp": 15,
+                "fp": 1,
+                "fn": 0,
+                "instances": 15,
+                "recall": 1.0
+              },
+              "sofa": {
+                "tp": 25,
+                "fp": 21,
+                "fn": 20,
+                "instances": 45,
+                "recall": 0.5555555555555556
+              },
+              "table_or_desk": {
+                "tp": 49,
+                "fp": 122,
+                "fn": 109,
+                "instances": 158,
+                "recall": 0.310126582278481
+              },
+              "tub_or_bowl_or_pot": {
+                "tp": 13,
+                "fp": 44,
+                "fn": 25,
+                "instances": 38,
+                "recall": 0.34210526315789475
+              },
+              "unknown": {
+                "tp": 0,
+                "fp": 71,
+                "fn": 0,
+                "instances": 0,
+                "recall": null
+              }
+            },
+            "per_clip": {
+              "vip-d1-indoor-structure": {
+                "tp": 76,
+                "fp": 171,
+                "fn": 105
+              },
+              "vip-d2-indoor-structure": {
+                "tp": 101,
+                "fp": 56,
+                "fn": 83
+              },
+              "vip-d3-indoor-objects": {
+                "tp": 8,
+                "fp": 88,
+                "fn": 52
+              },
+              "vip-d4-vehicles": {
+                "tp": 0,
+                "fp": 80,
+                "fn": 0
+              },
+              "vip-d5-vehicles": {
+                "tp": 0,
+                "fp": 11,
+                "fn": 0
+              },
+              "vip-d6-vehicles": {
+                "tp": 0,
+                "fp": 40,
+                "fn": 0
+              }
+            }
+          },
+          "vehicles": {
+            "pass": false,
+            "reasons": [
+              "precision 0.626 is below 0.8",
+              "recall 0.296 is below 0.7",
+              "subtype 'bicycle' recall 0.077 is below 0.5",
+              "subtype 'car' recall 0.428 is below 0.5",
+              "subtype 'truck' recall 0.000 is below 0.5"
+            ],
+            "counts": {
+              "tp": 107,
+              "fp": 64,
+              "fn": 255
+            },
+            "precision": 0.6257309941520468,
+            "recall": 0.2955801104972376,
+            "per_class": {
+              "bicycle": {
+                "tp": 9,
+                "fp": 13,
+                "fn": 108,
+                "instances": 117,
+                "recall": 0.07692307692307693
+              },
+              "bus": {
+                "tp": 0,
+                "fp": 17,
+                "fn": 0,
+                "instances": 0,
+                "recall": null
+              },
+              "car": {
+                "tp": 98,
+                "fp": 15,
+                "fn": 131,
+                "instances": 229,
+                "recall": 0.4279475982532751
+              },
+              "motorcycle": {
+                "tp": 0,
+                "fp": 7,
+                "fn": 0,
+                "instances": 0,
+                "recall": null
+              },
+              "truck": {
+                "tp": 0,
+                "fp": 12,
+                "fn": 16,
+                "instances": 16,
+                "recall": 0.0
+              }
+            },
+            "per_clip": {
+              "vip-d1-indoor-structure": {
+                "tp": 0,
+                "fp": 0,
+                "fn": 0
+              },
+              "vip-d2-indoor-structure": {
+                "tp": 0,
+                "fp": 0,
+                "fn": 0
+              },
+              "vip-d3-indoor-objects": {
+                "tp": 0,
+                "fp": 0,
+                "fn": 0
+              },
+              "vip-d4-vehicles": {
+                "tp": 2,
+                "fp": 13,
+                "fn": 25
+              },
+              "vip-d5-vehicles": {
+                "tp": 22,
+                "fp": 26,
+                "fn": 130
+              },
+              "vip-d6-vehicles": {
+                "tp": 83,
+                "fp": 25,
+                "fn": 100
+              }
+            }
+          },
+          "walls": {
+            "pass": false,
+            "reasons": [
+              "IoU 0.213 is below 0.65",
+              "clip 'vip-d2-indoor-structure' IoU 0.052 is below 0.5",
+              "clip 'vip-d3-indoor-objects' IoU 0.069 is below 0.5",
+              "37 of 47 wall-negative frames hold a predicted region over 1% of the image"
+            ],
+            "iou": 0.21292435638720725,
+            "intersection_pixels": 435244,
+            "union_pixels": 2044125,
+            "per_clip": {
+              "vip-d1-indoor-structure": 0.5977561435624341,
+              "vip-d2-indoor-structure": 0.051656377462098994,
+              "vip-d3-indoor-objects": 0.06862590407154144
+            },
+            "negatives": {
+              "frames": 47,
+              "false_positive_frames": 37,
+              "rate": 0.7872340425531915
+            }
+          },
+          "floors": {
+            "pass": false,
+            "reasons": [
+              "43 of 47 floor-negative frames hold a predicted region over 1% of the image"
+            ],
+            "iou": 0.7598780307594376,
+            "intersection_pixels": 2139160,
+            "union_pixels": 2815136,
+            "per_clip": {
+              "vip-d1-indoor-structure": 0.8521491349926477,
+              "vip-d2-indoor-structure": 0.8240396580341602,
+              "vip-d3-indoor-objects": 0.7307068875654286
+            },
+            "negatives": {
+              "frames": 47,
+              "false_positive_frames": 43,
+              "rate": 0.9148936170212766
+            }
+          },
+          "ceilings": {
+            "pass": false,
+            "reasons": [
+              "IoU 0.445 is below 0.65",
+              "clip 'vip-d1-indoor-structure' IoU 0.298 is below 0.5",
+              "60 of 63 ceiling-negative frames hold a predicted region over 1% of the image"
+            ],
+            "iou": 0.44493115199135874,
+            "intersection_pixels": 744740,
+            "union_pixels": 1673832,
+            "per_clip": {
+              "vip-d1-indoor-structure": 0.29803501098091056,
+              "vip-d2-indoor-structure": 0.6549298125674041
+            },
+            "negatives": {
+              "frames": 63,
+              "false_positive_frames": 60,
+              "rate": 0.9523809523809523
+            }
+          },
+          "structural_surfaces": {
+            "pass": false,
+            "classes": {
+              "wall": false,
+              "floor": false,
+              "ceiling": false
+            }
+          },
+          "identity_objects": {
+            "pass": false,
+            "reasons": [
+              "IDF1 0.318 is below 0.75"
+            ],
+            "idf1": 0.3179587831207066,
+            "idtp": 162,
+            "gt_detections": 417,
+            "pred_detections": 602,
+            "switches": 39,
+            "fragmentation": 13,
+            "misses": 235,
+            "per_clip": {
+              "vip-d1-indoor-structure": {
+                "idtp": 60,
+                "gt_detections": 181,
+                "pred_detections": 247
+              },
+              "vip-d2-indoor-structure": {
+                "idtp": 101,
+                "gt_detections": 184,
+                "pred_detections": 157
+              },
+              "vip-d3-indoor-objects": {
+                "idtp": 1,
+                "gt_detections": 52,
+                "pred_detections": 67
+              },
+              "vip-d4-vehicles": {
+                "idtp": 0,
+                "gt_detections": 0,
+                "pred_detections": 80
+              },
+              "vip-d5-vehicles": {
+                "idtp": 0,
+                "gt_detections": 0,
+                "pred_detections": 11
+              },
+              "vip-d6-vehicles": {
+                "idtp": 0,
+                "gt_detections": 0,
+                "pred_detections": 40
+              }
+            }
+          },
+          "identity_vehicles": {
+            "pass": false,
+            "reasons": [
+              "IDF1 0.308 is below 0.75"
+            ],
+            "idf1": 0.3076923076923077,
+            "idtp": 82,
+            "gt_detections": 362,
+            "pred_detections": 171,
+            "switches": 26,
+            "fragmentation": 8,
+            "misses": 255,
+            "per_clip": {
+              "vip-d1-indoor-structure": {
+                "idtp": 0,
+                "gt_detections": 0,
+                "pred_detections": 0
+              },
+              "vip-d2-indoor-structure": {
+                "idtp": 0,
+                "gt_detections": 0,
+                "pred_detections": 0
+              },
+              "vip-d3-indoor-objects": {
+                "idtp": 0,
+                "gt_detections": 0,
+                "pred_detections": 0
+              },
+              "vip-d4-vehicles": {
+                "idtp": 2,
+                "gt_detections": 27,
+                "pred_detections": 15
+              },
+              "vip-d5-vehicles": {
+                "idtp": 19,
+                "gt_detections": 152,
+                "pred_detections": 48
+              },
+              "vip-d6-vehicles": {
+                "idtp": 61,
+                "gt_detections": 183,
+                "pred_detections": 108
+              }
+            }
+          },
+          "registration": {
+            "pass": false,
+            "reasons": [
+              "coverage 0.000 is below 0.8; abstained frames count against it",
+              "no control-point reprojections to measure"
+            ],
+            "eligible_frames": 4,
+            "registered_frames": 0,
+            "coverage": 0.0,
+            "median_error_pct": null,
+            "p95_error_pct": null,
+            "percentile_method": "nearest rank",
+            "per_clip": {
+              "tum-fr2-rpy": {
+                "eligible_frames": 4,
+                "registered": 0
+              }
+            }
+          },
+          "metric_scale": {
+            "pass": false,
+            "reasons": [
+              "tum-fr2-rpy/check-dimension: no predicted value"
+            ],
+            "dimensions": [
+              {
+                "clip": "tum-fr2-rpy",
+                "id": "check-dimension",
+                "true_m": 2.411626243734126,
+                "predicted_m": null,
+                "relative_error": null,
+                "uncertainty_m": 0.042426406871192854,
+                "status": "relative-camera-frame",
+                "pass": false
+              }
+            ]
+          },
+          "underconstrained": {
+            "pass": true,
+            "reasons": [],
+            "clips": {
+              "tum-fr2-rpy": true,
+              "vip-d6-vehicles": true
+            }
+          },
+          "corpus_coverage": {
+            "pass": false,
+            "reasons": [
+              "failed: complete prediction runs"
+            ],
+            "checks": [
+              {
+                "name": "clips",
+                "pass": true,
+                "detail": "12 semantic clips (6 development, 6 held-out) of 15 in the corpus; need 12 semantic clips with 6 and 6; geometry-scope clips are counted by the geometry checks only"
+              },
+              {
+                "name": "held-out evaluation frames",
+                "pass": true,
+                "detail": "clips under 10 annotated frames: none"
+              },
+              {
+                "name": "tracking interval seconds",
+                "pass": true,
+                "detail": "held-out clips without a 2.0 s tracking interval: none"
+              },
+              {
+                "name": "second review",
+                "pass": true,
+                "detail": "every held-out semantic clip needs a second reviewer with disagreements resolved, or a published dataset's documented quality control; 6 clips rely on the published dataset: ['vip-h1-indoor-structure', 'vip-h2-indoor-structure', 'vip-h3-indoor-objects', 'vip-h4-vehicles', 'vip-h5-vehicles', 'vip-h6-vehicles-fixed']"
+              },
+              {
+                "name": "complete prediction runs",
+                "pass": false,
+                "detail": "missing or incomplete: ['vip-h3-indoor-objects']"
+              },
+              {
+                "name": "object positive clips",
+                "pass": true,
+                "detail": "3 held-out clips; need 2"
+              },
+              {
+                "name": "vehicle positive clips",
+                "pass": true,
+                "detail": "3 held-out clips; need 2"
+              },
+              {
+                "name": "wall positive clips",
+                "pass": true,
+                "detail": "3 held-out clips; need 2"
+              },
+              {
+                "name": "floor positive clips",
+                "pass": true,
+                "detail": "3 held-out clips; need 2"
+              },
+              {
+                "name": "ceiling positive clips",
+                "pass": true,
+                "detail": "2 held-out clips; need 2"
+              },
+              {
+                "name": "wall negative frames",
+                "pass": true,
+                "detail": "48 class-negative held-out frames; need at least 1"
+              },
+              {
+                "name": "floor negative frames",
+                "pass": true,
+                "detail": "48 class-negative held-out frames; need at least 1"
+              },
+              {
+                "name": "ceiling negative frames",
+                "pass": true,
+                "detail": "64 class-negative held-out frames; need at least 1"
+              },
+              {
+                "name": "object subtypes",
+                "pass": true,
+                "detail": "9 distinct; need 6"
+              },
+              {
+                "name": "vehicle subtypes",
+                "pass": true,
+                "detail": "5 distinct; need 3"
+              },
+              {
+                "name": "required scene tags",
+                "pass": true,
+                "detail": "missing: none"
+              },
+              {
+                "name": "translating-camera registration clips",
+                "pass": true,
+                "detail": "2 held-out clips with eligible frames and control points; need 2"
+              },
+              {
+                "name": "withheld metric dimension",
+                "pass": true,
+                "detail": "2 held-out clips withhold a measured dimension"
+              }
+            ]
+          }
+        },
+        "all_gates_passed": false
+      }
+    },
+    "heldout": {
+      "path": "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/reports/heldout-final-score.json",
+      "sha256": "e5074c63be8089615e0ca51b2da23825284c9569256abad9c928d071555dcf1c",
+      "execution": {
+        "command": [
+          "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/.venv/bin/skeleton-maker",
+          "environment-score",
+          "--predictions",
+          "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/evaluation-cpu-manifests",
+          "--annotations",
+          "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/annotations",
+          "--split",
+          "heldout",
+          "--out",
+          "/Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/reports/heldout-final-score.json"
+        ],
+        "exit_code": 1,
+        "stdout": "FAIL  objects\n        precision 0.593 is below 0.8\n        recall 0.242 is below 0.7\n        subtype 'chair_or_seat' recall 0.336 is below 0.5\n        subtype 'computer' recall 0.000 is below 0.5\n        subtype 'plate' recall 0.000 is below 0.5\n        subtype 'screen_or_television' recall 0.208 is below 0.5\n        subtype 'sofa' recall 0.000 is below 0.5\n        subtype 'table_or_desk' recall 0.407 is below 0.5\nFAIL  vehicles\n        precision 0.740 is below 0.8\n        recall 0.533 is below 0.7\n        subtype 'car' recall 0.455 is below 0.5\nFAIL  walls\n        IoU 0.301 is below 0.65\n        clip 'vip-h3-indoor-objects' IoU 0.000 is below 0.5\n        17 of 48 wall-negative frames hold a predicted region over 1% of the image\nFAIL  floors\n        IoU 0.335 is below 0.65\n        clip 'vip-h2-indoor-structure' IoU 0.214 is below 0.5\n        clip 'vip-h3-indoor-objects' IoU 0.000 is below 0.5\n        47 of 48 floor-negative frames hold a predicted region over 1% of the image\nFAIL  ceilings\n        37 of 48 ceiling-negative frames hold a predicted region over 1% of the image\nFAIL  structural_surfaces\nFAIL  identity_objects\n        IDF1 0.270 is below 0.75\nFAIL  identity_vehicles\n        IDF1 0.566 is below 0.75\nFAIL  registration\n        coverage 0.000 is below 0.8; abstained frames count against it\n        no control-point reprojections to measure\nFAIL  metric_scale\n        tum-fr1-rpy/check-dimension: no predicted value\n        tum-fr1-xyz/check-dimension: no predicted value\nFAIL  underconstrained\n        clip 'vip-h3-indoor-objects' claims registration without adequate evidence\nFAIL  corpus_coverage\n        failed: complete prediction runs\nscorer 2, split heldout: report written to /Users/Nicolas/Documents/datasets/skeleton-maker/corpus-v2/runs/reports/heldout-final-score.json\n",
+        "stderr": "error: not every gate passed\n"
+      },
+      "report": {
+        "schema": "skeleton-maker.environment-score/1",
+        "scorer_version": "2",
+        "split": "heldout",
+        "targets": {
+          "mask_iou": 0.5,
+          "object_precision": 0.8,
+          "object_recall": 0.7,
+          "subtype_min_instances": 10,
+          "subtype_recall": 0.5,
+          "structural_iou": 0.65,
+          "structural_clip_iou": 0.5,
+          "negative_area_fraction": 0.01,
+          "negative_false_positive_rate": 0.05,
+          "idf1": 0.75,
+          "registration_coverage": 0.8,
+          "reprojection_median_pct": 0.5,
+          "reprojection_p95_pct": 2.0,
+          "metric_relative_error": 0.1,
+          "ignore_overlap": 0.5,
+          "corpus": {
+            "clips": 12,
+            "development_clips": 6,
+            "heldout_clips": 6,
+            "heldout_frames_per_clip": 10,
+            "tracking_interval_seconds": 2.0,
+            "family_positive_heldout_clips": 2,
+            "object_subtypes": 6,
+            "vehicle_subtypes": 3,
+            "translating_registration_clips": 2
+          },
+          "required_tags": [
+            "indoor",
+            "outdoor",
+            "vehicle_stationary",
+            "vehicle_moving",
+            "handled_object",
+            "tripod",
+            "translating",
+            "pan",
+            "occlusion",
+            "motion_blur",
+            "person_free",
+            "edited_cut",
+            "underconstrained"
+          ]
+        },
+        "inputs": {
+          "annotations": 15,
+          "predictions": 14,
+          "unmatched_predictions": [],
+          "clips": {
+            "tum-fr1-rpy": {
+              "split": "heldout",
+              "scope": "geometry",
+              "prediction": "present",
+              "run_status": "partial"
+            },
+            "tum-fr1-xyz": {
+              "split": "heldout",
+              "scope": "geometry",
+              "prediction": "present",
+              "run_status": "partial"
+            },
+            "vip-h1-indoor-structure": {
+              "split": "heldout",
+              "scope": "semantic",
+              "prediction": "present",
+              "run_status": "partial",
+              "frames_unscanned": []
+            },
+            "vip-h2-indoor-structure": {
+              "split": "heldout",
+              "scope": "semantic",
+              "prediction": "present",
+              "run_status": "partial",
+              "frames_unscanned": []
+            },
+            "vip-h3-indoor-objects": {
+              "split": "heldout",
+              "scope": "semantic",
+              "prediction": "missing",
+              "frames_unscanned": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15
+              ]
+            },
+            "vip-h4-vehicles": {
+              "split": "heldout",
+              "scope": "semantic",
+              "prediction": "present",
+              "run_status": "partial",
+              "frames_unscanned": []
+            },
+            "vip-h5-vehicles": {
+              "split": "heldout",
+              "scope": "semantic",
+              "prediction": "present",
+              "run_status": "partial",
+              "frames_unscanned": []
+            },
+            "vip-h6-vehicles-fixed": {
+              "split": "heldout",
+              "scope": "semantic",
+              "prediction": "present",
+              "run_status": "partial",
+              "frames_unscanned": []
+            }
+          }
+        },
+        "gates": {
+          "objects": {
+            "pass": false,
+            "reasons": [
+              "precision 0.593 is below 0.8",
+              "recall 0.242 is below 0.7",
+              "subtype 'chair_or_seat' recall 0.336 is below 0.5",
+              "subtype 'computer' recall 0.000 is below 0.5",
+              "subtype 'plate' recall 0.000 is below 0.5",
+              "subtype 'screen_or_television' recall 0.208 is below 0.5",
+              "subtype 'sofa' recall 0.000 is below 0.5",
+              "subtype 'table_or_desk' recall 0.407 is below 0.5"
+            ],
+            "counts": {
+              "tp": 211,
+              "fp": 145,
+              "fn": 661
+            },
+            "precision": 0.5926966292134831,
+            "recall": 0.24197247706422018,
+            "per_class": {
+              "book": {
+                "tp": 0,
+                "fp": 1,
+                "fn": 0,
+                "instances": 0,
+                "recall": null
+              },
+              "bottle_or_cup": {
+                "tp": 0,
+                "fp": 0,
+                "fn": 9,
+                "instances": 9,
+                "recall": 0.0
+              },
+              "box": {
+                "tp": 0,
+                "fp": 19,
+                "fn": 0,
+                "instances": 0,
+                "recall": null
+              },
+              "chair_or_seat": {
+                "tp": 86,
+                "fp": 9,
+                "fn": 170,
+                "instances": 256,
+                "recall": 0.3359375
+              },
+              "computer": {
+                "tp": 0,
+                "fp": 1,
+                "fn": 46,
+                "instances": 46,
+                "recall": 0.0
+              },
+              "lamp": {
+                "tp": 0,
+                "fp": 9,
+                "fn": 0,
+                "instances": 0,
+                "recall": null
+              },
+              "plate": {
+                "tp": 0,
+                "fp": 9,
+                "fn": 30,
+                "instances": 30,
+                "recall": 0.0
+              },
+              "screen_or_television": {
+                "tp": 88,
+                "fp": 0,
+                "fn": 336,
+                "instances": 424,
+                "recall": 0.20754716981132076
+              },
+              "sofa": {
+                "tp": 0,
+                "fp": 24,
+                "fn": 16,
+                "instances": 16,
+                "recall": 0.0
+              },
+              "table_or_desk": {
+                "tp": 37,
+                "fp": 45,
+                "fn": 54,
+                "instances": 91,
+                "recall": 0.4065934065934066
+              },
+              "tub_or_bowl_or_pot": {
+                "tp": 0,
+                "fp": 1,
+                "fn": 0,
+                "instances": 0,
+                "recall": null
+              },
+              "unknown": {
+                "tp": 0,
+                "fp": 27,
+                "fn": 0,
+                "instances": 0,
+                "recall": null
+              }
+            },
+            "per_clip": {
+              "vip-h1-indoor-structure": {
+                "tp": 179,
+                "fp": 55,
+                "fn": 499
+              },
+              "vip-h2-indoor-structure": {
+                "tp": 32,
+                "fp": 25,
+                "fn": 82
+              },
+              "vip-h3-indoor-objects": {
+                "tp": 0,
+                "fp": 0,
+                "fn": 80
+              },
+              "vip-h4-vehicles": {
+                "tp": 0,
+                "fp": 10,
+                "fn": 0
+              },
+              "vip-h5-vehicles": {
+                "tp": 0,
+                "fp": 31,
+                "fn": 0
+              },
+              "vip-h6-vehicles-fixed": {
+                "tp": 0,
+                "fp": 24,
+                "fn": 0
+              }
+            }
+          },
+          "vehicles": {
+            "pass": false,
+            "reasons": [
+              "precision 0.740 is below 0.8",
+              "recall 0.533 is below 0.7",
+              "subtype 'car' recall 0.455 is below 0.5"
+            ],
+            "counts": {
+              "tp": 196,
+              "fp": 69,
+              "fn": 172
+            },
+            "precision": 0.7396226415094339,
+            "recall": 0.532608695652174,
+            "per_class": {
+              "bicycle": {
+                "tp": 0,
+                "fp": 3,
+                "fn": 0,
+                "instances": 0,
+                "recall": null
+              },
+              "bus": {
+                "tp": 16,
+                "fp": 0,
+                "fn": 14,
+                "instances": 30,
+                "recall": 0.5333333333333333
+              },
+              "car": {
+                "tp": 131,
+                "fp": 18,
+                "fn": 157,
+                "instances": 288,
+                "recall": 0.4548611111111111
+              },
+              "motorcycle": {
+                "tp": 2,
+                "fp": 0,
+                "fn": 0,
+                "instances": 2,
+                "recall": 1.0
+              },
+              "truck": {
+                "tp": 47,
+                "fp": 48,
+                "fn": 1,
+                "instances": 48,
+                "recall": 0.9791666666666666
+              }
+            },
+            "per_clip": {
+              "vip-h1-indoor-structure": {
+                "tp": 0,
+                "fp": 0,
+                "fn": 0
+              },
+              "vip-h2-indoor-structure": {
+                "tp": 0,
+                "fp": 0,
+                "fn": 0
+              },
+              "vip-h3-indoor-objects": {
+                "tp": 0,
+                "fp": 0,
+                "fn": 0
+              },
+              "vip-h4-vehicles": {
+                "tp": 18,
+                "fp": 4,
+                "fn": 16
+              },
+              "vip-h5-vehicles": {
+                "tp": 120,
+                "fp": 57,
+                "fn": 109
+              },
+              "vip-h6-vehicles-fixed": {
+                "tp": 58,
+                "fp": 8,
+                "fn": 47
+              }
+            }
+          },
+          "walls": {
+            "pass": false,
+            "reasons": [
+              "IoU 0.301 is below 0.65",
+              "clip 'vip-h3-indoor-objects' IoU 0.000 is below 0.5",
+              "17 of 48 wall-negative frames hold a predicted region over 1% of the image"
+            ],
+            "iou": 0.30050845247924907,
+            "intersection_pixels": 421815,
+            "union_pixels": 1403671,
+            "per_clip": {
+              "vip-h1-indoor-structure": 0.5017593494426665,
+              "vip-h2-indoor-structure": 0.5184928512788801,
+              "vip-h3-indoor-objects": 0.0
+            },
+            "negatives": {
+              "frames": 48,
+              "false_positive_frames": 17,
+              "rate": 0.3541666666666667
+            }
+          },
+          "floors": {
+            "pass": false,
+            "reasons": [
+              "IoU 0.335 is below 0.65",
+              "clip 'vip-h2-indoor-structure' IoU 0.214 is below 0.5",
+              "clip 'vip-h3-indoor-objects' IoU 0.000 is below 0.5",
+              "47 of 48 floor-negative frames hold a predicted region over 1% of the image"
+            ],
+            "iou": 0.334738269616776,
+            "intersection_pixels": 434425,
+            "union_pixels": 1297805,
+            "per_clip": {
+              "vip-h1-indoor-structure": 0.6380395622323431,
+              "vip-h2-indoor-structure": 0.2135486066855918,
+              "vip-h3-indoor-objects": 0.0
+            },
+            "negatives": {
+              "frames": 48,
+              "false_positive_frames": 47,
+              "rate": 0.9791666666666666
+            }
+          },
+          "ceilings": {
+            "pass": false,
+            "reasons": [
+              "37 of 48 ceiling-negative frames hold a predicted region over 1% of the image"
+            ],
+            "iou": 0.8539501772063666,
+            "intersection_pixels": 666462,
+            "union_pixels": 780446,
+            "per_clip": {
+              "vip-h1-indoor-structure": 0.5657329025022031,
+              "vip-h2-indoor-structure": 0.9704694798511598
+            },
+            "negatives": {
+              "frames": 48,
+              "false_positive_frames": 37,
+              "rate": 0.7708333333333334
+            }
+          },
+          "structural_surfaces": {
+            "pass": false,
+            "classes": {
+              "wall": false,
+              "floor": false,
+              "ceiling": false
+            }
+          },
+          "identity_objects": {
+            "pass": false,
+            "reasons": [
+              "IDF1 0.270 is below 0.75"
+            ],
+            "idf1": 0.2703583061889251,
+            "idtp": 166,
+            "gt_detections": 872,
+            "pred_detections": 356,
+            "switches": 47,
+            "fragmentation": 12,
+            "misses": 661,
+            "per_clip": {
+              "vip-h1-indoor-structure": {
+                "idtp": 134,
+                "gt_detections": 678,
+                "pred_detections": 234
+              },
+              "vip-h2-indoor-structure": {
+                "idtp": 32,
+                "gt_detections": 114,
+                "pred_detections": 57
+              },
+              "vip-h3-indoor-objects": {
+                "idtp": 0,
+                "gt_detections": 80,
+                "pred_detections": 0
+              },
+              "vip-h4-vehicles": {
+                "idtp": 0,
+                "gt_detections": 0,
+                "pred_detections": 10
+              },
+              "vip-h5-vehicles": {
+                "idtp": 0,
+                "gt_detections": 0,
+                "pred_detections": 31
+              },
+              "vip-h6-vehicles-fixed": {
+                "idtp": 0,
+                "gt_detections": 0,
+                "pred_detections": 24
+              }
+            }
+          },
+          "identity_vehicles": {
+            "pass": false,
+            "reasons": [
+              "IDF1 0.566 is below 0.75"
+            ],
+            "idf1": 0.5655608214849921,
+            "idtp": 179,
+            "gt_detections": 368,
+            "pred_detections": 265,
+            "switches": 19,
+            "fragmentation": 8,
+            "misses": 172,
+            "per_clip": {
+              "vip-h1-indoor-structure": {
+                "idtp": 0,
+                "gt_detections": 0,
+                "pred_detections": 0
+              },
+              "vip-h2-indoor-structure": {
+                "idtp": 0,
+                "gt_detections": 0,
+                "pred_detections": 0
+              },
+              "vip-h3-indoor-objects": {
+                "idtp": 0,
+                "gt_detections": 0,
+                "pred_detections": 0
+              },
+              "vip-h4-vehicles": {
+                "idtp": 18,
+                "gt_detections": 34,
+                "pred_detections": 22
+              },
+              "vip-h5-vehicles": {
+                "idtp": 105,
+                "gt_detections": 229,
+                "pred_detections": 177
+              },
+              "vip-h6-vehicles-fixed": {
+                "idtp": 56,
+                "gt_detections": 105,
+                "pred_detections": 66
+              }
+            }
+          },
+          "registration": {
+            "pass": false,
+            "reasons": [
+              "coverage 0.000 is below 0.8; abstained frames count against it",
+              "no control-point reprojections to measure"
+            ],
+            "eligible_frames": 8,
+            "registered_frames": 0,
+            "coverage": 0.0,
+            "median_error_pct": null,
+            "p95_error_pct": null,
+            "percentile_method": "nearest rank",
+            "per_clip": {
+              "tum-fr1-rpy": {
+                "eligible_frames": 4,
+                "registered": 0
+              },
+              "tum-fr1-xyz": {
+                "eligible_frames": 4,
+                "registered": 0
+              }
+            }
+          },
+          "metric_scale": {
+            "pass": false,
+            "reasons": [
+              "tum-fr1-rpy/check-dimension: no predicted value",
+              "tum-fr1-xyz/check-dimension: no predicted value"
+            ],
+            "dimensions": [
+              {
+                "clip": "tum-fr1-rpy",
+                "id": "check-dimension",
+                "true_m": 1.852445048790997,
+                "predicted_m": null,
+                "relative_error": null,
+                "uncertainty_m": 0.042426406871192854,
+                "status": "relative-camera-frame",
+                "pass": false
+              },
+              {
+                "clip": "tum-fr1-xyz",
+                "id": "check-dimension",
+                "true_m": 1.642585810664978,
+                "predicted_m": null,
+                "relative_error": null,
+                "uncertainty_m": 0.042426406871192854,
+                "status": "relative-camera-frame",
+                "pass": false
+              }
+            ]
+          },
+          "underconstrained": {
+            "pass": false,
+            "reasons": [
+              "clip 'vip-h3-indoor-objects' claims registration without adequate evidence"
+            ],
+            "clips": {
+              "vip-h3-indoor-objects": false,
+              "vip-h6-vehicles-fixed": true
+            }
+          },
+          "corpus_coverage": {
+            "pass": false,
+            "reasons": [
+              "failed: complete prediction runs"
+            ],
+            "checks": [
+              {
+                "name": "clips",
+                "pass": true,
+                "detail": "12 semantic clips (6 development, 6 held-out) of 15 in the corpus; need 12 semantic clips with 6 and 6; geometry-scope clips are counted by the geometry checks only"
+              },
+              {
+                "name": "held-out evaluation frames",
+                "pass": true,
+                "detail": "clips under 10 annotated frames: none"
+              },
+              {
+                "name": "tracking interval seconds",
+                "pass": true,
+                "detail": "held-out clips without a 2.0 s tracking interval: none"
+              },
+              {
+                "name": "second review",
+                "pass": true,
+                "detail": "every held-out semantic clip needs a second reviewer with disagreements resolved, or a published dataset's documented quality control; 6 clips rely on the published dataset: ['vip-h1-indoor-structure', 'vip-h2-indoor-structure', 'vip-h3-indoor-objects', 'vip-h4-vehicles', 'vip-h5-vehicles', 'vip-h6-vehicles-fixed']"
+              },
+              {
+                "name": "complete prediction runs",
+                "pass": false,
+                "detail": "missing or incomplete: ['vip-h3-indoor-objects']"
+              },
+              {
+                "name": "object positive clips",
+                "pass": true,
+                "detail": "3 held-out clips; need 2"
+              },
+              {
+                "name": "vehicle positive clips",
+                "pass": true,
+                "detail": "3 held-out clips; need 2"
+              },
+              {
+                "name": "wall positive clips",
+                "pass": true,
+                "detail": "3 held-out clips; need 2"
+              },
+              {
+                "name": "floor positive clips",
+                "pass": true,
+                "detail": "3 held-out clips; need 2"
+              },
+              {
+                "name": "ceiling positive clips",
+                "pass": true,
+                "detail": "2 held-out clips; need 2"
+              },
+              {
+                "name": "wall negative frames",
+                "pass": true,
+                "detail": "48 class-negative held-out frames; need at least 1"
+              },
+              {
+                "name": "floor negative frames",
+                "pass": true,
+                "detail": "48 class-negative held-out frames; need at least 1"
+              },
+              {
+                "name": "ceiling negative frames",
+                "pass": true,
+                "detail": "64 class-negative held-out frames; need at least 1"
+              },
+              {
+                "name": "object subtypes",
+                "pass": true,
+                "detail": "9 distinct; need 6"
+              },
+              {
+                "name": "vehicle subtypes",
+                "pass": true,
+                "detail": "5 distinct; need 3"
+              },
+              {
+                "name": "required scene tags",
+                "pass": true,
+                "detail": "missing: none"
+              },
+              {
+                "name": "translating-camera registration clips",
+                "pass": true,
+                "detail": "2 held-out clips with eligible frames and control points; need 2"
+              },
+              {
+                "name": "withheld metric dimension",
+                "pass": true,
+                "detail": "2 held-out clips withhold a measured dimension"
+              }
+            ]
+          }
+        },
+        "all_gates_passed": false
+      }
+    }
+  },
+  "software_checks": {
+    "command": [
+      "just",
+      "check"
+    ],
+    "exit_code": 0,
+    "evaluated_source_commit": "cb8f2749cab3d3e3dbf2c09821bee78a149fe817",
+    "log": "/Users/Nicolas/Documents/github/skeleton-maker-worktrees/issue-51-jev-integration/work/issue-51-resume/just-check.log",
+    "log_sha256": "78cfb2031d9455d092310c810363c86fe2bb9d426ae4ec9c9755e81692b77da3",
+    "tests_passed": 532,
+    "tests_skipped": 1,
+    "coverage_percent": 82.76,
+    "browser_regressions": "all passed",
+    "scope": "Source checks ran before the report-only changes; report hooks are checked separately."
+  },
+  "limits": [
+    "The missing held-out object clip is scored as misses; no retry or completed-subset headline score.",
+    "The interrupted h3 expected command is reconstructed from the freeze; its original runtime argv was not captured.",
+    "No held-out data was used for tuning; aliases, targets and inference settings remained frozen.",
+    "Published VIPSeg quality control replaces a newly named independent reviewer.",
+    "Whether the models were trained on VIPSeg source footage is unknown.",
+    "Structural negatives follow the frozen VIPSeg mapping; other stuff classes remain background.",
+    "Pan is represented only in development; the blur proxy was checked on one frame pair.",
+    "The check dimension is withheld from scale fitting, but its expected length is in the calibration payload for post-fit checks.",
+    "Process RSS is not total physical footprint or peak accelerator memory.",
+    "The machine was shared with other active workloads; measured runtimes are not a throughput benchmark.",
+    "Jev judgments are advisory; retained low-confidence/escalated results are not correctness proof.",
+    "Fixture success does not establish recognition accuracy; results apply only to this finite pilot."
+  ],
+  "jev_final_report_review": {
+    "tool": "jev_gate",
+    "model": "typesafe/jev-1.13",
+    "provider": "openrouter",
+    "truncated": false,
+    "action": "escalate",
+    "reason_codes": [
+      "confidence_below_review",
+      "safe_to_apply_below_review",
+      "review_escalated",
+      "claim_confidence_below_auto_accept"
+    ],
+    "review": {
+      "safe_to_apply": 0.4,
+      "scores": {
+        "correctness": {
+          "score": 1.64,
+          "confidence": 0.46,
+          "probabilities": {
+            "0": 0.11,
+            "1": 0.14,
+            "2": 0.75
+          }
+        },
+        "spec_match": {
+          "score": 1.73,
+          "confidence": 0.59,
+          "probabilities": {
+            "0": 0.05,
+            "1": 0.18,
+            "2": 0.77
+          }
+        },
+        "test_gap": {
+          "score": 0.3,
+          "confidence": 0.55,
+          "probabilities": {
+            "0": 0.74,
+            "1": 0.22,
+            "2": 0.04
+          }
+        },
+        "blast_radius": {
+          "score": 0.39,
+          "confidence": 0.41,
+          "probabilities": {
+            "0": 0.72,
+            "1": 0.18,
+            "2": 0.1
+          }
+        }
+      },
+      "weights": {
+        "correctness": 0.4,
+        "spec_match": 0.3,
+        "test_gap": 0.15,
+        "blast_radius": 0.15
+      },
+      "thresholds": {
+        "auto_accept": 0.8,
+        "review_at": 0.5,
+        "composite_floor": 0.7
+      },
+      "action": "escalate",
+      "composite": 0.8357500000000001,
+      "reason_codes": [
+        "confidence_below_review",
+        "safe_to_apply_below_review"
+      ],
+      "limiting_rubrics": [
+        "blast_radius"
+      ]
+    },
+    "verification": {
+      "action": "review",
+      "summary": {
+        "verified": 5,
+        "contradicted": 0,
+        "unsupported": 0,
+        "needs_review": 1,
+        "invalid_response": 0
+      },
+      "thresholds": {
+        "auto_accept": 0.8,
+        "review_at": 0.5
+      },
+      "results": [
+        {
+          "claim": "Fifteen clips were attempted;14 manifests validate and one heldout clip is retained interrupted without retry. Its runtime fields are unknown and expected argv is explicitly reconstructed.",
+          "verdict": "verified",
+          "confidence": 0.95,
+          "probabilities": {
+            "verified": 0.97,
+            "unsupported": 0,
+            "contradicted": 0.03
+          },
+          "action": "auto"
+        },
+        {
+          "claim": "Both final split public scores failed; every gate and full per-class/per-clip results are retained without omitting the missing attempt or changing targets.",
+          "verdict": "verified",
+          "confidence": 0.97,
+          "probabilities": {
+            "verified": 0.98,
+            "unsupported": 0.01,
+            "contradicted": 0.01
+          },
+          "action": "auto"
+        },
+        {
+          "claim": "All2506 corpus input hashes and55 frozen source/helper/requirements hashes remain unchanged; reports equal original public scorer outputs.",
+          "verdict": "verified",
+          "confidence": 0.76,
+          "probabilities": {
+            "verified": 0.84,
+            "unsupported": 0.08,
+            "contradicted": 0.08
+          },
+          "action": "review"
+        },
+        {
+          "claim": "Fresh just check passed532 tests,1skip,82.76% coverage, and report-only hooks passed. These do not prove recognition accuracy.",
+          "verdict": "verified",
+          "confidence": 0.99,
+          "probabilities": {
+            "verified": 1,
+            "unsupported": 0,
+            "contradicted": 0
+          },
+          "action": "auto"
+        },
+        {
+          "claim": "This is a failed finite pilot with limited published annotation review, unknown training contamination, development-only pan, limited blur proxy, no solved metric registration and shared-machine resource measurements; current-head CI and merge readiness are not claimed.",
+          "verdict": "verified",
+          "confidence": 0.86,
+          "probabilities": {
+            "verified": 0.91,
+            "unsupported": 0.05,
+            "contradicted": 0.04
+          },
+          "action": "auto"
+        }
+      ]
+    },
+    "usage": {
+      "input_tokens": 18506,
+      "output_tokens": 278
+    }
+  }
+}

@@ -1,6 +1,6 @@
 # Scoring environment scans
 
-`skeleton-maker environment-score` grades environment manifests against human annotations and reports every gate separately. There is no combined score: `all_gates_passed` is true only when each gate is, so a strong floor result cannot hide a failed ceiling.
+`skeleton-maker environment-score` grades environment manifests against independent annotations from people or published datasets and reports every gate separately. There is no combined score: `all_gates_passed` is true only when each gate is, so a strong floor result cannot hide a failed ceiling.
 
 ```bash
 skeleton-maker environment-score --predictions runs/ --annotations labels/ --out score.json
@@ -8,7 +8,7 @@ skeleton-maker environment-score --predictions runs/ --annotations labels/ --out
 
 `--split` picks the clips the gates score (`heldout` by default, or `development` or `all`). Corpus coverage always looks at every annotation. Exit codes: `0` all gates passed, `1` a gate failed, `2` invalid input (malformed annotation or manifest, missing directory, empty corpus). The report is written atomically.
 
-Ground truth is human labelling only. Model predictions and Jev judgments are never ground truth. The targets below were fixed before any held-out evaluation; changing one needs an explicit spec change with its rationale. Scorer version: `2` (in the report as `scorer_version`). Version 2 adds annotation `scope` and `provenance`; the targets are unchanged. Rationale: the maintainer approved non-human annotation on 2026-10-04, and the independent camera and depth measurements that registration needs come from motion-capture datasets that carry no masks. Declaring a clip's scope keeps those clips out of the mask rules instead of padding them with empty labels.
+Ground truth comes from independent human annotations or published dataset masks and measurements, with provenance stated. This project's model predictions and Jev judgments are never ground truth. The targets below were fixed before any held-out evaluation; changing one needs an explicit spec change with its rationale. Scorer version: `2` (in the report as `scorer_version`). Version 2 adds annotation `scope` and `provenance`; the targets are unchanged. Rationale: the maintainer approved non-human annotation on 2026-10-04, and the independent camera and depth measurements that registration needs come from motion-capture datasets that carry no masks. Declaring a clip's scope keeps those clips out of the mask rules instead of padding them with empty labels.
 
 ## Inputs
 
