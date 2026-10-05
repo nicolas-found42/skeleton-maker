@@ -43,6 +43,7 @@ The first source gives masks and no camera truth. The second gives camera truth 
 | vip-d6-vehicles | development | 577_IzGj3UWB83M | 0.111 | occlusion, outdoor, tripod, underconstrained, vehicle_moving, vehicle_stationary |
 | tum-fr1-xyz | held-out | rgbd_dataset_freiburg1_xyz | n/a | indoor, translating |
 | tum-fr1-rpy | held-out | rgbd_dataset_freiburg1_rpy | n/a | indoor, motion_blur, translating |
+| tum-fr2-rpy | development | rgbd_dataset_freiburg2_rpy | n/a | indoor, pan, underconstrained |
 
 Each VIPSeg clip is at most 16 consecutive annotated frames (about 3 s at 5 fps), scaled to 640 px wide, with masks scaled by nearest neighbour. Both limits come from measurement on the 16 GiB reference machine, not from taste:
 
@@ -52,9 +53,9 @@ Each VIPSeg clip is at most 16 consecutive annotated frames (about 3 s at 5 fps)
 
 A window starts at the first frame unless the video has a cut; then it is the first window that keeps the cut at least three frames from either end (the shot detector misses a cut on the last frame) and still holds a two-second run inside one shot.
 
-The TUM clips keep the full 30 fps colour video (723 and 798 frames, 640 × 480) and are scanned at 0.5 fps, so the geometry worker sees 13 and 14 frames. A clip is cut to at most 16 samples for the same reason.
+The TUM clips keep the full 30 fps colour video (723, 798 and 901 frames, 640 × 480) and are scanned at 0.5 fps, so the geometry worker sees 13, 14 and 16 frames. A clip is cut to at most 16 samples for the same reason.
 
-TUM anchors and dimension. Four fit frames and four check frames are chosen on the 60-frame grid; each frame gives corners on flat valid-depth pixels, back-projected through the measured pose. The check dimension is the distance between two measured check points (1.64 m for xyz, 1.85 m for rpy) and is withheld from the pipeline. Depth and pose agree to a median of 1.9 cm (xyz) and 2.5 cm (rpy) when points seen in two frames are compared; the 90th percentiles are 9.2 cm and 20.4 cm. The anchor uncertainty is bounded at 3 cm per point, and the builder refuses a sequence whose median disagreement is above it.
+TUM anchors and dimension. Four fit frames and four check frames are chosen on the 60-frame grid; each frame gives corners on flat valid-depth pixels, back-projected through the measured pose. The check dimension is the distance between two measured check points (1.64 m for xyz, 1.85 m for rpy, 2.41 m for fr2-rpy) and is withheld from the pipeline. Depth and pose agree to a median of 1.9 cm (xyz), 2.5 cm (rpy) and 0.9 cm (fr2-rpy) when points seen in two frames are compared. The anchor uncertainty is bounded at 3 cm per point, and the builder refuses a sequence whose median disagreement is above it.
 
 ## Tags: measured, not assumed
 
@@ -69,17 +70,17 @@ Each tag follows a rule in the converter, and a tag is absent when the rule did 
 | handled_object | an object instance touching a person that is larger than it |
 | tripod, underconstrained, vehicle_moving, vehicle_stationary | camera shift below 0.3 px; vehicle motion only on fixed-camera clips (step at least 1.5% of the width a frame is moving, at most 0.3% is stationary) |
 | translating | mocap path extent of at least 0.3 m |
-| pan | camera turns at least 20° and moves under 0.3 m (no clip qualifies, see below) |
+| pan | camera turns at least 20° and moves under 0.3 m (`tum-fr2-rpy`: 52° at 0.173 m) |
 | motion_blur | at least 5% of poses turn at 100° a second or faster. Checked by eye on `freiburg1_rpy` frame 429 (185° a second, visibly smeared) beside frame 244 (3° a second, sharp). A sharpness-ratio test was tried first and flagged 45% of the slow `freiburg1_xyz`, so it was dropped |
 
 The 100° a second threshold was set after looking at one frame pair, so treat it as a proxy checked on one example, not a validated blur detector.
 
 ## Open gaps and rejected inputs
 
-- `pan` is not covered. `freiburg1_rpy` turns 115° but its path extent is 0.328 m, just above the 0.3 m rule, so it is tagged `translating`. The 0.3 m rule was fixed before the data was seen and was not changed. The maintainer approved one more archive, `freiburg1_360`; it turns 180° but moves 0.85 m, and its depth and pose disagree by a median 4.7 cm, so it is not a pan clip and its geometry is not usable. The `corpus_coverage` gate therefore fails on `required scene tags` until a pan clip is added.
+- `pan` was not covered when the corpus was frozen: `freiburg1_rpy` turns 115° but its path extent is 0.328 m, just above the 0.3 m rule, so it is tagged `translating`, and the refused `freiburg1_360` turns 180° but moves 0.85 m. The 0.3 m rule was fixed before the data was seen and was not changed. The maintainer approved one more download; candidate ground-truth trajectories were measured with the converter's own rule before anything was chosen. `freiburg2_rpy` qualified (52° at 0.173 m on the truncated 30 s window, depth/pose agreeing to 0.9 cm) and joined development. `freiburg3_sitting_rpy` also measures as `pan` (extent 0.2999 m, a 0.0001 m margin — the tag flips if the sequence is re-recorded or remeasured) and needs the Freiburg 3 Xtion calibration with a different depth scale, so it was rejected on the margin; the fr1/fr2 `_validation` twins publish no ground truth, and every other fr2 quasi-static sequence moves 1.8–2.8 m.
 - `freiburg1_room` was built and refused: depth and pose disagree by a median 6.4 cm against the 3 cm bound. `freiburg1_360` was refused for the same reason. Their outputs are kept outside Git as rejected inputs.
 - The second review for held-out semantic clips is VIPSeg's own documented quality control (expert checking of machine-propagated masks), not a named second reviewer. The scorer states which clips rely on it. The maintainer accepted this in place of a reviewer; it is a weaker guarantee than #64 first asked for.
-- There is no development geometry clip, so geometry settings cannot be tuned on development data. Both TUM clips are held-out.
+- `tum-fr2-rpy` is the first development geometry clip, so geometry behavior can now be exercised on development data; `tum-fr1-xyz` and `tum-fr1-rpy` stay held-out. The development split was frozen with six semantic clips; the maintainer approved this addition.
 - `motion_blur`, `translating` and `pan` cannot be measured on VIPSeg clips, so no semantic clip carries them.
 - The sports-hall dimension candidate from [environment-independent-references.md](environment-independent-references.md) was not used. TUM supplies the measured dimension.
 - Whether the perception models saw VIPSeg frames in training is unknown. VIPSeg videos come from YouTube, and a model trained on web video may have seen them. Scores here measure agreement with VIPSeg labels, not generalisation to unseen footage.
