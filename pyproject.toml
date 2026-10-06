@@ -48,7 +48,7 @@ skeleton-maker = "skeleton_maker.cli:main"
 packages = ["skeleton_maker"]
 
 [tool.setuptools.package-data]
-skeleton_maker = ["proto/**/*.proto", "characters/*.json", "web/*.html", "web/*.js"]
+skeleton_maker = ["proto/**/*.proto", "characters/*.json", "web/*.html", "web/*.js", "workers/*.py", "workers/*.txt"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -60,6 +60,7 @@ python-version = "3.10"
 [tool.ty.src]
 include = ["skeleton_maker", "tests", "scripts", "experiments"]
 # Generated gRPC stubs are rebuilt from proto/ on demand and gitignored.
+# Worker modules are shipped and imported by offline tests; their model dependencies stay lazy.
 exclude = ["skeleton_maker/_gen"]
 
 [tool.coverage.run]
@@ -71,12 +72,21 @@ omit = ["skeleton_maker/_gen/*"]
 
 [tool.coverage.report]
 # Ratchet: this floor may only ever go up. Raise it when a PR adds tests; never lower it.
-fail_under = 55
+fail_under = 82
 show_missing = true
 
 [tool.typos.files]
-# Vendored, minified third-party code (three.js): not ours to spell-check.
-extend-exclude = ["skeleton_maker/web/three.module.min.js"]
+# Vendored, minified third-party code (three.js): not ours to spell-check. YouTube video IDs in the
+# corpus manifest are random strings that the spell checker mistakes for words.
+extend-exclude = [
+  "skeleton_maker/web/three.module.min.js",
+  "docs/research/environment-corpus-manifest.json",
+]
+
+[tool.typos.default]
+# An 11-character video ID in a Markdown code span, and a VIPSeg video name (number, underscore,
+# then the 11-character YouTube ID).
+extend-ignore-re = ["`[A-Za-z0-9_-]{11}`", "\\b[0-9]+_[A-Za-z0-9_-]{11}\\b"]
 
 [tool.typos.default.extend-words]
 # A real three.js material property (MeshStandardMaterial.metalness), used in the character specs.

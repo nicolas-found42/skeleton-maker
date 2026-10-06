@@ -1,0 +1,386 @@
+{
+ "schema": "skeleton-maker.environment-corpus-manifest/1",
+ "status": "frozen_unannotated",
+ "frozen_at": "2026-10-04T20:32:46.814966+00:00",
+ "media_root": "~/Documents/datasets/skeleton-maker/environment-pool-20261004 (outside Git)",
+ "rights": {
+  "basis": "Creative Commons Attribution licence reported by YouTube for each upload, accepted by the maintainer (Nicolas Alexander, chat, 2026-10-04) for personal, non-commercial evaluation; media are not redistributed and stay outside Git; uploader attribution and source URL are retained here",
+  "third_party_content": "not audited per clip"
+ },
+ "selection": {
+  "pool": "100 clips downloaded from 35 Creative Commons searches (12 s excerpts, at most 2 per uploader)",
+  "method": "Jev scene-type classification of titles, human contact-sheet review of every clip, Jev noul ranking within five declared roles, then one declared coverage override",
+  "override": "aVCOlgSzPp4 (Jev 0.41) replaces -epQkpZPUug (Jev 0.61) in role R1 because the scorer requires an edited-cut clip and -epQkpZPUug has no detected cut",
+  "held_out_rule": "two person-free indoor structure clips with ceilings, one fixed-camera object clip, one fixed street camera, two translating-camera vehicle clips"
+ },
+ "frame_proposal": {
+  "file": "annotation-proposal-20261004/frame-proposal.json",
+  "sha256": "ad6d3997f7754775fd77b682b4de09a0c83ef0c15726c381aac86d48e3ae3bdd"
+ },
+ "model_exposure": "No environment model has run on any of these clips as of the freeze. Clips were viewed as contact sheets during selection.",
+ "clips": [
+  {
+   "id": "SrNN_Z7z8OI",
+   "split": "heldout",
+   "role": "R1",
+   "file": "SrNN_Z7z8OI.mp4",
+   "sha256": "6c6295631f615420a84151726f21e1642eed242b806e88577d674274a529bd33",
+   "source_url": "https://www.youtube.com/watch?v=SrNN_Z7z8OI",
+   "title": "Free Stock Footage! *Empty Showroom - Before Move In [HD]",
+   "uploader": "California Balloon Films",
+   "channel_id": "UCtl2G1NrhN6-eDiciPknu_w",
+   "reported_license": "Creative Commons Attribution license (reuse allowed)",
+   "upload_date": "20180327",
+   "excerpt_source_seconds": [
+    25,
+    37
+   ],
+   "width": 640,
+   "height": 360,
+   "frame_rate": [
+    24000,
+    1001
+   ],
+   "frame_count": 288,
+   "duration_s": 12.01,
+   "detected_cuts": [],
+   "median_background_shift_px_per_quarter_second": 0.01,
+   "capture_session": "one upload per clip; session identity is the uploader's single video",
+   "annotation": "pending",
+   "second_review": "pending"
+  },
+  {
+   "id": "aVCOlgSzPp4",
+   "split": "heldout",
+   "role": "R1",
+   "file": "aVCOlgSzPp4.mp4",
+   "sha256": "3a0f30eaae4259f815e6599e380ea1d31cdcdd6a6621ee980155512f3b39e851",
+   "source_url": "https://www.youtube.com/watch?v=aVCOlgSzPp4",
+   "title": "EMPTY HOUSE TOUR - Yes, I Have Moved AGAIN!!",
+   "uploader": "Ms Barbell Barbie",
+   "channel_id": "UCghOanAKgeTGDThmHa-kK0A",
+   "reported_license": "Creative Commons Attribution license (reuse allowed)",
+   "upload_date": "20230919",
+   "excerpt_source_seconds": [
+    243,
+    255
+   ],
+   "width": 640,
+   "height": 360,
+   "frame_rate": [
+    30000,
+    1001
+   ],
+   "frame_count": 360,
+   "duration_s": 12.01,
+   "detected_cuts": [
+    172,
+    322
+   ],
+   "median_background_shift_px_per_quarter_second": 2.05,
+   "capture_session": "one upload per clip; session identity is the uploader's single video",
+   "annotation": "pending",
+   "second_review": "pending"
+  },
+  {
+   "id": "vf04M-FwgMk",
+   "split": "heldout",
+   "role": "R2",
+   "file": "vf04M-FwgMk.mp4",
+   "sha256": "5dacbafccced21d5d9817eb42da43ddca31540352afd17f1a99f8600f1b08479",
+   "source_url": "https://www.youtube.com/watch?v=vf04M-FwgMk",
+   "title": "SmallRig DT01 Flexible Tripod (vs Ulanzi MT-33) Unboxing and Review",
+   "uploader": "Ahmed Dawn",
+   "channel_id": "UCrp_S2gDAjqdbrU4MKbhmaQ",
+   "reported_license": "Creative Commons Attribution license (reuse allowed)",
+   "upload_date": "20220703",
+   "excerpt_source_seconds": [
+    131,
+    143
+   ],
+   "width": 854,
+   "height": 480,
+   "frame_rate": [
+    25,
+    1
+   ],
+   "frame_count": 300,
+   "duration_s": 12.0,
+   "detected_cuts": [],
+   "median_background_shift_px_per_quarter_second": 0.17,
+   "capture_session": "one upload per clip; session identity is the uploader's single video",
+   "annotation": "pending",
+   "second_review": "pending"
+  },
+  {
+   "id": "Pgf5qBULDCo",
+   "split": "heldout",
+   "role": "R3",
+   "file": "Pgf5qBULDCo.mp4",
+   "sha256": "bab34433d529a39afa9da11705ed7b49c7a8c82d51712c07e5a52e5e89861b9a",
+   "source_url": "https://www.youtube.com/watch?v=Pgf5qBULDCo",
+   "title": "City Traffic | Free Timelapse #021",
+   "uploader": "JunX",
+   "channel_id": "UCt_pmK_f5ZLtm2QC0q8jMWA",
+   "reported_license": "Creative Commons Attribution license (reuse allowed)",
+   "upload_date": "20160508",
+   "excerpt_source_seconds": [
+    0,
+    12
+   ],
+   "width": 854,
+   "height": 480,
+   "frame_rate": [
+    30,
+    1
+   ],
+   "frame_count": 361,
+   "duration_s": 12.03,
+   "detected_cuts": [],
+   "median_background_shift_px_per_quarter_second": 0.06,
+   "capture_session": "one upload per clip; session identity is the uploader's single video",
+   "annotation": "pending",
+   "second_review": "pending"
+  },
+  {
+   "id": "64DSWDfgxcE",
+   "split": "heldout",
+   "role": "R4",
+   "file": "64DSWDfgxcE.mp4",
+   "sha256": "07a97e0f89472e45f2e8c3afcba2616606a4f191614bcf10540291ba2b81afb1",
+   "source_url": "https://www.youtube.com/watch?v=64DSWDfgxcE",
+   "title": "Driving Across Coast Meridian Overpass 🇨🇦 | Port Coquitlam POV Drive",
+   "uploader": "driving with carmen",
+   "channel_id": "UCz6skYTLpTWyiipXHkIidfQ",
+   "reported_license": "Creative Commons Attribution license (reuse allowed)",
+   "upload_date": "20240917",
+   "excerpt_source_seconds": [
+    20,
+    32
+   ],
+   "width": 640,
+   "height": 360,
+   "frame_rate": [
+    30000,
+    1001
+   ],
+   "frame_count": 360,
+   "duration_s": 12.01,
+   "detected_cuts": [],
+   "median_background_shift_px_per_quarter_second": 4.52,
+   "capture_session": "one upload per clip; session identity is the uploader's single video",
+   "annotation": "pending",
+   "second_review": "pending"
+  },
+  {
+   "id": "jpfU01SDpI8",
+   "split": "heldout",
+   "role": "R4",
+   "file": "jpfU01SDpI8.mp4",
+   "sha256": "f8d79bd543b19521b6378c8dffc81c7b3f701c7f8c7f401be08ae2de9e481d3d",
+   "source_url": "https://www.youtube.com/watch?v=jpfU01SDpI8",
+   "title": "4K DUBLIN CITY DRIVING#dashcam #ireland",
+   "uploader": "DASHCAM DRIVING IRELAND ",
+   "channel_id": "UCgeuTsoP_gUSQPAidXakcZw",
+   "reported_license": "Creative Commons Attribution license (reuse allowed)",
+   "upload_date": "20240614",
+   "excerpt_source_seconds": [
+    715,
+    727
+   ],
+   "width": 854,
+   "height": 480,
+   "frame_rate": [
+    30,
+    1
+   ],
+   "frame_count": 360,
+   "duration_s": 12.0,
+   "detected_cuts": [],
+   "median_background_shift_px_per_quarter_second": 3.22,
+   "capture_session": "one upload per clip; session identity is the uploader's single video",
+   "annotation": "pending",
+   "second_review": "pending"
+  },
+  {
+   "id": "D4tisPrCvtE",
+   "split": "development",
+   "role": "R1",
+   "file": "D4tisPrCvtE.mp4",
+   "sha256": "42ce5246d624393809950f144f172e593971902cdfa52d95fbdedf95faf14630",
+   "source_url": "https://www.youtube.com/watch?v=D4tisPrCvtE",
+   "title": "Empty House TOUR! // Bloomfield Homes!",
+   "uploader": "Us And Plus",
+   "channel_id": "UC-fWj_89U5SHxd98vJmvizQ",
+   "reported_license": "Creative Commons Attribution license (reuse allowed)",
+   "upload_date": "20210515",
+   "excerpt_source_seconds": [
+    280,
+    292
+   ],
+   "width": 640,
+   "height": 360,
+   "frame_rate": [
+    30000,
+    1001
+   ],
+   "frame_count": 360,
+   "duration_s": 12.01,
+   "detected_cuts": [],
+   "median_background_shift_px_per_quarter_second": 2.03,
+   "capture_session": "one upload per clip; session identity is the uploader's single video",
+   "annotation": "pending",
+   "second_review": "pending"
+  },
+  {
+   "id": "bhv0YUAT-5o",
+   "split": "development",
+   "role": "R2",
+   "file": "bhv0YUAT-5o.mp4",
+   "sha256": "356c63ac5f15f4a2c5a1b5aabce3afe6afa69ab63688a417d0a3dd45cfe941bf",
+   "source_url": "https://www.youtube.com/watch?v=bhv0YUAT-5o",
+   "title": "Unboxing and Packing ASMR of DJI Mini 2 Camera Bundle",
+   "uploader": "Elbin Elias",
+   "channel_id": "UCVB_u-C2UER3WjIl2vK-bLg",
+   "reported_license": "Creative Commons Attribution license (reuse allowed)",
+   "upload_date": "20230502",
+   "excerpt_source_seconds": [
+    0,
+    12
+   ],
+   "width": 854,
+   "height": 480,
+   "frame_rate": [
+    25,
+    1
+   ],
+   "frame_count": 300,
+   "duration_s": 12.0,
+   "detected_cuts": [],
+   "median_background_shift_px_per_quarter_second": 0.05,
+   "capture_session": "one upload per clip; session identity is the uploader's single video",
+   "annotation": "pending",
+   "second_review": "pending"
+  },
+  {
+   "id": "rFp8fle9w1w",
+   "split": "development",
+   "role": "R2",
+   "file": "rFp8fle9w1w.mp4",
+   "sha256": "a9dbbe386171bad69cef17049a374fe57e4ef45bec70392ca39118193451b83a",
+   "source_url": "https://www.youtube.com/watch?v=rFp8fle9w1w",
+   "title": "Unboxing/ Unpacking of AmazonBasics 50-inch Lightweight Tripod with Bag",
+   "uploader": "iq pop",
+   "channel_id": "UC4bvZ8KGoaePPcpvdXqCBpQ",
+   "reported_license": "Creative Commons Attribution license (reuse allowed)",
+   "upload_date": "20180909",
+   "excerpt_source_seconds": [
+    60,
+    72
+   ],
+   "width": 640,
+   "height": 360,
+   "frame_rate": [
+    30000,
+    1001
+   ],
+   "frame_count": 360,
+   "duration_s": 12.01,
+   "detected_cuts": [],
+   "median_background_shift_px_per_quarter_second": 0.14,
+   "capture_session": "one upload per clip; session identity is the uploader's single video",
+   "annotation": "pending",
+   "second_review": "pending"
+  },
+  {
+   "id": "Ehc0_SiHuTA",
+   "split": "development",
+   "role": "R3",
+   "file": "Ehc0_SiHuTA.mp4",
+   "sha256": "aa8944161529f89461442d2b6f481184d058c70497feeb3eb34512abcd46b977",
+   "source_url": "https://www.youtube.com/watch?v=Ehc0_SiHuTA",
+   "title": "Motor Vehicles Stopping On A Red Light Of TheTraffic Lights! Video | Free download",
+   "uploader": "P&V Free",
+   "channel_id": "UCmL34cK4zIHP6i0CHwNh5Ug",
+   "reported_license": "Creative Commons Attribution license (reuse allowed)",
+   "upload_date": "20210519",
+   "excerpt_source_seconds": [
+    22,
+    34
+   ],
+   "width": 640,
+   "height": 360,
+   "frame_rate": [
+    30000,
+    1001
+   ],
+   "frame_count": 360,
+   "duration_s": 12.01,
+   "detected_cuts": [],
+   "median_background_shift_px_per_quarter_second": 0.02,
+   "capture_session": "one upload per clip; session identity is the uploader's single video",
+   "annotation": "pending",
+   "second_review": "pending"
+  },
+  {
+   "id": "m5GYVRhJZdQ",
+   "split": "development",
+   "role": "R3",
+   "file": "m5GYVRhJZdQ.mp4",
+   "sha256": "94ccd75585f48eb531ddca25fe491fad56af16d47e70ba26d2534abef5056c27",
+   "source_url": "https://www.youtube.com/watch?v=m5GYVRhJZdQ",
+   "title": "Charlotte St, Looking Down At Traffic 2-BRISBANE, AUSTRALIA=TIMELAPSE [STOCK CC]",
+   "uploader": "XONRAD",
+   "channel_id": "UClL5_Z-F2V8bDsUTlbVG8Ug",
+   "reported_license": "Creative Commons Attribution license (reuse allowed)",
+   "upload_date": "20250111",
+   "excerpt_source_seconds": [
+    19,
+    31
+   ],
+   "width": 854,
+   "height": 480,
+   "frame_rate": [
+    30,
+    1
+   ],
+   "frame_count": 360,
+   "duration_s": 12.0,
+   "detected_cuts": [],
+   "median_background_shift_px_per_quarter_second": 0.03,
+   "capture_session": "one upload per clip; session identity is the uploader's single video",
+   "annotation": "pending",
+   "second_review": "pending"
+  },
+  {
+   "id": "uRbDaKgz1_w",
+   "split": "development",
+   "role": "R4",
+   "file": "uRbDaKgz1_w.mp4",
+   "sha256": "ee543fb9f3d963d20d9f249e540ab79aab6d7492de36f42aaf0ca4b0bf37589c",
+   "source_url": "https://www.youtube.com/watch?v=uRbDaKgz1_w",
+   "title": "Chennai City in 4K | Dashcam City Drive | Tamil Nadu, India",
+   "uploader": "Lets GO",
+   "channel_id": "UCRZvgqcTGlOSmY1Kn2KMZSA",
+   "reported_license": "Creative Commons Attribution license (reuse allowed)",
+   "upload_date": "20260124",
+   "excerpt_source_seconds": [
+    147,
+    159
+   ],
+   "width": 854,
+   "height": 480,
+   "frame_rate": [
+    30,
+    1
+   ],
+   "frame_count": 360,
+   "duration_s": 12.0,
+   "detected_cuts": [],
+   "median_background_shift_px_per_quarter_second": 1.86,
+   "capture_session": "one upload per clip; session identity is the uploader's single video",
+   "annotation": "pending",
+   "second_review": "pending"
+  }
+ ]
+}

@@ -30,6 +30,7 @@ from itertools import pairwise
 import numpy as np
 
 from .nova77 import CANON, CANON_INDEX, canon_sources
+from .poses import load_poses
 
 NUM_JOINTS = 77
 MISSING = -32768  # int16 sentinel for "no data" in the packed blob
@@ -88,14 +89,7 @@ class Stage:
 
 def load_frames(path: str) -> list:
     """``[(frame_id, [detection, ...]), ...]`` sorted by frame id."""
-    frames = {}
-    with open(path) as fh:
-        for line in fh:
-            line = line.strip()
-            if line:
-                rec = json.loads(line)
-                frames[rec["frame_id"]] = rec["detections"]
-    return sorted(frames.items())
+    return sorted(load_poses(path).items())
 
 
 def _root(det) -> np.ndarray:
@@ -299,7 +293,13 @@ def _body_unit(canon: np.ndarray) -> float:
 # --- build -----------------------------------------------------------------
 
 
-def build_stage(frames: list, opts: Options | None = None, *, video: dict | None = None) -> Stage:
+def build_stage(
+    frames: list,
+    opts: Options | None = None,
+    *,
+    video: dict | None = None,
+    capture_display_transforms: bool = False,
+) -> Stage:
     """Build a :class:`Stage` from :func:`load_frames` output."""
     opts = opts or Options()
     shots_meta, chunks, offset = [], [], 0
@@ -412,19 +412,32 @@ def build_stage(frames: list, opts: Options | None = None, *, video: dict | None
             chunks.append(data)
             offset += len(data)
         mean_floor = float(np.mean(floor))
-        shots_meta.append(
-            {
-                "frame0": int(f0),
-                "floor_source": floor_source,
-                "n": int(n),
-                "center": [round(float(c), 3) for c in center],
-                "camera": {
-                    "position": [0.0, round(-mean_floor, 3), 0.0],
-                    "direction": [round(float(c), 4) for c in (R @ np.array([0.0, 0.0, -1.0]))],
-                },
-                "tracks": track_meta,
-            }
-        )
+        shot_meta = {
+            "frame0": int(f0),
+            "floor_source": floor_source,
+            "n": int(n),
+            "center": [round(float(c), 3) for c in center],
+            "camera": {
+                "position": [0.0, round(-mean_floor, 3), 0.0],
+                "direction": [round(float(c), 4) for c in (R @ np.array([0.0, 0.0, -1.0]))],
+            },
+            "tracks": track_meta,
+        }
+        if capture_display_transforms:
+            camera_to_stage = np.eye(4, dtype=np.float64)
+            camera_to_stage[:3, :3] = R @ cam_flip
+            display_frames = []
+            for local_frame, floor_y in enumerate(floor):
+                camera_to_stage[:3, 3] = [0.0, -float(floor_y), 0.0]
+                display_frames.append(
+                    {
+                        "source_frame": int(f0 + local_frame),
+                        "camera_to_stage": camera_to_stage.tolist(),
+                        "floor_source": floor_source,
+                    }
+                )
+            shot_meta["display_frames"] = display_frames
+        shots_meta.append(shot_meta)
     meta = {
         "version": VERSION,
         "fps": opts.fps,

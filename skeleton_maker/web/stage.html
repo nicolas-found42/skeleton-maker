@@ -41,7 +41,7 @@
 <div id="labels"></div>
 <div id="loading">Building the stage…</div>
 <video id="video" playsinline></video>
-<div id="info" class="panel"><h1 id="title"></h1><div class="sub"><span id="count"></span> · <span id="shot"></span></div></div>
+<div id="info" class="panel"><h1 id="title"></h1><div class="sub"><span id="count"></span> · <span id="shot"></span></div>__ENVIRONMENT_STATUS__</div>
 <div id="side" class="panel">
   <h2>Character</h2>
   <select id="style"></select>
@@ -71,7 +71,7 @@ const THREE = await import(URL.createObjectURL(new Blob([document.getElementById
 const SPECS = JSON.parse(document.getElementById("specs").textContent);
 const OPTIONS = JSON.parse(document.getElementById("options").textContent);
 const PAYLOAD = document.getElementById("payload").textContent.trim();
-__VIEWER__
+__ENVIRONMENT_VIEWER____VIEWER__
 </script>
 </body>
 </html>

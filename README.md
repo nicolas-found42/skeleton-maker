@@ -181,8 +181,14 @@ character driven by their 3D joints.
 ```bash
 skeleton-maker character in/clip.skeleton/pose.json --video in/clip.skeleton/clip.mp4
 skeleton-maker character pose.json --character robot --out robot.html
+skeleton-maker character pose.json --environment environment.json --out stage.html
 skeleton-maker character --list
 ```
+
+`--environment` is opt-in. It displays depth geometry only when the manifest
+marks the shared geometry as `registered_metric` and supplies a transform for
+the exact source frame; otherwise the stage reports why geometry is hidden.
+Without this flag, character output keeps its existing format and behavior.
 
 Open the HTML in a browser. It plays the clip, shows the source video
 picture-in-picture (serve the folder with a server that supports HTTP range
@@ -202,6 +208,17 @@ What the stage does to the raw 3D joints:
 
 Characters are driven by joint **positions** only; the model's `rest_pose` is
 bone-aligned rather than anatomical, so its rotations are not used.
+
+### Environment scan
+
+`skeleton-maker environment` scans a clip for surfaces, objects and vehicles and writes a versioned manifest. Add `--overlay` to render the observations with existing poses, or enable the same scan after the normal skeleton pipeline:
+
+```bash
+skeleton-maker all demo.mp4 --work demo.skeleton \
+  --environment --environment-backend grounded-sam2-da3
+```
+
+The opt-in combined run keeps the usual skeleton files and also writes `environment.json`, `environment-overlay.mp4`, and an offline `environment.html` viewer with its local asset bundle. `all` without `--environment` keeps the pose-only workflow. The base package ships the command, manifest and backend contract; perception models are installed separately. See [docs/environment.md](docs/environment.md).
 
 ### Writing a character
 
