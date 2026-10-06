@@ -838,10 +838,17 @@ def run_cli(args) -> int:
         assets_stage.mkdir()
         try:
             resp = _cache_get(cache_root, key, assets_stage) if key is not None else None
+            if resp is not None:
+                try:
+                    _validate_response(resp, request, args.geometry)
+                    _check_masks(resp, request, assets_stage)
+                except BackendError as exc:
+                    print(f"environment: ignoring invalid cache response: {exc}")
+                    shutil.rmtree(assets_stage)
+                    assets_stage.mkdir()
+                    resp = None
             if resp is not None and key is not None:
                 print(f"environment: cache hit ({key[:12]})")
-                _validate_response(resp, request, args.geometry)
-                _check_masks(resp, request, assets_stage)
                 assets = _collect_assets(assets_stage)
             else:
                 if key is not None:

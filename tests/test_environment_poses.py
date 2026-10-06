@@ -310,3 +310,23 @@ def test_one_shared_loader_serves_render_stage_and_verify(tmp_path):
     (tmp_path / "bad.json").write_text("nope\n")
     with pytest.raises(poses.PoseFileError, match="line 1"):
         poses.read_records(str(tmp_path / "bad.json"))
+
+
+def test_pose_duplicate_validation_has_linear_comparison_cost():
+    from skeleton_maker import poses
+
+    class CountedInt(int):
+        comparisons = 0
+        __hash__ = int.__hash__
+
+        def __eq__(self, other):
+            type(self).comparisons += 1
+            return int.__eq__(self, other)
+
+    count = 200
+    records = [{"frame_id": CountedInt(i), "detections": []} for i in range(count)]
+    assert (
+        poses.check_against_clip(records, frame_count=count, width=64, height=48, clip_sha256="s")
+        == "user-supplied"
+    )
+    assert CountedInt.comparisons < 10 * count

@@ -194,3 +194,41 @@ def test_partial_and_failed_runs_are_not_cached(clip, monkeypatch, tmp_path):
         _run(clip, tmp_path, out="b.json")
 
     assert not (tmp_path / "cache").exists() or not list((tmp_path / "cache").iterdir())
+
+
+@pytest.mark.parametrize("damage", ["response", "mask"])
+def test_invalid_cached_response_or_mask_recomputes_from_empty_staging(
+    clip, backend, tmp_path, monkeypatch, damage
+):
+    import hashlib
+
+    import cv2
+    import numpy as np
+
+    assert _run(clip, tmp_path) == 0
+    entry_dir = _entry(tmp_path)
+    path = entry_dir / "entry.json"
+    entry = json.loads(path.read_text())
+    if damage == "response":
+        entry["response"]["status"] = "invalid-status"
+    else:
+        mask = entry_dir / "assets" / "masks" / "floor-0.png"
+        cv2.imwrite(str(mask), np.zeros((2, 2), np.uint8))
+        asset = next(a for a in entry["assets"] if a["path"] == "masks/floor-0.png")
+        asset["sha256"] = hashlib.sha256(mask.read_bytes()).hexdigest()
+    sentinel = entry_dir / "assets" / "stale.txt"
+    sentinel.write_text("cached-only asset")
+    entry["assets"].append(
+        {"path": "stale.txt", "sha256": hashlib.sha256(sentinel.read_bytes()).hexdigest()}
+    )
+    path.write_text(json.dumps(entry))
+    original_run = backend.run
+
+    def assert_empty_then_run(request, assets):
+        assert not any(assets.iterdir()), "invalid cache must not leak assets into fresh inference"
+        return original_run(request, assets)
+
+    monkeypatch.setattr(backend, "run", assert_empty_then_run)
+    assert _run(clip, tmp_path, out="recovered.json") == 0
+    assert len(backend.requests) == 2
+    assert not (tmp_path / "recovered.assets" / "stale.txt").exists()

@@ -46,7 +46,7 @@ class Clip:
         self.vocab = {}
         self.observations = []
         self.scanned = list(self.frames)
-        self.pred_geometry = {"status": "unavailable", "reason": "test"}
+        self.pred_geometry: dict = {"status": "unavailable", "reason": "test"}
         self.run_status = "complete"
         self.perception_status = "complete"
         self._masks = 0
@@ -290,6 +290,12 @@ class Clip:
     def write_prediction(self):
         base = self.corpus.predictions / f"{self.name}.assets"
         base.mkdir(parents=True, exist_ok=True)
+        for frame in self.pred_geometry.get("frames", []):
+            path = base / frame["depth_asset"]
+            path.parent.mkdir(parents=True, exist_ok=True)
+            if not path.exists():
+                width, height = frame["preprocessing"]["processed_size"]
+                np.save(path, np.ones((height, width), dtype=np.float32), allow_pickle=False)
         assets = []
         for path in sorted(path for path in base.rglob("*") if path.is_file()):
             from skeleton_maker.artifacts import sha256_file

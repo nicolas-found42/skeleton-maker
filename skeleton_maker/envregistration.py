@@ -473,6 +473,17 @@ def register_geometry(geometry: dict, calibration: dict, depth_root: Path) -> di
                     "stage_transform_applied": False,
                 }
             )
+    missing_dimensions = [
+        dimension
+        for dimension in calibration.get("measured_dimensions", [])
+        if dimension.get("role") == "check" and dimension["id"] not in check_dimension_ids
+    ]
+    if missing_dimensions:
+        detail = "; ".join(
+            f"{dimension['id']!r} (frames {dimension['a']['frame_id']}, {dimension['b']['frame_id']})"
+            for dimension in missing_dimensions
+        )
+        raise RegistrationError(f"check dimension {detail}: not processed in a single shot")
     if not all(item["passed"] for item in registration_checks):
         raise RegistrationError("fit or independent check anchors exceed their uncertainty bounds")
     evaluation_frames = [evaluation_frames_by_id[key] for key in sorted(evaluation_frames_by_id)]

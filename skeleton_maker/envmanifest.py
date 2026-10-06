@@ -832,7 +832,9 @@ def validate_manifest(doc: dict) -> None:
     width = _need(source, "width", int, "source")
     height = _need(source, "height", int, "source")
     rate = _need(source, "frame_rate", list, "source")
-    if len(rate) != 2 or not all(isinstance(v, int) and v > 0 for v in rate):
+    if len(rate) != 2 or not all(
+        isinstance(v, int) and not isinstance(v, bool) and v > 0 for v in rate
+    ):
         raise ManifestError("source.frame_rate: expected [numerator, denominator], both > 0")
     _need(source, "frame_count", int, "source")
     if source["frame_count"] <= 0:
@@ -841,9 +843,16 @@ def validate_manifest(doc: dict) -> None:
     ids = []
     for i, frame in enumerate(frames):
         where = f"processed_frames[{i}]"
-        ids.append(_need(frame, "frame_id", int, where))
+        frame_id = _need(frame, "frame_id", int, where)
+        if not 0 <= frame_id < source["frame_count"]:
+            raise ManifestError(f"{where}.frame_id: outside source frame range")
+        ids.append(frame_id)
         t = _need(frame, "time", list, where)
-        if len(t) != 2 or not all(isinstance(v, int) for v in t) or t[1] <= 0:
+        if (
+            len(t) != 2
+            or not all(isinstance(v, int) and not isinstance(v, bool) for v in t)
+            or t[1] <= 0
+        ):
             raise ManifestError(f"{where}.time: expected [numerator, denominator]")
         _need(frame, "time_s", float, where)
     if ids != sorted(set(ids)):
@@ -1028,13 +1037,10 @@ def check_assets(doc: dict, bundle: Path) -> None:
                 f"observations[{i}].mask: asset {mask['asset']!r} is not listed in assets"
             )
     geometry = doc.get("geometry") or {}
-    if geometry.get("status") == "relative-camera-frame":
-        for i, frame in enumerate(geometry.get("frames", [])):
-            rel = _need(frame, "depth_asset", str, f"geometry.frames[{i}]")
-            if rel not in declared:
-                raise ManifestError(
-                    f"geometry.frames[{i}].depth_asset: asset {rel!r} is not listed"
-                )
+    for i, frame in enumerate(geometry.get("frames", [])):
+        rel = _need(frame, "depth_asset", str, f"geometry.frames[{i}]")
+        if rel not in declared:
+            raise ManifestError(f"geometry.frames[{i}].depth_asset: asset {rel!r} is not listed")
 
 
 def load_manifest(path) -> dict:

@@ -15,6 +15,9 @@
   const sampled = new Set(payload.processed_frames.map((record) => record.frame_id));
   const colors = { surface: "#34d399", object: "#fbbf24", vehicle: "#60a5fa", person: "#f472b6" };
   const images = new Map();
+  const tintedMasks = new Map();
+  const MAX_TINT_BYTES = 64 * 1024 * 1024;
+  let tintBytes = 0;
   let currentFrame = 0;
 
   const familyLabels = { person: "people", surface: "surfaces", object: "objects", vehicle: "vehicles" };
@@ -54,7 +57,7 @@
   function imageFor(rel) {
     if (!images.has(rel)) {
       const image = new Image();
-      image.onload = paint;
+      image.onload = () => { if (images.get(rel) === image) paint(); };
       image.onerror = () => {
         const error = document.getElementById("error");
         error.textContent = "A bundled mask image could not be opened. Restore the local viewer asset bundle beside this HTML file.";
@@ -64,6 +67,46 @@
       images.set(rel, image);
     }
     return images.get(rel);
+  }
+  function tintedMask(rel, color) {
+    const key = JSON.stringify([rel, color]);
+    if (tintedMasks.has(key)) {
+      const tint = tintedMasks.get(key);
+      tintedMasks.delete(key);
+      tintedMasks.set(key, tint);
+      return tint;
+    }
+    const image = imageFor(rel);
+    if (!image.complete || !image.naturalWidth) return null;
+    const tint = document.createElement("canvas");
+    tint.width = canvas.width; tint.height = canvas.height;
+    const tintCtx = tint.getContext("2d");
+    tintCtx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    const maskPixels = tintCtx.getImageData(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < maskPixels.data.length; i += 4) {
+      const maskAlpha = maskPixels.data[i];
+      maskPixels.data[i] = 255;
+      maskPixels.data[i + 1] = 255;
+      maskPixels.data[i + 2] = 255;
+      maskPixels.data[i + 3] = maskAlpha;
+    }
+    tintCtx.putImageData(maskPixels, 0, 0);
+    tintCtx.globalCompositeOperation = "source-in";
+    tintCtx.fillStyle = color;
+    tintCtx.fillRect(0, 0, canvas.width, canvas.height);
+    const bytes = tint.width * tint.height * 4;
+    if (bytes <= MAX_TINT_BYTES) {
+      while (tintBytes + bytes > MAX_TINT_BYTES) {
+        const oldest = tintedMasks.keys().next().value;
+        const evicted = tintedMasks.get(oldest);
+        tintBytes -= evicted.width * evicted.height * 4;
+        tintedMasks.delete(oldest);
+        evicted.width = 0; evicted.height = 0;
+      }
+      tintedMasks.set(key, tint);
+      tintBytes += bytes;
+    }
+    return tint;
   }
   function frameStatus(entityId) {
     if (!sampled.has(currentFrame)) return { label: "not sampled", kind: "missing", observation: null };
@@ -108,24 +151,8 @@
       ctx.lineWidth = Math.max(2, canvas.width / 400);
       ctx.setLineDash(observation.visibility === "uncertain" ? [8, 6] : []);
       if (observation.mask) {
-        const image = imageFor(observation.mask.asset);
-        if (image.complete && image.naturalWidth) {
-          const tint = document.createElement("canvas");
-          tint.width = canvas.width; tint.height = canvas.height;
-          const tintCtx = tint.getContext("2d");
-          tintCtx.drawImage(image, 0, 0, canvas.width, canvas.height);
-          const maskPixels = tintCtx.getImageData(0, 0, canvas.width, canvas.height);
-          for (let i = 0; i < maskPixels.data.length; i += 4) {
-            const maskAlpha = maskPixels.data[i];
-            maskPixels.data[i] = 255;
-            maskPixels.data[i + 1] = 255;
-            maskPixels.data[i + 2] = 255;
-            maskPixels.data[i + 3] = maskAlpha;
-          }
-          tintCtx.putImageData(maskPixels, 0, 0);
-          tintCtx.globalCompositeOperation = "source-in";
-          tintCtx.fillStyle = colors[family] || "#fff";
-          tintCtx.fillRect(0, 0, canvas.width, canvas.height);
+        const tint = tintedMask(observation.mask.asset, colors[family] || "#fff");
+        if (tint) {
           ctx.globalAlpha = observation.visibility === "uncertain" ? 0.22 : 0.3;
           ctx.drawImage(tint, 0, 0);
           ctx.globalAlpha = 1;
@@ -169,7 +196,10 @@
     }
   }
   function setFrame(frame, seek) {
-    currentFrame = Math.max(0, Math.min(Number(frame) || 0, payload.source.frame_count - 1));
+    const nextFrame = Math.max(0, Math.min(Number(frame) || 0, payload.source.frame_count - 1));
+    // Raw images serve repeated paints and tint eviction only for the current frame.
+    if (nextFrame !== currentFrame) images.clear();
+    currentFrame = nextFrame;
     frameInput.value = String(currentFrame);
     frameLabel.value = String(currentFrame);
     if (seek && Number.isFinite(fps) && fps > 0 && Math.abs(video.currentTime - currentFrame / fps) > 1 / fps / 2) {

@@ -1109,3 +1109,40 @@ def test_missing_directories_and_empty_corpora_are_errors(tmp_path, capsys):
 )
 def test_identity_assignment_is_optimal(weights, best):
     assert envscore._hungarian_max(weights) == best
+
+
+@pytest.mark.parametrize("sidecar", ["run-record", "operator-stop"])
+def test_runner_directory_sidecars_do_not_block_scoring(corpus, tmp_path, monkeypatch, sidecar):
+    from pathlib import Path
+
+    from scripts import run_environment_corpus as runner
+
+    sample = corpus.clip()
+    corpus.write()
+    source = tmp_path / "input-corpus"
+    (source / "build-reports").mkdir(parents=True)
+
+    def recorded_run(argv, **kwargs):
+        return type("Done", (), {"returncode": 0})()
+
+    monkeypatch.setattr(runner.subprocess, "run", recorded_run)
+    runner.run_one(
+        source,
+        {"clip": sample.name, "split": "heldout", "scope": "semantic", "frame_rate": [10, 1]},
+        corpus.predictions,
+    )
+    if sidecar == "operator-stop":
+        (corpus.predictions / "a.operator-stop.json").write_text('{"reason":"operator stop"}')
+    assert list(Path(corpus.predictions).glob("*.run-record.json"))
+    rc, report = _score(corpus, tmp_path)
+    assert rc == 1
+    assert report["scorer_version"] == "2"
+
+
+def test_unknown_malformed_prediction_is_still_rejected(corpus, tmp_path):
+    corpus.clip()
+    corpus.write()
+    (corpus.predictions / "broken.json").write_text("{}")
+    with pytest.raises(SystemExit) as exc:
+        _score(corpus, tmp_path)
+    assert exc.value.code == 2

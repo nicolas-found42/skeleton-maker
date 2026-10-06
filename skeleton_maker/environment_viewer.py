@@ -125,6 +125,8 @@ def prepare_viewer(
     if not source.is_file():
         raise ManifestError(f"viewer source video is missing: {source}")
     manifest = envmanifest.load_manifest(manifest_path)
+    if artifacts.sha256_file(source) != manifest["source"]["sha256"]:
+        raise ManifestError("viewer source video hash does not match manifest source")
     manifest_pose_path = manifest["poses"]["path"] if manifest["poses"] else None
     validate_viewer_paths(manifest_path, source, output, manifest_pose_path)
     pose_source = pose_path if pose_path is not None else manifest_pose_path

@@ -12,6 +12,8 @@ Ground truth comes from independent human annotations or published dataset masks
 
 ## Inputs
 
+The prediction directory may contain corpus-runner `*.run-record.json` and operator `*.operator-stop.json` metadata sidecars. The scorer skips these known filenames and validates every other prediction JSON and its assets; malformed predictions still exit 2.
+
 A predictions directory of environment manifests (`*.json`, loaded with full validation), joined to annotations by `source.sha256`. A clip with an annotation but no manifest scores as all misses and fails coverage. Incomplete prediction runs also fail coverage, except when perception completed and only geometry is partial with an honest unregistered status (`not_requested`, `unavailable`, `relative` or `relative-camera-frame`).
 
 Mask assets in manifests and annotations are single-channel PNG images the size of the source frame; any non-zero pixel is inside. Only observations with `visibility: "visible"` and a mask count as detections.

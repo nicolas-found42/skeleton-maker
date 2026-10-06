@@ -390,3 +390,35 @@ def test_viewer_backup_cleanup_failure_warns_after_committing_new_outputs(
     assert not (tmp_path / "review.viewer.assets" / "previous.bin").exists()
     backups = list(tmp_path.glob(".*.old"))
     assert len(backups) == 4
+
+
+def test_standalone_viewer_rejects_a_different_readable_video(monkeypatch, tmp_path):
+    from skeleton_maker import environment_viewer, envmanifest
+
+    source = tmp_path / "source.mp4"
+    other = tmp_path / "other.mp4"
+    _make_video(source)
+    _make_video(other, size="80x60")
+    monkeypatch.setitem(environment.BACKENDS, "fake", FakeBackend())
+    manifest = tmp_path / "environment.json"
+    assert (
+        cli.main(
+            [
+                "environment",
+                str(source),
+                "--out",
+                str(manifest),
+                "--backend",
+                "fake",
+                "--geometry",
+                "off",
+                "--no-cache",
+            ]
+        )
+        == 0
+    )
+    output = tmp_path / "viewer.html"
+    with pytest.raises(envmanifest.ManifestError, match=r"source.*hash|source.*match"):
+        environment_viewer.export_viewer(manifest, other, output)
+    assert not output.exists()
+    assert not (tmp_path / "viewer.viewer.assets").exists()

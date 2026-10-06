@@ -70,6 +70,11 @@ def prepare(manifest_path: str | Path, stage_meta: dict, *, document: dict | Non
         if depth.ndim != 2:
             output["reason"] = f"depth geometry for source frame {source_frame} is not a 2D grid"
             continue
+        if list(depth.shape[::-1]) != geom_frame["preprocessing"]["processed_size"]:
+            output["reason"] = (
+                f"depth grid size differs from processed size for source frame {source_frame}"
+            )
+            continue
         intrinsics = np.asarray(geom_frame["intrinsics"], dtype=np.float64)
         source_to_processed = np.asarray(
             geom_frame["preprocessing"]["undistorted_source_to_processed"], dtype=np.float64

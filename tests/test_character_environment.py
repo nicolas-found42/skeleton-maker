@@ -83,6 +83,7 @@ def _registered_manifest(
         depth = np.full((10, 10), np.nan, dtype=np.float32)
         depth[7, 6] = 2.0
         np.save(depth_path, depth, allow_pickle=False)
+        doc["assets"] = [asset for asset in doc["assets"] if asset["path"] != frame["depth_asset"]]
         doc["assets"].append(
             {
                 "path": frame["depth_asset"],

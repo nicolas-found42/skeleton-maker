@@ -27,6 +27,23 @@ const { chromium } = require("playwright");
       return ctx.getImageData(30, 40, 1, 1).data[3] > 0;
     });
 
+    const repaintReads = await page.evaluate(() => {
+      const original = CanvasRenderingContext2D.prototype.getImageData;
+      let reads = 0;
+      CanvasRenderingContext2D.prototype.getImageData = function (...args) {
+        if (args[2] > 1 && args[3] > 1) reads += 1;
+        return original.apply(this, args);
+      };
+      try {
+        const input = document.querySelector("#entity");
+        for (let i = 0; i < 20; i += 1) input.dispatchEvent(new Event("change"));
+        return reads;
+      } finally {
+        CanvasRenderingContext2D.prototype.getImageData = original;
+      }
+    });
+    assert.equal(repaintReads, 0, "repainting loaded masks must reuse tinted pixels");
+
     const selected = "shot-0/chair";
     await page.selectOption("#entity", selected);
     const saved = await page.evaluate(() => {
@@ -98,6 +115,30 @@ const { chromium } = require("playwright");
     assert.equal(await page.locator("#shot").innerText(), "shot-1");
     assert.deepEqual(externalRequests, [], "page and assets make no off-origin requests");
     assert.deepEqual(errors, [], "viewer has no runtime errors");
+
+    // A one-mask tint budget must evict without repeatedly reloading visible masks.
+    const boundedPage = await browser.newPage();
+    let maskLoads = 0;
+    boundedPage.on("request", (request) => {
+      if (request.url().includes("/environment/masks/")) maskLoads += 1;
+    });
+    await boundedPage.route("**/viewer.js", async (route) => {
+      const response = await route.fetch();
+      const script = (await response.text()).replace(
+        "const MAX_TINT_BYTES = 64 * 1024 * 1024;",
+        "const MAX_TINT_BYTES = 640 * 360 * 4;",
+      );
+      await route.fulfill({ response, body: script });
+    });
+    await boundedPage.goto(process.argv[2]);
+    await boundedPage.waitForFunction(() => document.querySelector("#video").readyState >= 1);
+    await boundedPage.waitForTimeout(250);
+    await boundedPage.evaluate(() => {
+      for (let i = 0; i < 20; i += 1) document.querySelector("#entity").dispatchEvent(new Event("change"));
+    });
+    await boundedPage.waitForTimeout(250);
+    assert.equal(maskLoads, 3, "tint eviction must not trigger a visible-mask reload loop");
+    await boundedPage.close();
 
     const missingMaskPage = await browser.newPage({ viewport: { width: 1280, height: 900 } });
     await missingMaskPage.route("**/environment/masks/floor.png", (route) =>

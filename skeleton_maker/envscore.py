@@ -136,6 +136,10 @@ def _load_corpus(predictions: str, annotations: str):
     manifests: dict[str, tuple[dict, Path]] = {}
     unmatched = []
     for path in pred_files:
+        # The corpus runner retains audit metadata beside actual predictions.
+        # Ignore only its known sidecars; malformed prediction JSON still fails.
+        if path.name.endswith((".run-record.json", ".operator-stop.json")):
+            continue
         manifest = envmanifest.load_manifest(path)
         sha = manifest["source"]["sha256"]
         if sha not in by_sha:

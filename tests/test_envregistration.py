@@ -301,3 +301,25 @@ def test_bad_independent_dimension_check_prevents_metric_claim(tmp_path):
 
     with pytest.raises(envregistration.RegistrationError, match="check anchors"):
         envregistration.register_geometry(geometry, reference, assets)
+
+
+@pytest.mark.parametrize("endpoint_frame", [75, 1])
+def test_unevaluated_check_dimension_abstains(tmp_path, endpoint_frame):
+    geometry, reference, assets, *_ = _fixture(tmp_path)
+    reference["measured_dimensions"][0]["b"]["frame_id"] = endpoint_frame
+    if endpoint_frame == 1:
+        second_shot = copy.deepcopy(geometry["frames"])
+        for frame in second_shot:
+            frame["frame_id"] += 2
+            frame["shot"] = "shot-1"
+        geometry["frames"].extend(second_shot)
+        second_anchors = copy.deepcopy(reference["anchors"])
+        for anchor in second_anchors:
+            anchor["frame_id"] += 2
+            anchor["id"] += "-shot1"
+        reference["anchors"].extend(second_anchors)
+        reference["measured_dimensions"][0]["b"]["frame_id"] = 2
+    with pytest.raises(
+        envregistration.RegistrationError, match=r"withheld-width.*not processed in a single shot"
+    ):
+        envregistration.register_geometry(geometry, reference, assets)

@@ -113,7 +113,7 @@ The [machine-readable results](environment-corpus-v2-results.json) include every
 
 CPU was selected from development resource/execution evidence before accuracy scoring. The MPS attempt was operator-stopped after 1,257.8 seconds amid swap and slow progress; no deadlock was proven. The completed CPU d1 probe was copied with identical hashes into the final prediction directory, preserving original command/log paths in its record. The baseline aliases, targets and inference settings were not tuned after development error analysis or held-out exposure. Hardware: Apple M5, 16 GiB, arm64, macOS 26.4.1.
 
-The public scorer rejects the raw runner directory with exit 2 because run-record JSON is parsed as a prediction. The frozen workaround uses a manifest-only symlink view: every manifest and asset is validated, runner/operator-stop metadata exclusions are recorded in a separate ledger, and score files are written outside both input directories. The scorer and targets were unchanged.
+At the evaluated source commit `cb8f274`, the public scorer rejected the raw runner directory with exit 2 because run-record JSON was parsed as a prediction. Subsequent Qodo review fixes allow direct scoring by ignoring only known runner/operator metadata sidecars; the frozen pilot scores below retain the original scorer and audited manifest-only view. The frozen workaround uses a manifest-only symlink view: every manifest and asset is validated, runner/operator-stop metadata exclusions are recorded in a separate ledger, and score files are written outside both input directories. The scorer and targets were unchanged.
 
 ### Separate gate results
 

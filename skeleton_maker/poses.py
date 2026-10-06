@@ -7,6 +7,7 @@ share this parser so a malformed line is reported the same way everywhere.
 
 import json
 import math
+from collections import Counter
 
 from .constants import BBOX_MARGIN
 
@@ -63,7 +64,8 @@ def check_against_clip(
             "the poses were computed for a different clip or frame range"
         )
     ids = [r["frame_id"] for r in records]
-    duplicates = sorted({i for i in ids if ids.count(i) > 1})
+    counts = Counter(ids)
+    duplicates = sorted(i for i, count in counts.items() if count > 1)
     if duplicates:
         raise PoseFileError(f"duplicate frame id {duplicates[0]} in the pose file")
     if set(ids) != set(range(frame_count)):
